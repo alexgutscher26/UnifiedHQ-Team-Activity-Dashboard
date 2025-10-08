@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaClient } from "@/generated/prisma";
 import { dymoEmailPlugin } from "@dymo-api/better-auth";
-import { openAPI } from "better-auth/plugins";
+import { openAPI, haveIBeenPwned, lastLoginMethod, multiSession } from "better-auth/plugins";
 
 const prisma = new PrismaClient();
 export const auth = betterAuth({
@@ -32,7 +32,14 @@ export const auth = betterAuth({
                 deny: ["FRAUD", "INVALID", "NO_MX_RECORDS", "NO_REPLY_EMAIL"]
             }
         }),
-        openAPI()
+        openAPI(),
+        multiSession(),
+        haveIBeenPwned({
+            customPasswordCompromisedMessage: "This password has been found in a data breach. Please choose a more secure password."
+        }),
+        lastLoginMethod({
+            storeInDatabase: true
+        })
     ],
     secret: process.env.BETTER_AUTH_SECRET as string,
     baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",

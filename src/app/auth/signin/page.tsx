@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Github, Slack } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,7 +17,14 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [lastMethod, setLastMethod] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    // Get the last used login method
+    const lastUsedMethod = authClient.getLastUsedLoginMethod();
+    setLastMethod(lastUsedMethod);
+  }, []);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,22 +74,32 @@ export default function SignInPage() {
         <CardContent className="space-y-4">
           {/* Social Sign In */}
           <div className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => handleSocialSignIn("github")}
-            >
-              <Github className="mr-2 h-4 w-4" />
-              Continue with GitHub
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => handleSocialSignIn("slack")}
-            >
-              <Slack className="mr-2 h-4 w-4" />
-              Continue with Slack
-            </Button>
+            <div className="relative">
+              <Button
+                variant={lastMethod === "github" ? "default" : "outline"}
+                className="w-full"
+                onClick={() => handleSocialSignIn("github")}
+              >
+                <Github className="mr-2 h-4 w-4" />
+                Continue with GitHub
+                {lastMethod === "github" && (
+                  <Badge variant="secondary" className="ml-2">Last used</Badge>
+                )}
+              </Button>
+            </div>
+            <div className="relative">
+              <Button
+                variant={lastMethod === "slack" ? "default" : "outline"}
+                className="w-full"
+                onClick={() => handleSocialSignIn("slack")}
+              >
+                <Slack className="mr-2 h-4 w-4" />
+                Continue with Slack
+                {lastMethod === "slack" && (
+                  <Badge variant="secondary" className="ml-2">Last used</Badge>
+                )}
+              </Button>
+            </div>
           </div>
 
           <div className="relative">
@@ -123,9 +141,19 @@ export default function SignInPage() {
                 {error}
               </div>
             )}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In"}
-            </Button>
+            <div className="relative">
+              <Button 
+                type="submit" 
+                variant={lastMethod === "email" ? "default" : "default"}
+                className="w-full" 
+                disabled={isLoading}
+              >
+                {isLoading ? "Signing in..." : "Sign In"}
+                {lastMethod === "email" && (
+                  <Badge variant="secondary" className="ml-2">Last used</Badge>
+                )}
+              </Button>
+            </div>
           </form>
 
           <div className="text-center text-sm">

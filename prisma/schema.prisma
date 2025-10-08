@@ -25,6 +25,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  lastLoginMethod String?
+
   @@unique([email])
   @@map("user")
 }
