@@ -252,6 +252,9 @@ export const successSchemas = {
 };
 
 // Utility functions
+/**
+ * Creates a paginated response object.
+ */
 export function createPaginatedResponse<T>(
   items: T[],
   page: number,
@@ -289,6 +292,9 @@ export function validateQueryParams<T>(
   return schema.parse(params);
 }
 
+/**
+ * Validates the request body against a Zod schema.
+ */
 export function validateRequestBody<T>(
   schema: z.ZodSchema<T>,
   body: unknown
