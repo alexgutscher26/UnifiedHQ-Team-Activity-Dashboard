@@ -13,11 +13,19 @@ import { Badge } from '@/components/ui/badge';
 import { LoadingState, LoadingSkeleton } from '@/components/ui/loading';
 import { useLoading } from '@/hooks/use-loading';
 
+/**
+ * Renders an AI-generated daily summary of team activities.
+ *
+ * The function utilizes React hooks to manage the loading state and summary data. It simulates an API call to generate a summary, which includes highlights and action items from team activities. The summary is displayed in a card format, with loading skeletons shown while the data is being fetched. The summary is updated every 30 minutes.
+ */
 export function AISummary() {
   const [summary, setSummary] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Simulate AI summary generation
+  /**
+   * Generates a summary of team activities and updates.
+   */
   const generateSummary = async () => {
     try {
       // Simulate API call delay - reduced for faster loading
