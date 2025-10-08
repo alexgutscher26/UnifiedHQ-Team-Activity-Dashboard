@@ -19,6 +19,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthErrorBoundary } from '@/components/error-boundaries';
 
+/**
+ * Renders the Sign In page with options for email/password and social sign-in.
+ *
+ * This component manages the state for email, password, loading status, and error messages. It retrieves the last used login method on mount and provides functions to handle email sign-in and social sign-in via GitHub or Slack. The email sign-in function handles form submission, manages loading states, and displays errors as necessary.
+ *
+ * @returns A JSX element representing the Sign In page.
+ */
 export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
