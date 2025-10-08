@@ -99,6 +99,15 @@ const activities: Activity[] = [
   },
 ]
 
+/**
+ * Returns the appropriate icon component based on the given activity type.
+ * The function uses a switch statement to determine which icon to return,
+ * mapping specific activity types like "github", "slack", and "notion"
+ * to their corresponding icon components. If the type does not match any
+ * case, the function will return undefined.
+ *
+ * @param type - The type of activity for which the icon is to be retrieved.
+ */
 const getIcon = (type: Activity["type"]) => {
   switch (type) {
     case "github":
@@ -110,6 +119,15 @@ const getIcon = (type: Activity["type"]) => {
   }
 }
 
+/**
+ * Retrieves the color scheme based on the specified activity type.
+ *
+ * The function takes an activity type and returns a corresponding color class string.
+ * It uses a switch statement to determine the color scheme for "github", "slack", and "notion".
+ * If the type does not match any case, it will return undefined.
+ *
+ * @param type - The type of the activity for which the color scheme is to be retrieved.
+ */
 const getColor = (type: Activity["type"]) => {
   switch (type) {
     case "github":
@@ -121,6 +139,9 @@ const getColor = (type: Activity["type"]) => {
   }
 }
 
+/**
+ * Renders a team activity feed with real-time updates from various platforms.
+ */
 export function ActivityFeed() {
   return (
     <Card>
