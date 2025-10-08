@@ -29,6 +29,9 @@ export function MemoryMonitor({ show = false, className }: MemoryMonitorProps) {
   // Monitor memory in development
   useMemoryMonitoring(5000);
 
+  /**
+   * Updates the report with the current memory report.
+   */
   const updateReport = () => {
     const memoryReport = getMemoryReport();
     setReport(memoryReport);
@@ -42,6 +45,9 @@ export function MemoryMonitor({ show = false, className }: MemoryMonitorProps) {
     }
   }, [isVisible]);
 
+  /**
+   * Cleans up memory leaks and updates the report.
+   */
   const handleCleanup = () => {
     cleanupAllMemoryLeaks();
     updateReport();
