@@ -10,6 +10,15 @@ import {
 
 const prisma = new PrismaClient();
 
+/**
+ * Retrieves the GitHub connection status for the authenticated user.
+ *
+ * This function first obtains the session using Better Auth. If the session is not found, it throws an authentication error.
+ * It then checks if the user has a connected GitHub account by querying the database.
+ * Depending on the presence of the account and its access token, it returns the connection status along with user details if connected.
+ *
+ * @param request - The NextRequest object containing the request headers for session retrieval.
+ */
 async function getGitHubStatus(request: NextRequest) {
   // Get the session from Better Auth
   const session = await auth.api.getSession({
