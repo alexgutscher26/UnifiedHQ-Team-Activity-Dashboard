@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
@@ -18,14 +16,24 @@ import { Github, Slack } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthErrorBoundary } from '@/components/error-boundaries';
+import { ValidatedInput, FormGroup, FormActions } from '@/components/ui/form';
+import { useFormValidation } from '@/lib/validation';
+import { validationSchemas } from '@/lib/validation';
 
 export default function SignInPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [lastMethod, setLastMethod] = useState<string | null>(null);
   const router = useRouter();
+
+  const {
+    data,
+    errors,
+    updateField,
+    validateForm,
+    getFieldError,
+    isFormValid,
+  } = useFormValidation({ email: '', password: '' }, validationSchemas.signIn);
 
   useEffect(() => {
     // Get the last used login method
@@ -35,14 +43,20 @@ export default function SignInPage() {
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
     try {
-      const { data, error } = await authClient.signIn.email(
+      const { data: authData, error } = await authClient.signIn.email(
         {
-          email,
-          password,
+          email: data.email,
+          password: data.password,
           callbackURL: '/dashboard',
         },
         {
@@ -129,48 +143,49 @@ export default function SignInPage() {
             </div>
 
             {/* Email/Password Sign In */}
-            <form onSubmit={handleEmailSignIn} className='space-y-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='email'>Email</Label>
-                <Input
-                  id='email'
+            <form onSubmit={handleEmailSignIn}>
+              <FormGroup>
+                <ValidatedInput
+                  label='Email'
                   type='email'
                   placeholder='m@example.com'
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  value={data.email}
+                  onChange={e => updateField('email', e.target.value)}
+                  validation={{ required: true, email: true }}
+                  error={getFieldError('email')}
                   required
                 />
-              </div>
-              <div className='space-y-2'>
-                <Label htmlFor='password'>Password</Label>
-                <Input
-                  id='password'
+                <ValidatedInput
+                  label='Password'
                   type='password'
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  placeholder='Enter your password'
+                  value={data.password}
+                  onChange={e => updateField('password', e.target.value)}
+                  validation={{ required: true, minLength: 6 }}
+                  error={getFieldError('password')}
                   required
                 />
-              </div>
-              {error && (
-                <div className='text-sm text-red-600 bg-red-50 p-2 rounded'>
-                  {error}
-                </div>
-              )}
-              <div className='relative'>
-                <Button
-                  type='submit'
-                  variant={lastMethod === 'email' ? 'default' : 'default'}
-                  className='w-full'
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Signing in...' : 'Sign In'}
-                  {lastMethod === 'email' && (
-                    <Badge variant='secondary' className='ml-2'>
-                      Last used
-                    </Badge>
-                  )}
-                </Button>
-              </div>
+                {error && (
+                  <div className='text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20'>
+                    {error}
+                  </div>
+                )}
+                <FormActions>
+                  <Button
+                    type='submit'
+                    variant={lastMethod === 'email' ? 'default' : 'default'}
+                    className='w-full'
+                    disabled={isLoading || !isFormValid()}
+                  >
+                    {isLoading ? 'Signing in...' : 'Sign In'}
+                    {lastMethod === 'email' && (
+                      <Badge variant='secondary' className='ml-2'>
+                        Last used
+                      </Badge>
+                    )}
+                  </Button>
+                </FormActions>
+              </FormGroup>
             </form>
 
             <div className='text-center text-sm'>
