@@ -15,7 +15,14 @@ interface UseLoadingReturn {
 }
 
 /**
- * Custom hook for managing loading states with error handling
+ * Custom hook for managing loading states with error handling.
+ *
+ * This hook provides a way to track loading states and handle errors during asynchronous operations.
+ * It initializes loading and error states based on the provided options and offers an `execute` function
+ * to run asynchronous functions while managing these states. Additionally, it includes a `reset` function
+ * to clear the loading and error states when needed.
+ *
+ * @param {UseLoadingOptions} [options={}] - Configuration options for the loading state management.
  */
 export function useLoading(options: UseLoadingOptions = {}): UseLoadingReturn {
   const { initialLoading = false, onError } = options;
@@ -64,7 +71,14 @@ export function useLoading(options: UseLoadingOptions = {}): UseLoadingReturn {
 }
 
 /**
- * Hook for managing multiple loading states
+ * Hook for managing multiple loading states.
+ *
+ * This hook initializes a loading state for each key provided in the `keys` array, allowing for individual loading management.
+ * It provides functions to set the loading state for a specific key, check if a specific key is loading, determine if any keys are loading,
+ * and reset all loading states to false. The loading states are stored in a record, and updates are handled through callbacks to ensure
+ * performance and avoid unnecessary re-renders.
+ *
+ * @param {string[]} keys - An array of keys representing the loading states to manage.
  */
 export function useMultipleLoading(keys: string[]) {
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
