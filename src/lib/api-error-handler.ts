@@ -71,11 +71,15 @@ const ERROR_CODES: Record<ApiErrorType, string> = {
 };
 
 // Generate request ID
+/** Generates a unique request ID. */
 function generateRequestId(): string {
   return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
 // Create standardized error
+/**
+ * Creates an API error object.
+ */
 export function createApiError(
   type: ApiErrorType,
   message: string,
@@ -94,6 +98,9 @@ export function createApiError(
 }
 
 // Create success response
+/**
+ * Creates a successful API response.
+ */
 export function createApiSuccess<T>(
   data: T,
   message?: string,
@@ -109,6 +116,9 @@ export function createApiSuccess<T>(
 }
 
 // Create error response
+/**
+ * Creates a JSON response for an API error.
+ */
 export function createApiErrorResponse(
   error: ApiError
 ): NextResponse<ApiErrorResponse> {
@@ -122,6 +132,9 @@ export function createApiErrorResponse(
 }
 
 // Create success response
+/**
+ * Creates a successful API response with optional message and request ID.
+ */
 export function createApiSuccessResponse<T>(
   data: T,
   message?: string,
@@ -133,6 +146,19 @@ export function createApiSuccessResponse<T>(
 }
 
 // Handle different error types
+/**
+ * Handles API errors and returns a structured response.
+ *
+ * The function first logs the error and requestId. It then checks the type of the error:
+ * if it's a ZodError, it creates a validation error response; if it's a custom API error,
+ * it returns that directly; if it's a generic Error, it creates an internal server error
+ * response based on the environment; and finally, it handles any unknown errors by
+ * returning a generic internal server error response.
+ *
+ * @param error - The error object that needs to be handled.
+ * @param requestId - An optional identifier for the request associated with the error.
+ * @returns A structured ApiErrorResponse based on the type of error.
+ */
 export function handleApiError(
   error: unknown,
   requestId?: string
@@ -188,6 +214,15 @@ export function handleApiError(
 }
 
 // Wrapper for API route handlers
+/**
+ * Wraps a handler function with error handling and request ID tracing.
+ *
+ * This function takes a handler that processes a NextRequest and returns a Promise of NextResponse.
+ * It generates a unique request ID for each request, adds it to the response headers for tracing,
+ * and handles any errors that occur during the execution of the handler by invoking handleApiError.
+ *
+ * @param handler - A function that processes the request and context, returning a Promise of NextResponse.
+ */
 export function withErrorHandling<T = any>(
   handler: (req: NextRequest, context?: any) => Promise<NextResponse<T>>
 ) {
@@ -284,6 +319,15 @@ export const ApiErrors = {
 };
 
 // Validation helpers
+/**
+ * Validates the provided data against a given schema.
+ *
+ * This function attempts to parse the data using the provided schema. If the parsing fails due to validation errors, it catches the error and throws a custom API error with details about the validation issues. If the error is not a ZodError, it rethrows the original error. The optional requestId can be used for tracking purposes.
+ *
+ * @param schema - The schema used for validation.
+ * @param data - The data to be validated.
+ * @param requestId - An optional identifier for the request.
+ */
 export function validateRequest<T>(
   schema: any,
   data: unknown,
@@ -311,6 +355,19 @@ export function validateRequest<T>(
 }
 
 // Rate limiting helper
+/**
+ * Checks if a request exceeds the rate limit for a given identifier.
+ *
+ * This function implements a simple in-memory rate limiter that tracks the number of requests made
+ * within a specified time window. It initializes a rate limit store if it doesn't exist, filters
+ * the requests to only include those within the defined time window, and checks if the number of
+ * recent requests exceeds the specified limit. If the limit is not exceeded, it records the current
+ * request timestamp and updates the store.
+ *
+ * @param identifier - A unique identifier for the rate limit check.
+ * @param limit - The maximum number of allowed requests within the time window (default is 100).
+ * @param windowMs - The time window in milliseconds for which requests are counted (default is 15 minutes).
+ */
 export function checkRateLimit(
   identifier: string,
   limit: number = 100,
@@ -347,6 +404,16 @@ export function checkRateLimit(
 }
 
 // Authentication helpers
+/**
+ * Validates the authentication of a user based on the provided request.
+ *
+ * This function checks for the presence of an 'authorization' header in the
+ * request. It ensures that the header starts with 'Bearer ' and extracts the
+ * token. If the token is invalid, it throws an authentication error. If valid,
+ * it simulates a user object and returns the user ID along with user details.
+ *
+ * @param req - The NextRequest object containing the request information.
+ */
 export async function requireAuth(
   req: NextRequest
 ): Promise<{ userId: string; user: any }> {
@@ -373,6 +440,9 @@ export async function requireAuth(
 }
 
 // Logging helper
+/**
+ * Logs API errors with relevant request and error details.
+ */
 export function logApiError(
   error: ApiError,
   req: NextRequest,
