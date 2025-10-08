@@ -13,6 +13,15 @@ import { useLoading } from '@/hooks/use-loading';
 import { Repository } from '@/lib/github';
 import { loadUserPreferences } from '@/lib/user-preferences';
 
+/**
+ * Renders the dashboard content, managing GitHub connection status and user preferences.
+ *
+ * The function initializes state for the selected repository, GitHub connection status, and initialization status.
+ * It checks the GitHub connection status on mount and loads user preferences, creating a repository object if available.
+ * The loading state is displayed until initialization is complete, after which the main dashboard content is rendered.
+ *
+ * @returns JSX.Element - The rendered dashboard content.
+ */
 export function DashboardContent() {
   const [selectedRepository, setSelectedRepository] =
     useState<Repository | null>(null);
@@ -20,6 +29,13 @@ export function DashboardContent() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Check GitHub connection status on mount
+  /**
+   * Checks the GitHub connection status.
+   *
+   * This function makes a GET request to the '/api/github/status' endpoint to determine if GitHub is connected.
+   * If the response is successful, it updates the connection status based on the returned data.
+   * In case of an error during the fetch operation, it logs the error and sets the connection status to false to avoid hanging.
+   */
   const checkGitHubStatus = async () => {
     try {
       const response = await fetch('/api/github/status', {
@@ -41,6 +57,15 @@ export function DashboardContent() {
 
   // Load GitHub status and saved repository on mount
   React.useEffect(() => {
+    /**
+     * Load data asynchronously, including GitHub status and user preferences.
+     *
+     * The function sets a timeout to prevent hanging and runs both the GitHub status check and user preferences loading in parallel.
+     * If preferences are successfully loaded and contain the necessary repository information, a repository object is created and set.
+     * In case of an error, it logs the error and sets default values, ensuring the initialization state is updated in the end.
+     *
+     * @returns Promise<void> A promise that resolves when the data loading process is complete.
+     */
     const loadData = async () => {
       try {
         // Add timeout to prevent hanging
