@@ -17,15 +17,26 @@ import {
 } from '@/components/ui/card';
 import { LoadingState, LoadingSkeleton } from '@/components/ui/loading';
 import { useLoading } from '@/hooks/use-loading';
+import {
+  useMemoryLeakPrevention,
+  useSafeTimer,
+} from '@/lib/memory-leak-prevention';
 
 export function SectionCards() {
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Memory leak prevention
+  useMemoryLeakPrevention('SectionCards');
+  const { setTimeout, clearTimeout } = useSafeTimer();
+
   const loadStats = async () => {
     try {
       // Simulate API call delay - reduced for faster loading
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise(resolve => {
+        const timer = setTimeout(resolve, 50);
+        return timer;
+      });
 
       // Mock stats data
       setStats({

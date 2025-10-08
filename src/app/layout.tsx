@@ -5,6 +5,7 @@ import { GeistMono } from 'geist/font/mono';
 import { Analytics } from '@vercel/analytics/next';
 import { Suspense } from 'react';
 import { GlobalErrorBoundary } from '@/components/error-boundaries';
+import { MemoryMonitor } from '@/components/memory-monitor';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({
           <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
         </GlobalErrorBoundary>
         <Analytics />
+        <MemoryMonitor />
       </body>
     </html>
   );

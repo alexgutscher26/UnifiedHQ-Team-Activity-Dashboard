@@ -12,12 +12,21 @@ import { LoadingState, LoadingCard } from '@/components/ui/loading';
 import { useLoading } from '@/hooks/use-loading';
 import { Repository } from '@/lib/github';
 import { loadUserPreferences } from '@/lib/user-preferences';
+import {
+  useMemoryLeakPrevention,
+  useSafeFetch,
+  useSafeTimer,
+} from '@/lib/memory-leak-prevention';
 
 export function DashboardContent() {
   const [selectedRepository, setSelectedRepository] =
     useState<Repository | null>(null);
   const [isGitHubConnected, setIsGitHubConnected] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Memory leak prevention
+  useMemoryLeakPrevention('DashboardContent');
+  const { setTimeout, clearTimeout } = useSafeTimer();
 
   // Check GitHub connection status on mount
   const checkGitHubStatus = async () => {
@@ -44,9 +53,13 @@ export function DashboardContent() {
     const loadData = async () => {
       try {
         // Add timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Loading timeout')), 3000)
-        );
+        const timeoutPromise = new Promise((_, reject) => {
+          const timer = setTimeout(
+            () => reject(new Error('Loading timeout')),
+            3000
+          );
+          return timer;
+        });
 
         // Run both operations in parallel for faster loading
         const [githubStatus, preferences] = (await Promise.race([

@@ -12,16 +12,27 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { LoadingState, LoadingSkeleton } from '@/components/ui/loading';
 import { useLoading } from '@/hooks/use-loading';
+import {
+  useMemoryLeakPrevention,
+  useSafeTimer,
+} from '@/lib/memory-leak-prevention';
 
 export function AISummary() {
   const [summary, setSummary] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Memory leak prevention
+  useMemoryLeakPrevention('AISummary');
+  const { setTimeout, clearTimeout } = useSafeTimer();
+
   // Simulate AI summary generation
   const generateSummary = async () => {
     try {
       // Simulate API call delay - reduced for faster loading
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise(resolve => {
+        const timer = setTimeout(resolve, 50);
+        return timer;
+      });
 
       // Mock summary data
       setSummary({
