@@ -11,6 +11,15 @@ import { Github, Slack } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+/**
+ * Renders the Sign Up page for user registration.
+ *
+ * This component manages the state for user input fields such as name, email, and password.
+ * It provides functionality for both email/password sign up and social sign in through GitHub and Slack.
+ * Upon successful sign up, it redirects the user to the dashboard, while handling errors appropriately.
+ *
+ * @returns A JSX element representing the Sign Up page.
+ */
 export default function SignUpPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -20,6 +29,9 @@ export default function SignUpPage() {
   const [success, setSuccess] = useState("");
   const router = useRouter();
 
+  /**
+   * Handles the email sign-up process.
+   */
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -48,6 +60,9 @@ export default function SignUpPage() {
     }
   };
 
+  /**
+   * Handles social sign-in for the specified provider.
+   */
   const handleSocialSignIn = async (provider: "github" | "slack") => {
     try {
       await authClient.signIn.social({
