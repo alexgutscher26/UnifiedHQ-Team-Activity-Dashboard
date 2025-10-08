@@ -1,39 +1,64 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { auth } from '@/lib/auth';
+import {
+  withErrorHandling,
+  createApiSuccessResponse,
+  validateRequestBody,
+  ApiErrors,
+} from '@/lib/api-error-handler';
+import { z } from 'zod';
 
-export async function POST(request: NextRequest) {
-  try {
-    // Get the session to associate errors with users
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+// Error report schema
+const errorReportSchema = z.object({
+  error: z.object({
+    message: z.string(),
+    stack: z.string().optional(),
+    name: z.string().optional(),
+  }),
+  errorInfo: z
+    .object({
+      componentStack: z.string().optional(),
+    })
+    .optional(),
+  errorId: z.string().optional(),
+  url: z.string().url().optional(),
+  userAgent: z.string().optional(),
+  timestamp: z.string().optional(),
+});
 
-    const errorData = await request.json();
+async function reportError(request: NextRequest) {
+  // Get the session to associate errors with users
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
 
-    // In production, you would:
-    // 1. Send to error tracking service (Sentry, LogRocket, etc.)
-    // 2. Store in database for analysis
-    // 3. Send alerts for critical errors
+  const errorData = validateRequestBody(
+    errorReportSchema,
+    await request.json()
+  );
 
-    console.error('Client Error Report:', {
-      ...errorData,
-      userId: session?.user?.id || 'anonymous',
-      timestamp: new Date().toISOString(),
-    });
+  // In production, you would:
+  // 1. Send to error tracking service (Sentry, LogRocket, etc.)
+  // 2. Store in database for analysis
+  // 3. Send alerts for critical errors
 
-    // For now, just log the error
-    // In production, integrate with your error tracking service
-    if (process.env.NODE_ENV === 'production') {
-      // Example: Send to Sentry, LogRocket, or your error tracking service
-      // await sendToErrorTrackingService(errorData);
-    }
+  console.error('Client Error Report:', {
+    ...errorData,
+    userId: session?.user?.id || 'anonymous',
+    timestamp: new Date().toISOString(),
+  });
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error handling error report:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to process error report' },
-      { status: 500 }
-    );
+  // For now, just log the error
+  // In production, integrate with your error tracking service
+  if (process.env.NODE_ENV === 'production') {
+    // Example: Send to Sentry, LogRocket, or your error tracking service
+    // await sendToErrorTrackingService(errorData);
   }
+
+  return createApiSuccessResponse(
+    { received: true },
+    'Error report received successfully'
+  );
 }
+
+export const POST = withErrorHandling(reportError);
