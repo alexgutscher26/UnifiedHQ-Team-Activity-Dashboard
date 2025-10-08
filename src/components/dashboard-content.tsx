@@ -18,6 +18,16 @@ import {
   useSafeTimer,
 } from '@/lib/memory-leak-prevention';
 
+/**
+ * Renders the dashboard content, managing GitHub connection status and user preferences.
+ *
+ * The function initializes state for the selected repository, GitHub connection status, and initialization status.
+ * It checks the GitHub connection status on mount and loads user preferences, creating a repository object if available.
+ * The loading state is managed to prevent memory leaks and ensure a responsive UI.
+ * If initialization is not complete, loading indicators are displayed; otherwise, the main dashboard content is rendered.
+ *
+ * @returns {JSX.Element} The rendered dashboard content.
+ */
 export function DashboardContent() {
   const [selectedRepository, setSelectedRepository] =
     useState<Repository | null>(null);
@@ -50,6 +60,13 @@ export function DashboardContent() {
 
   // Load GitHub status and saved repository on mount
   React.useEffect(() => {
+    /**
+     * Load data asynchronously, including GitHub status and user preferences.
+     *
+     * The function sets a timeout to prevent hanging during the loading process. It runs both the GitHub status check and user preferences loading in parallel, handling any errors gracefully. If valid preferences are retrieved, it creates a repository object and updates the selected repository. In case of an error, it logs the error and sets default values.
+     *
+     * @returns {Promise<void>} A promise that resolves when the data loading is complete.
+     */
     const loadData = async () => {
       try {
         // Add timeout to prevent hanging
