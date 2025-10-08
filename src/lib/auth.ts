@@ -1,12 +1,13 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-// If your Prisma file is located elsewhere, you can change the path
 import { PrismaClient } from "@/generated/prisma";
+import { dymoEmailPlugin } from "@dymo-api/better-auth";
+import { openAPI } from "better-auth/plugins";
 
 const prisma = new PrismaClient();
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
-        provider: "postgresql", // or "mysql", "postgresql", ...etc
+        provider: "postgresql",
     }),
     emailAndPassword: { 
         enabled: true, 
@@ -21,6 +22,18 @@ export const auth = betterAuth({
         //     clientSecret: process.env.SLACK_CLIENT_SECRET as string, 
         // }, 
     },
+    plugins: [ 
+        dymoEmailPlugin({ 
+            apiKey: process.env.DYMO_API_KEY as string,
+            applyToLogin: true,  // recommended
+            applyToOAuth: true,   // validate OAuth emails
+            emailRules: {
+                // These are the default rules defined for email validation.
+                deny: ["FRAUD", "INVALID", "NO_MX_RECORDS", "NO_REPLY_EMAIL"]
+            }
+        }),
+        openAPI()
+    ],
     secret: process.env.BETTER_AUTH_SECRET as string,
     baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
 });
