@@ -18,10 +18,20 @@ import {
 import { LoadingState, LoadingSkeleton } from '@/components/ui/loading';
 import { useLoading } from '@/hooks/use-loading';
 
+/**
+ * Renders a section of cards displaying various statistics.
+ *
+ * The SectionCards component manages the loading state and fetches mock statistics data for Notion, Slack, GitHub, and AI summaries.
+ * It displays loading skeletons while the data is being fetched and renders the statistics in card format once available.
+ * The loadStats function simulates an API call to retrieve the data and handles any potential errors during the loading process.
+ */
 export function SectionCards() {
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  /**
+   * Loads and sets mock statistics data asynchronously.
+   */
   const loadStats = async () => {
     try {
       // Simulate API call delay - reduced for faster loading
@@ -65,6 +75,9 @@ export function SectionCards() {
     loadStats();
   }, []);
 
+  /**
+   * Renders a loading card with skeleton placeholders.
+   */
   const LoadingCard = () => (
     <Card className='@container/card'>
       <CardHeader>
