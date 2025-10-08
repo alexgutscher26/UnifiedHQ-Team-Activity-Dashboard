@@ -5,8 +5,10 @@ import { AISummary } from "@/components/ai-summary"
 import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { getCurrentUser } from "@/lib/get-user"
 
-export default function Page() {
+export default async function Page() {
+  const user = await getCurrentUser()
   return (
     <SidebarProvider
       style={
@@ -16,7 +18,7 @@ export default function Page() {
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebar variant="inset" user={user} />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">
