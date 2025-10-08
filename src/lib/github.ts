@@ -114,36 +114,8 @@ export interface Repository {
   defaultBranch: string;
 }
 
-export function getGitHubConfig() {
-  // Try environment variables first (for production)
-  const envOwner = process.env.NEXT_PUBLIC_GITHUB_OWNER;
-  const envRepo = process.env.NEXT_PUBLIC_GITHUB_REPO;
-  const envToken = process.env.GITHUB_TOKEN;
-
-  if (envOwner && envRepo && envToken) {
-    return { owner: envOwner, repo: envRepo, token: envToken };
-  }
-
-  // Fall back to localStorage (for development/demo)
-  if (typeof window !== 'undefined') {
-    const localOwner = localStorage.getItem('github_owner');
-    const localRepo = localStorage.getItem('github_repo');
-    const localToken = localStorage.getItem('github_token');
-
-    if (localOwner && localRepo && localToken) {
-      return { owner: localOwner, repo: localRepo, token: localToken };
-    }
-  }
-
-  return null;
-}
-
-export function saveGitHubConfig(owner: string, repo: string, token: string) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('github_owner', owner);
-    localStorage.setItem('github_repo', repo);
-    localStorage.setItem('github_token', token);
-  }
-}
+// Note: GitHub authentication is handled through OAuth via Better Auth
+// Tokens are automatically managed and stored in the Account table
+// No manual token storage needed
 
 export type { GitHubActivity };
