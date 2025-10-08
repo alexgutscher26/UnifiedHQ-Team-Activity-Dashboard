@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Github, Slack, Mail, Lock } from "lucide-react";
 
+/**
+ * Renders the Home component for the Better Auth demo application.
+ */
 export default function Home() {
   return (
     <div className="min-h-screen bg-background">
