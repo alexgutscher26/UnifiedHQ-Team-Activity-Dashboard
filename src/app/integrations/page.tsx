@@ -1,7 +1,7 @@
 import type React from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
-import { DashboardContent } from "@/components/dashboard-content"
+import { IntegrationsPage } from "@/components/integrations-page"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { getCurrentUser } from "@/lib/get-user"
 
@@ -19,7 +19,7 @@ export default async function Page() {
       <AppSidebar variant="inset" user={user} />
       <SidebarInset>
         <SiteHeader />
-        <DashboardContent />
+        <IntegrationsPage />
       </SidebarInset>
     </SidebarProvider>
   )

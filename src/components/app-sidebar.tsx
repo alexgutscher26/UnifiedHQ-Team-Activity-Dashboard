@@ -16,6 +16,7 @@ import {
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import { IntegrationsList } from "@/components/integrations-list"
 import {
   Sidebar,
   SidebarContent,
@@ -30,7 +31,7 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: IconDashboard,
     },
     {
@@ -43,22 +44,10 @@ const data = {
       url: "#",
       icon: IconSparkles,
     },
-  ],
-  integrations: [
     {
-      title: "Notion",
-      icon: IconBrandNotion,
-      url: "#",
-    },
-    {
-      title: "Slack",
-      icon: IconBrandSlack,
-      url: "#",
-    },
-    {
-      title: "GitHub",
-      icon: IconBrandGithub,
-      url: "#",
+      title: "Integrations",
+      url: "/integrations",
+      icon: IconSettings,
     },
   ],
   navSecondary: [
@@ -108,17 +97,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         <NavMain items={data.navMain} />
         <div className="px-3 py-2">
           <div className="mb-2 px-2 text-xs font-semibold text-sidebar-foreground/70">Integrations</div>
-          <div className="space-y-1">
-            {data.integrations.map((item) => (
-              <SidebarMenuButton key={item.title} asChild>
-                <a href={item.url} className="flex items-center gap-3">
-                  <item.icon className="size-4" />
-                  <span>{item.title}</span>
-                  <div className="ml-auto size-2 rounded-full bg-green-500" />
-                </a>
-              </SidebarMenuButton>
-            ))}
-          </div>
+          <IntegrationsList />
         </div>
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

@@ -30,6 +30,7 @@ model User {
   oauthapplications OauthApplication[]
   oauthaccesstokens OauthAccessToken[]
   oauthconsents     OauthConsent[]
+  preferences       UserPreferences?
 
   @@unique([email])
   @@map("user")
@@ -141,4 +142,25 @@ model RateLimit {
   lastRequest BigInt?
 
   @@map("rateLimit")
+}
+
+model UserPreferences {
+  id          String  @id @default(cuid())
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // GitHub preferences
+  githubOwner String?
+  githubRepo  String?
+  githubRepoId Int?
+  
+  // Other integration preferences can be added here
+  // notionWorkspaceId String?
+  // slackTeamId String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId])
+  @@map("userPreferences")
 }
