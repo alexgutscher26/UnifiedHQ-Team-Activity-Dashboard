@@ -8,6 +8,8 @@ import {
   ActivityFeedErrorBoundary,
   GitHubErrorBoundary,
 } from '@/components/error-boundaries';
+import { LoadingState, LoadingCard } from '@/components/ui/loading';
+import { useLoading } from '@/hooks/use-loading';
 import { Repository } from '@/lib/github';
 import { loadUserPreferences } from '@/lib/user-preferences';
 
@@ -15,32 +17,50 @@ export function DashboardContent() {
   const [selectedRepository, setSelectedRepository] =
     useState<Repository | null>(null);
   const [isGitHubConnected, setIsGitHubConnected] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Check GitHub connection status on mount
   const checkGitHubStatus = async () => {
     try {
-      const response = await fetch('/api/github/status');
+      const response = await fetch('/api/github/status', {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         setIsGitHubConnected(data.success && data.connected);
       }
     } catch (error) {
       console.error('Error checking GitHub status:', error);
+      // Set to false on error to prevent hanging
+      setIsGitHubConnected(false);
     }
   };
 
   // Load GitHub status and saved repository on mount
   React.useEffect(() => {
     const loadData = async () => {
-      await checkGitHubStatus();
-
-      // Load saved repository preferences
       try {
-        const preferences = await loadUserPreferences();
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Loading timeout')), 3000)
+        );
+
+        // Run both operations in parallel for faster loading
+        const [githubStatus, preferences] = (await Promise.race([
+          Promise.all([
+            checkGitHubStatus(),
+            loadUserPreferences().catch(() => null), // Don't fail if preferences can't be loaded
+          ]),
+          timeoutPromise,
+        ])) as [any, any];
+
         if (
-          preferences.githubRepoId &&
-          preferences.githubOwner &&
-          preferences.githubRepo
+          preferences?.githubRepoId &&
+          preferences?.githubOwner &&
+          preferences?.githubRepo
         ) {
           // Create a repository object from saved preferences
           const savedRepo: Repository = {
@@ -56,12 +76,36 @@ export function DashboardContent() {
           setSelectedRepository(savedRepo);
         }
       } catch (error) {
-        console.error('Error loading saved repository:', error);
+        console.error('Error loading data:', error);
+        // Set default values on error
+        setIsGitHubConnected(false);
+      } finally {
+        setIsInitialized(true);
       }
     };
 
     loadData();
   }, []);
+
+  if (!isInitialized) {
+    return (
+      <div className='flex flex-1 flex-col'>
+        <div className='@container/main flex flex-1 flex-col gap-2'>
+          <div className='flex flex-col gap-4 py-4 md:gap-6 md:py-6'>
+            <LoadingCard className='mx-4 lg:mx-6' />
+            <div className='grid grid-cols-1 gap-4 px-4 lg:grid-cols-3 lg:gap-6 lg:px-6'>
+              <div className='lg:col-span-2'>
+                <LoadingCard />
+              </div>
+              <div className='lg:col-span-1'>
+                <LoadingCard />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='flex flex-1 flex-col'>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { IconSparkles } from '@tabler/icons-react';
 import {
   Card,
@@ -9,8 +10,47 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { LoadingState, LoadingSkeleton } from '@/components/ui/loading';
+import { useLoading } from '@/hooks/use-loading';
 
 export function AISummary() {
+  const [summary, setSummary] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate AI summary generation
+  const generateSummary = async () => {
+    try {
+      // Simulate API call delay - reduced for faster loading
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      // Mock summary data
+      setSummary({
+        highlights: [
+          'Engineering team merged 7 pull requests, with authentication flow now complete',
+          'Product roadmap updated with 3 new features prioritized for Q1',
+          'Design team shared new mockups in Slack, awaiting feedback from stakeholders',
+          '156 messages across 8 Slack channels, highest activity in #engineering',
+        ],
+        actionItems: [
+          '2 pull requests awaiting review from senior engineers',
+          'Sprint planning notes need capacity estimates from 3 team members',
+        ],
+        generatedAt: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      });
+    } catch (error) {
+      console.error('Error generating AI summary:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    generateSummary();
+  }, []);
+
   return (
     <Card className='bg-gradient-to-br from-primary/5 via-card to-card'>
       <CardHeader>
@@ -26,59 +66,61 @@ export function AISummary() {
         </CardDescription>
       </CardHeader>
       <CardContent className='space-y-4'>
-        <div className='space-y-2'>
-          <h4 className='font-semibold text-sm'>Key Highlights</h4>
-          <ul className='space-y-2 text-sm text-muted-foreground'>
-            <li className='flex items-start gap-2'>
-              <span className='mt-1 size-1.5 rounded-full bg-primary flex-shrink-0' />
-              <span>
-                Engineering team merged 7 pull requests, with authentication
-                flow now complete
-              </span>
-            </li>
-            <li className='flex items-start gap-2'>
-              <span className='mt-1 size-1.5 rounded-full bg-primary flex-shrink-0' />
-              <span>
-                Product roadmap updated with 3 new features prioritized for Q1
-              </span>
-            </li>
-            <li className='flex items-start gap-2'>
-              <span className='mt-1 size-1.5 rounded-full bg-primary flex-shrink-0' />
-              <span>
-                Design team shared new mockups in Slack, awaiting feedback from
-                stakeholders
-              </span>
-            </li>
-            <li className='flex items-start gap-2'>
-              <span className='mt-1 size-1.5 rounded-full bg-primary flex-shrink-0' />
-              <span>
-                156 messages across 8 Slack channels, highest activity in
-                #engineering
-              </span>
-            </li>
-          </ul>
-        </div>
-        <div className='space-y-2'>
-          <h4 className='font-semibold text-sm'>Action Items</h4>
-          <ul className='space-y-2 text-sm text-muted-foreground'>
-            <li className='flex items-start gap-2'>
-              <span className='mt-1 size-1.5 rounded-full bg-orange-500 flex-shrink-0' />
-              <span>2 pull requests awaiting review from senior engineers</span>
-            </li>
-            <li className='flex items-start gap-2'>
-              <span className='mt-1 size-1.5 rounded-full bg-orange-500 flex-shrink-0' />
-              <span>
-                Sprint planning notes need capacity estimates from 3 team
-                members
-              </span>
-            </li>
-          </ul>
-        </div>
-        <div className='pt-2 border-t'>
-          <p className='text-xs text-muted-foreground'>
-            Summary generated at 2:45 PM • Updates every 30 minutes
-          </p>
-        </div>
+        {isLoading ? (
+          <div className='space-y-4'>
+            <div className='space-y-2'>
+              <LoadingSkeleton className='h-4 w-24' />
+              <div className='space-y-2'>
+                <LoadingSkeleton className='h-3 w-full' />
+                <LoadingSkeleton className='h-3 w-5/6' />
+                <LoadingSkeleton className='h-3 w-4/6' />
+                <LoadingSkeleton className='h-3 w-3/4' />
+              </div>
+            </div>
+            <div className='space-y-2'>
+              <LoadingSkeleton className='h-4 w-20' />
+              <div className='space-y-2'>
+                <LoadingSkeleton className='h-3 w-full' />
+                <LoadingSkeleton className='h-3 w-4/5' />
+              </div>
+            </div>
+          </div>
+        ) : (
+          summary && (
+            <>
+              <div className='space-y-2'>
+                <h4 className='font-semibold text-sm'>Key Highlights</h4>
+                <ul className='space-y-2 text-sm text-muted-foreground'>
+                  {summary.highlights.map(
+                    (highlight: string, index: number) => (
+                      <li key={index} className='flex items-start gap-2'>
+                        <span className='mt-1 size-1.5 rounded-full bg-primary flex-shrink-0' />
+                        <span>{highlight}</span>
+                      </li>
+                    )
+                  )}
+                </ul>
+              </div>
+              <div className='space-y-2'>
+                <h4 className='font-semibold text-sm'>Action Items</h4>
+                <ul className='space-y-2 text-sm text-muted-foreground'>
+                  {summary.actionItems.map((item: string, index: number) => (
+                    <li key={index} className='flex items-start gap-2'>
+                      <span className='mt-1 size-1.5 rounded-full bg-orange-500 flex-shrink-0' />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className='pt-2 border-t'>
+                <p className='text-xs text-muted-foreground'>
+                  Summary generated at {summary.generatedAt} • Updates every 30
+                  minutes
+                </p>
+              </div>
+            </>
+          )
+        )}
       </CardContent>
     </Card>
   );
