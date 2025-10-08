@@ -17,6 +17,11 @@ import {
   useSafeTimer,
 } from '@/lib/memory-leak-prevention';
 
+/**
+ * Renders an AI-generated daily summary card.
+ *
+ * This function manages the state for the summary and loading status, simulates an API call to generate a summary, and displays the results in a card format. It utilizes memory leak prevention and a safe timer for handling asynchronous operations. The summary includes key highlights and action items, and updates every 30 minutes.
+ */
 export function AISummary() {
   const [summary, setSummary] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,6 +31,9 @@ export function AISummary() {
   const { setTimeout, clearTimeout } = useSafeTimer();
 
   // Simulate AI summary generation
+  /**
+   * Generates a summary of team activities and updates.
+   */
   const generateSummary = async () => {
     try {
       // Simulate API call delay - reduced for faster loading
