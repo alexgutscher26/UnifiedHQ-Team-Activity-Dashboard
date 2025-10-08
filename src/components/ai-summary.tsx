@@ -4,6 +4,9 @@ import { IconSparkles } from "@tabler/icons-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
+/**
+ * Renders the AI Daily Summary component displaying key highlights and action items.
+ */
 export function AISummary() {
   return (
     <Card className="bg-gradient-to-br from-primary/5 via-card to-card">
