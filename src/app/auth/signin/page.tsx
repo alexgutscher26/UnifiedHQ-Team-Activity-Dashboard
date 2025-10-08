@@ -11,6 +11,13 @@ import { Github, Slack } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+/**
+ * Renders the Sign In page for user authentication.
+ *
+ * This component manages the state for email, password, loading status, and error messages.
+ * It provides functionality for both email/password sign-in and social sign-in via GitHub or Slack.
+ * Upon successful sign-in, users are redirected to the dashboard, while errors are displayed as needed.
+ */
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +25,9 @@ export default function SignInPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  /**
+   * Handles email sign-in for the user.
+   */
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -43,6 +53,9 @@ export default function SignInPage() {
     }
   };
 
+  /**
+   * Handles social sign-in for the specified provider.
+   */
   const handleSocialSignIn = async (provider: "github" | "slack") => {
     try {
       await authClient.signIn.social({
