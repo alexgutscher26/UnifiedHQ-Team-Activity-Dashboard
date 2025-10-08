@@ -26,6 +26,9 @@ export default function SignInPage() {
     setLastMethod(lastUsedMethod);
   }, []);
 
+  /**
+   * Handles email sign-in process and manages loading and error states.
+   */
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
