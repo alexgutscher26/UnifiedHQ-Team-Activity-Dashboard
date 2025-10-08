@@ -20,6 +20,17 @@ interface GitHubRepository {
   default_branch: string;
 }
 
+/**
+ * Handles the GET request to fetch the user's GitHub repositories.
+ *
+ * This function retrieves the session using Better Auth, checks for the user's GitHub OAuth token in the database,
+ * and fetches the user's repositories from the GitHub API. It formats the repository data into a simpler structure
+ * before returning it. If any step fails, appropriate error responses are returned.
+ *
+ * @param request - The incoming NextRequest object containing the request details.
+ * @returns A JSON response containing either the formatted repositories or an error message.
+ * @throws Error If there is an issue with the GitHub API response or other unexpected errors occur.
+ */
 export async function GET(request: NextRequest) {
   try {
     // Get the session from Better Auth
