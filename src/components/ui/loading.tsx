@@ -7,6 +7,9 @@ interface LoadingSpinnerProps {
   className?: string;
 }
 
+/**
+ * Renders a loading spinner with specified size and additional classes.
+ */
 export function LoadingSpinner({
   size = 'md',
   className,
@@ -69,6 +72,9 @@ interface LoadingCardProps {
   showFooter?: boolean;
 }
 
+/**
+ * Renders a loading card with optional header, content, and footer.
+ */
 export function LoadingCard({
   className,
   showHeader = true,
@@ -107,6 +113,9 @@ interface LoadingButtonProps {
   onClick?: () => void;
 }
 
+/**
+ * Renders a button that shows a loading spinner when in a loading state.
+ */
 export function LoadingButton({
   loading = false,
   children,
@@ -140,6 +149,9 @@ interface LoadingOverlayProps {
   className?: string;
 }
 
+/**
+ * Renders a loading overlay with a spinner and message when loading is true.
+ */
 export function LoadingOverlay({
   loading,
   children,
@@ -168,6 +180,9 @@ interface LoadingStateProps {
   className?: string;
 }
 
+/**
+ * Renders a loading state or the children based on the loading prop.
+ */
 export function LoadingState({
   loading,
   children,
