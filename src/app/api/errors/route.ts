@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 
+/**
+ * Handles POST requests for error reporting.
+ *
+ * This function retrieves the user session to associate errors with users, processes the incoming error data from the request, and logs the error details. In production, it is intended to integrate with an error tracking service and store the errors for further analysis. If an error occurs during processing, it logs the error and returns a failure response.
+ *
+ * @param request - The NextRequest object containing the request data.
+ * @returns A JSON response indicating the success of the error report processing.
+ * @throws Error If an error occurs while handling the error report.
+ */
 export async function POST(request: NextRequest) {
   try {
     // Get the session to associate errors with users
