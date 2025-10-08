@@ -8,15 +8,15 @@ export async function GET(request: NextRequest) {
   try {
     // Get the session from Better Auth
     const session = await auth.api.getSession({
-      headers: request.headers
+      headers: request.headers,
     });
 
     if (!session) {
       return NextResponse.json(
-        { 
+        {
           success: false,
           connected: false,
-          error: 'Authentication required' 
+          error: 'Authentication required',
         },
         { status: 401 }
       );
@@ -26,15 +26,15 @@ export async function GET(request: NextRequest) {
     const account = await prisma.account.findFirst({
       where: {
         userId: session.user.id,
-        providerId: 'github'
-      }
+        providerId: 'github',
+      },
     });
 
     if (!account || !account.accessToken) {
       return NextResponse.json({
         success: true,
         connected: false,
-        message: 'GitHub account not connected'
+        message: 'GitHub account not connected',
       });
     }
 
@@ -45,18 +45,17 @@ export async function GET(request: NextRequest) {
       user: {
         id: session.user.id,
         name: session.user.name,
-        email: session.user.email
-      }
+        email: session.user.email,
+      },
     });
-
   } catch (error) {
     console.error('GitHub Status API Error:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         connected: false,
         error: 'Failed to check GitHub connection status',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

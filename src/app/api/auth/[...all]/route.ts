@@ -1,5 +1,5 @@
-import { auth } from "@/lib/auth";
-import { NextRequest } from "next/server";
+import { auth } from '@/lib/auth';
+import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
   return auth.handler(request);

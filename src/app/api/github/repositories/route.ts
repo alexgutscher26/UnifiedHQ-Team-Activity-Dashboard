@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get the session from Better Auth
     const session = await auth.api.getSession({
-      headers: request.headers
+      headers: request.headers,
     });
 
     if (!session) {
@@ -38,22 +38,25 @@ export async function GET(request: NextRequest) {
     const account = await prisma.account.findFirst({
       where: {
         userId: session.user.id,
-        providerId: 'github'
-      }
+        providerId: 'github',
+      },
     });
 
     if (!account || !account.accessToken) {
       return NextResponse.json(
-        { error: 'GitHub account not connected. Please connect your GitHub account first.' },
+        {
+          error:
+            'GitHub account not connected. Please connect your GitHub account first.',
+        },
         { status: 400 }
       );
     }
 
     // Fetch user's repositories
     const headers = {
-      'Authorization': `token ${account.accessToken}`,
-      'Accept': 'application/vnd.github.v3+json',
-      'User-Agent': 'Team-Dashboard-App'
+      Authorization: `token ${account.accessToken}`,
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'Team-Dashboard-App',
     };
 
     const response = await fetch(
@@ -76,22 +79,21 @@ export async function GET(request: NextRequest) {
       description: repo.description,
       isPrivate: repo.private,
       updatedAt: repo.updated_at,
-      defaultBranch: repo.default_branch
+      defaultBranch: repo.default_branch,
     }));
 
     return NextResponse.json({
       success: true,
       data: {
-        repositories: formattedRepos
-      }
+        repositories: formattedRepos,
+      },
     });
-
   } catch (error) {
     console.error('GitHub Repositories API Error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch repositories',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

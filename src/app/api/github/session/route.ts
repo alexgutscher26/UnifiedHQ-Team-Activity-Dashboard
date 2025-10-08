@@ -112,9 +112,9 @@ interface GitHubActivity {
 
 async function fetchGitHubData(owner: string, repo: string, token: string) {
   const headers = {
-    'Authorization': `token ${token}`,
-    'Accept': 'application/vnd.github.v3+json',
-    'User-Agent': 'Team-Dashboard-App'
+    Authorization: `token ${token}`,
+    Accept: 'application/vnd.github.v3+json',
+    'User-Agent': 'Team-Dashboard-App',
   };
 
   try {
@@ -123,11 +123,11 @@ async function fetchGitHubData(owner: string, repo: string, token: string) {
       `${GITHUB_API_BASE}/repos/${owner}/${repo}/commits?per_page=10`,
       { headers }
     );
-    
+
     if (!commitsResponse.ok) {
       throw new Error(`GitHub API error: ${commitsResponse.status}`);
     }
-    
+
     const commits: GitHubCommit[] = await commitsResponse.json();
 
     // Fetch recent pull requests (last 10)
@@ -135,11 +135,11 @@ async function fetchGitHubData(owner: string, repo: string, token: string) {
       `${GITHUB_API_BASE}/repos/${owner}/${repo}/pulls?state=all&per_page=10&sort=updated`,
       { headers }
     );
-    
+
     if (!prsResponse.ok) {
       throw new Error(`GitHub API error: ${prsResponse.status}`);
     }
-    
+
     const pullRequests: GitHubPullRequest[] = await prsResponse.json();
 
     // Fetch recent issues (last 10)
@@ -147,11 +147,11 @@ async function fetchGitHubData(owner: string, repo: string, token: string) {
       `${GITHUB_API_BASE}/repos/${owner}/${repo}/issues?state=all&per_page=10&sort=updated`,
       { headers }
     );
-    
+
     if (!issuesResponse.ok) {
       throw new Error(`GitHub API error: ${issuesResponse.status}`);
     }
-    
+
     const issues: GitHubIssue[] = await issuesResponse.json();
 
     // Fetch recent releases (last 5)
@@ -159,11 +159,11 @@ async function fetchGitHubData(owner: string, repo: string, token: string) {
       `${GITHUB_API_BASE}/repos/${owner}/${repo}/releases?per_page=5`,
       { headers }
     );
-    
+
     if (!releasesResponse.ok) {
       throw new Error(`GitHub API error: ${releasesResponse.status}`);
     }
-    
+
     const releases: GitHubRelease[] = await releasesResponse.json();
 
     // Fetch recent stargazers (last 10)
@@ -171,11 +171,11 @@ async function fetchGitHubData(owner: string, repo: string, token: string) {
       `${GITHUB_API_BASE}/repos/${owner}/${repo}/stargazers?per_page=10`,
       { headers }
     );
-    
+
     if (!starsResponse.ok) {
       throw new Error(`GitHub API error: ${starsResponse.status}`);
     }
-    
+
     const stars: GitHubStar[] = await starsResponse.json();
 
     return { commits, pullRequests, issues, releases, stars };
@@ -191,23 +191,26 @@ function formatTimeAgo(dateString: string): string {
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  if (diffInSeconds < 3600)
+    return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+  if (diffInSeconds < 86400)
+    return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  if (diffInSeconds < 2592000)
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
   return `${Math.floor(diffInSeconds / 2592000)} months ago`;
 }
 
 function transformToActivity(
-  commits: GitHubCommit[], 
-  pullRequests: GitHubPullRequest[], 
-  issues: GitHubIssue[], 
-  releases: GitHubRelease[], 
+  commits: GitHubCommit[],
+  pullRequests: GitHubPullRequest[],
+  issues: GitHubIssue[],
+  releases: GitHubRelease[],
   stars: GitHubStar[]
 ): GitHubActivity[] {
   const activities: GitHubActivity[] = [];
 
   // Transform commits
-  commits.forEach((commit) => {
+  commits.forEach(commit => {
     activities.push({
       id: `commit-${commit.sha}`,
       type: 'github',
@@ -217,18 +220,19 @@ function transformToActivity(
       target: commit.commit.message.split('\n')[0], // First line of commit message
       time: formatTimeAgo(commit.commit.author.date),
       details: `Commit ${commit.sha.substring(0, 7)}`,
-      url: commit.html_url
+      url: commit.html_url,
     });
   });
 
   // Transform pull requests
-  pullRequests.forEach((pr) => {
-    const action = pr.state === 'open' 
-      ? 'opened pull request' 
-      : pr.merged_at 
-        ? 'merged pull request' 
-        : 'closed pull request';
-    
+  pullRequests.forEach(pr => {
+    const action =
+      pr.state === 'open'
+        ? 'opened pull request'
+        : pr.merged_at
+          ? 'merged pull request'
+          : 'closed pull request';
+
     activities.push({
       id: `pr-${pr.id}`,
       type: 'github',
@@ -238,16 +242,14 @@ function transformToActivity(
       target: `#${pr.number} - ${pr.title}`,
       time: formatTimeAgo(pr.updated_at),
       details: `${pr.head.ref} → ${pr.base.ref}`,
-      url: pr.html_url
+      url: pr.html_url,
     });
   });
 
   // Transform issues
-  issues.forEach((issue) => {
-    const action = issue.state === 'open' 
-      ? 'opened issue' 
-      : 'closed issue';
-    
+  issues.forEach(issue => {
+    const action = issue.state === 'open' ? 'opened issue' : 'closed issue';
+
     activities.push({
       id: `issue-${issue.id}`,
       type: 'github',
@@ -259,14 +261,16 @@ function transformToActivity(
       details: issue.labels.map(l => l.name).join(', '),
       url: issue.html_url,
       labels: issue.labels.map(l => l.name),
-      assignees: issue.assignees.map(a => a.login)
+      assignees: issue.assignees.map(a => a.login),
     });
   });
 
   // Transform releases
-  releases.forEach((release) => {
-    const action = release.prerelease ? 'published prerelease' : 'published release';
-    
+  releases.forEach(release => {
+    const action = release.prerelease
+      ? 'published prerelease'
+      : 'published release';
+
     activities.push({
       id: `release-${release.id}`,
       type: 'github',
@@ -276,12 +280,12 @@ function transformToActivity(
       target: release.name || release.tag_name,
       time: formatTimeAgo(release.published_at),
       details: `${release.assets.length} assets, ${release.assets.reduce((sum, asset) => sum + asset.download_count, 0)} downloads`,
-      url: release.html_url
+      url: release.html_url,
     });
   });
 
   // Transform stars
-  stars.forEach((star) => {
+  stars.forEach(star => {
     activities.push({
       id: `star-${star.user.login}-${Date.now()}`,
       type: 'github',
@@ -291,20 +295,30 @@ function transformToActivity(
       target: 'this repository',
       time: formatTimeAgo(star.starred_at),
       details: '⭐',
-      url: `https://github.com/${star.user.login}`
+      url: `https://github.com/${star.user.login}`,
     });
   });
 
   // Sort by time (most recent first)
   return activities.sort((a, b) => {
-    const timeA = a.time.includes('seconds') ? 0 : 
-                  a.time.includes('minutes') ? 1 : 
-                  a.time.includes('hours') ? 2 : 
-                  a.time.includes('days') ? 3 : 4;
-    const timeB = b.time.includes('seconds') ? 0 : 
-                  b.time.includes('minutes') ? 1 : 
-                  b.time.includes('hours') ? 2 : 
-                  b.time.includes('days') ? 3 : 4;
+    const timeA = a.time.includes('seconds')
+      ? 0
+      : a.time.includes('minutes')
+        ? 1
+        : a.time.includes('hours')
+          ? 2
+          : a.time.includes('days')
+            ? 3
+            : 4;
+    const timeB = b.time.includes('seconds')
+      ? 0
+      : b.time.includes('minutes')
+        ? 1
+        : b.time.includes('hours')
+          ? 2
+          : b.time.includes('days')
+            ? 3
+            : 4;
     return timeA - timeB;
   });
 }
@@ -313,7 +327,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get the session from Better Auth
     const session = await auth.api.getSession({
-      headers: request.headers
+      headers: request.headers,
     });
 
     if (!session) {
@@ -327,13 +341,16 @@ export async function GET(request: NextRequest) {
     const account = await prisma.account.findFirst({
       where: {
         userId: session.user.id,
-        providerId: 'github'
-      }
+        providerId: 'github',
+      },
     });
 
     if (!account || !account.accessToken) {
       return NextResponse.json(
-        { error: 'GitHub account not connected. Please connect your GitHub account first.' },
+        {
+          error:
+            'GitHub account not connected. Please connect your GitHub account first.',
+        },
         { status: 400 }
       );
     }
@@ -345,13 +362,23 @@ export async function GET(request: NextRequest) {
 
     if (!owner || !repo) {
       return NextResponse.json(
-        { error: 'Repository not specified. Please provide owner and repo parameters.' },
+        {
+          error:
+            'Repository not specified. Please provide owner and repo parameters.',
+        },
         { status: 400 }
       );
     }
 
-    const { commits, pullRequests, issues, releases, stars } = await fetchGitHubData(owner, repo, account.accessToken);
-    const activities = transformToActivity(commits, pullRequests, issues, releases, stars);
+    const { commits, pullRequests, issues, releases, stars } =
+      await fetchGitHubData(owner, repo, account.accessToken);
+    const activities = transformToActivity(
+      commits,
+      pullRequests,
+      issues,
+      releases,
+      stars
+    );
 
     return NextResponse.json({
       success: true,
@@ -362,18 +389,17 @@ export async function GET(request: NextRequest) {
           pullRequests: pullRequests.length,
           issues: issues.length,
           releases: releases.length,
-          stars: stars.length
+          stars: stars.length,
         },
-        lastUpdated: new Date().toISOString()
-      }
+        lastUpdated: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     console.error('GitHub API Error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch GitHub data',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

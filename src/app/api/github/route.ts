@@ -55,9 +55,9 @@ interface GitHubActivity {
 
 async function fetchGitHubData(owner: string, repo: string, token: string) {
   const headers = {
-    'Authorization': `token ${token}`,
-    'Accept': 'application/vnd.github.v3+json',
-    'User-Agent': 'Team-Dashboard-App'
+    Authorization: `token ${token}`,
+    Accept: 'application/vnd.github.v3+json',
+    'User-Agent': 'Team-Dashboard-App',
   };
 
   try {
@@ -66,11 +66,11 @@ async function fetchGitHubData(owner: string, repo: string, token: string) {
       `${GITHUB_API_BASE}/repos/${owner}/${repo}/commits?per_page=10`,
       { headers }
     );
-    
+
     if (!commitsResponse.ok) {
       throw new Error(`GitHub API error: ${commitsResponse.status}`);
     }
-    
+
     const commits: GitHubCommit[] = await commitsResponse.json();
 
     // Fetch recent pull requests (last 10)
@@ -78,11 +78,11 @@ async function fetchGitHubData(owner: string, repo: string, token: string) {
       `${GITHUB_API_BASE}/repos/${owner}/${repo}/pulls?state=all&per_page=10&sort=updated`,
       { headers }
     );
-    
+
     if (!prsResponse.ok) {
       throw new Error(`GitHub API error: ${prsResponse.status}`);
     }
-    
+
     const pullRequests: GitHubPullRequest[] = await prsResponse.json();
 
     return { commits, pullRequests };
@@ -98,17 +98,23 @@ function formatTimeAgo(dateString: string): string {
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  if (diffInSeconds < 3600)
+    return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+  if (diffInSeconds < 86400)
+    return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  if (diffInSeconds < 2592000)
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
   return `${Math.floor(diffInSeconds / 2592000)} months ago`;
 }
 
-function transformToActivity(commits: GitHubCommit[], pullRequests: GitHubPullRequest[]): GitHubActivity[] {
+function transformToActivity(
+  commits: GitHubCommit[],
+  pullRequests: GitHubPullRequest[]
+): GitHubActivity[] {
   const activities: GitHubActivity[] = [];
 
   // Transform commits
-  commits.forEach((commit) => {
+  commits.forEach(commit => {
     activities.push({
       id: `commit-${commit.sha}`,
       type: 'commit',
@@ -118,18 +124,19 @@ function transformToActivity(commits: GitHubCommit[], pullRequests: GitHubPullRe
       target: commit.commit.message.split('\n')[0], // First line of commit message
       time: formatTimeAgo(commit.commit.author.date),
       details: `Commit ${commit.sha.substring(0, 7)}`,
-      url: commit.html_url
+      url: commit.html_url,
     });
   });
 
   // Transform pull requests
-  pullRequests.forEach((pr) => {
-    const action = pr.state === 'open' 
-      ? 'opened pull request' 
-      : pr.merged_at 
-        ? 'merged pull request' 
-        : 'closed pull request';
-    
+  pullRequests.forEach(pr => {
+    const action =
+      pr.state === 'open'
+        ? 'opened pull request'
+        : pr.merged_at
+          ? 'merged pull request'
+          : 'closed pull request';
+
     activities.push({
       id: `pr-${pr.id}`,
       type: 'pull_request',
@@ -139,20 +146,30 @@ function transformToActivity(commits: GitHubCommit[], pullRequests: GitHubPullRe
       target: `#${pr.number} - ${pr.title}`,
       time: formatTimeAgo(pr.updated_at),
       details: `${pr.head.ref} → ${pr.base.ref}`,
-      url: pr.html_url
+      url: pr.html_url,
     });
   });
 
   // Sort by time (most recent first)
   return activities.sort((a, b) => {
-    const timeA = a.time.includes('seconds') ? 0 : 
-                  a.time.includes('minutes') ? 1 : 
-                  a.time.includes('hours') ? 2 : 
-                  a.time.includes('days') ? 3 : 4;
-    const timeB = b.time.includes('seconds') ? 0 : 
-                  b.time.includes('minutes') ? 1 : 
-                  b.time.includes('hours') ? 2 : 
-                  b.time.includes('days') ? 3 : 4;
+    const timeA = a.time.includes('seconds')
+      ? 0
+      : a.time.includes('minutes')
+        ? 1
+        : a.time.includes('hours')
+          ? 2
+          : a.time.includes('days')
+            ? 3
+            : 4;
+    const timeB = b.time.includes('seconds')
+      ? 0
+      : b.time.includes('minutes')
+        ? 1
+        : b.time.includes('hours')
+          ? 2
+          : b.time.includes('days')
+            ? 3
+            : 4;
     return timeA - timeB;
   });
 }
@@ -180,16 +197,15 @@ export async function GET(request: NextRequest) {
         activities,
         commits: commits.length,
         pullRequests: pullRequests.length,
-        lastUpdated: new Date().toISOString()
-      }
+        lastUpdated: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     console.error('GitHub API Error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch GitHub data',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

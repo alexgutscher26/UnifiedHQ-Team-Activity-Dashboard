@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import type * as React from "react"
+import type * as React from 'react';
 import {
   IconBrandGithub,
   IconBrandNotion,
@@ -11,12 +11,12 @@ import {
   IconSettings,
   IconSparkles,
   IconUsers,
-} from "@tabler/icons-react"
+} from '@tabler/icons-react';
 
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
-import { IntegrationsList } from "@/components/integrations-list"
+import { NavMain } from '@/components/nav-main';
+import { NavSecondary } from '@/components/nav-secondary';
+import { NavUser } from '@/components/nav-user';
+import { IntegrationsList } from '@/components/integrations-list';
 import {
   Sidebar,
   SidebarContent,
@@ -25,49 +25,49 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from '@/components/ui/sidebar';
 
 const data = {
   navMain: [
     {
-      title: "Dashboard",
-      url: "/dashboard",
+      title: 'Dashboard',
+      url: '/dashboard',
       icon: IconDashboard,
     },
     {
-      title: "Team Activity",
-      url: "#",
+      title: 'Team Activity',
+      url: '#',
       icon: IconUsers,
     },
     {
-      title: "AI Insights",
-      url: "#",
+      title: 'AI Insights',
+      url: '#',
       icon: IconSparkles,
     },
     {
-      title: "Integrations",
-      url: "/integrations",
+      title: 'Integrations',
+      url: '/integrations',
       icon: IconSettings,
     },
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "#",
+      title: 'Settings',
+      url: '#',
       icon: IconSettings,
     },
     {
-      title: "Get Help",
-      url: "#",
+      title: 'Get Help',
+      url: '#',
       icon: IconHelp,
     },
     {
-      title: "Search",
-      url: "#",
+      title: 'Search',
+      url: '#',
       icon: IconSearch,
     },
   ],
-}
+};
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user?: {
@@ -80,14 +80,17 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible='offcanvas' {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
-                <IconSparkles className="!size-5" />
-                <span className="text-base font-semibold">UnifiedHQ</span>
+            <SidebarMenuButton
+              asChild
+              className='data-[slot=sidebar-menu-button]:!p-1.5'
+            >
+              <a href='#'>
+                <IconSparkles className='!size-5' />
+                <span className='text-base font-semibold'>UnifiedHQ</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -95,15 +98,15 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <div className="px-3 py-2">
-          <div className="mb-2 px-2 text-xs font-semibold text-sidebar-foreground/70">Integrations</div>
+        <div className='px-3 py-2'>
+          <div className='mb-2 px-2 text-xs font-semibold text-sidebar-foreground/70'>
+            Integrations
+          </div>
           <IntegrationsList />
         </div>
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavSecondary items={data.navSecondary} className='mt-auto' />
       </SidebarContent>
-      <SidebarFooter>
-        {user && <NavUser user={user} />}
-      </SidebarFooter>
+      <SidebarFooter>{user && <NavUser user={user} />}</SidebarFooter>
     </Sidebar>
-  )
+  );
 }

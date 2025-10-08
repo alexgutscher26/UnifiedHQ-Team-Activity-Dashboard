@@ -30,8 +30,8 @@ interface GitHubApiResponse {
 }
 
 export async function fetchGitHubActivities(
-  owner: string, 
-  repo: string, 
+  owner: string,
+  repo: string,
   token: string
 ): Promise<GitHubActivity[]> {
   try {
@@ -56,9 +56,14 @@ export async function fetchGitHubActivities(
   }
 }
 
-export async function fetchGitHubActivitiesWithSession(owner: string, repo: string): Promise<GitHubActivity[]> {
+export async function fetchGitHubActivitiesWithSession(
+  owner: string,
+  repo: string
+): Promise<GitHubActivity[]> {
   try {
-    const response = await fetch(`/api/github/session?owner=${encodeURIComponent(owner)}&repo=${encodeURIComponent(repo)}`);
+    const response = await fetch(
+      `/api/github/session?owner=${encodeURIComponent(owner)}&repo=${encodeURIComponent(repo)}`
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -99,14 +104,14 @@ export async function fetchUserRepositories(): Promise<Repository[]> {
 }
 
 export interface Repository {
-  id: number
-  name: string
-  fullName: string
-  owner: string
-  description: string | null
-  isPrivate: boolean
-  updatedAt: string
-  defaultBranch: string
+  id: number;
+  name: string;
+  fullName: string;
+  owner: string;
+  description: string | null;
+  isPrivate: boolean;
+  updatedAt: string;
+  defaultBranch: string;
 }
 
 export function getGitHubConfig() {

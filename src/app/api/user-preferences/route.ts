@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
-      headers: request.headers
+      headers: request.headers,
     });
 
     if (!session) {
@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
 
     const preferences = await prisma.userPreferences.findUnique({
       where: {
-        userId: session.user.id
-      }
+        userId: session.user.id,
+      },
     });
 
     return NextResponse.json({
@@ -29,16 +29,15 @@ export async function GET(request: NextRequest) {
       data: preferences || {
         githubOwner: null,
         githubRepo: null,
-        githubRepoId: null
-      }
+        githubRepoId: null,
+      },
     });
-
   } catch (error) {
     console.error('User Preferences GET Error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to load user preferences',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -49,7 +48,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
-      headers: request.headers
+      headers: request.headers,
     });
 
     if (!session) {
@@ -65,7 +64,10 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!githubOwner || !githubRepo || !githubRepoId) {
       return NextResponse.json(
-        { error: 'Missing required fields: githubOwner, githubRepo, githubRepoId' },
+        {
+          error:
+            'Missing required fields: githubOwner, githubRepo, githubRepoId',
+        },
         { status: 400 }
       );
     }
@@ -73,33 +75,32 @@ export async function POST(request: NextRequest) {
     // Upsert user preferences
     const preferences = await prisma.userPreferences.upsert({
       where: {
-        userId: session.user.id
+        userId: session.user.id,
       },
       update: {
         githubOwner,
         githubRepo,
         githubRepoId,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       create: {
         userId: session.user.id,
         githubOwner,
         githubRepo,
-        githubRepoId
-      }
+        githubRepoId,
+      },
     });
 
     return NextResponse.json({
       success: true,
-      data: preferences
+      data: preferences,
     });
-
   } catch (error) {
     console.error('User Preferences POST Error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to save user preferences',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
-      headers: request.headers
+      headers: request.headers,
     });
 
     if (!session) {
@@ -122,21 +123,20 @@ export async function DELETE(request: NextRequest) {
 
     await prisma.userPreferences.deleteMany({
       where: {
-        userId: session.user.id
-      }
+        userId: session.user.id,
+      },
     });
 
     return NextResponse.json({
       success: true,
-      message: 'User preferences cleared'
+      message: 'User preferences cleared',
     });
-
   } catch (error) {
     console.error('User Preferences DELETE Error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to clear user preferences',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
