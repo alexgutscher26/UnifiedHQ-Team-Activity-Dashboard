@@ -22,6 +22,11 @@ import {
   useSafeTimer,
 } from '@/lib/memory-leak-prevention';
 
+/**
+ * Renders a section of cards displaying various statistics.
+ *
+ * The SectionCards function manages the loading state and fetches mock statistics data for Notion, Slack, GitHub, and AI summaries. It utilizes a memory leak prevention hook and a safe timer for simulating an API call delay. The component conditionally renders loading skeletons or the actual statistics cards based on the loading state.
+ */
 export function SectionCards() {
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
