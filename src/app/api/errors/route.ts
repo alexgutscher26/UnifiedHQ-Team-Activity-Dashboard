@@ -26,6 +26,13 @@ const errorReportSchema = z.object({
   timestamp: z.string().optional(),
 });
 
+/**
+ * Logs an error report and associates it with the user session.
+ *
+ * This function retrieves the user session from the request headers, validates the error report data against a predefined schema, and logs the error details to the console. In a production environment, it is intended to integrate with an error tracking service and store the error data for further analysis. Finally, it returns a success response indicating that the error report was received.
+ *
+ * @param request - The NextRequest object containing the request data and headers.
+ */
 async function reportError(request: NextRequest) {
   // Get the session to associate errors with users
   const session = await auth.api.getSession({
