@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaClient } from "@/generated/prisma";
 import { dymoEmailPlugin } from "@dymo-api/better-auth";
-import { openAPI, haveIBeenPwned, lastLoginMethod, multiSession } from "better-auth/plugins";
+import { openAPI, haveIBeenPwned, lastLoginMethod, multiSession, mcp } from "better-auth/plugins";
 
 const prisma = new PrismaClient();
 export const auth = betterAuth({
@@ -39,8 +39,70 @@ export const auth = betterAuth({
         }),
         lastLoginMethod({
             storeInDatabase: true
+        }),
+        mcp({
+            loginPage: "/auth/signin"
         })
     ],
+    rateLimit: {
+        enabled: process.env.NODE_ENV === "production",
+        window: 60, // 60 seconds
+        max: 100, // 100 requests per window
+        storage: "database",
+        customRules: {
+            "/sign-in/email": {
+                window: 10,
+                max: 3,
+            },
+            "/sign-up/email": {
+                window: 10,
+                max: 3,
+            },
+            "/get-session": false, // Disable rate limiting for session checks
+        },
+    },
+    advanced: {
+        cookiePrefix: "my-app",
+        useSecureCookies: process.env.NODE_ENV === "production",
+        cookies: {
+            session_token: {
+                name: "session_token",
+                attributes: {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "lax",
+                    maxAge: 60 * 60 * 24 * 7, // 7 days
+                }
+            },
+            session_data: {
+                name: "session_data", 
+                attributes: {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "lax",
+                    maxAge: 60 * 60 * 24 * 7, // 7 days
+                }
+            },
+            dont_remember: {
+                name: "dont_remember",
+                attributes: {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "lax",
+                    maxAge: 60 * 60 * 24 * 30, // 30 days
+                }
+            }
+        },
+        // Uncomment and configure if you need cross-subdomain cookies
+        // crossSubDomainCookies: {
+        //     enabled: true,
+        //     domain: process.env.COOKIE_DOMAIN || "localhost", // Set your domain
+        // },
+        // trustedOrigins: [
+        //     process.env.BETTER_AUTH_URL || "http://localhost:3000",
+        //     // Add other trusted origins
+        // ],
+    },
     secret: process.env.BETTER_AUTH_SECRET as string,
     baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
 });

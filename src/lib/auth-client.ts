@@ -8,5 +8,24 @@ export const authClient = createAuthClient({
     plugins: [
         multiSessionClient(),
         lastLoginMethodClient() 
-    ]
+    ],
+    fetchOptions: {
+        onError: async (context) => {
+            const { response } = context;
+            if (response.status === 429) {
+                const retryAfter = response.headers.get("X-Retry-After");
+                console.warn(`Rate limit exceeded. Retry after ${retryAfter} seconds`);
+                
+                // You can add custom UI handling here, such as:
+                // - Show a toast notification
+                // - Display a retry countdown
+                // - Redirect to a rate limit page
+                
+                // Example: Show alert to user
+                if (typeof window !== 'undefined') {
+                    alert(`Too many requests. Please wait ${retryAfter} seconds before trying again.`);
+                }
+            }
+        },
+    }
 });
