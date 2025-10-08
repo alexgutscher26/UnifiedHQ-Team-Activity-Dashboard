@@ -18,6 +18,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthErrorBoundary } from '@/components/error-boundaries';
 
+/**
+ * Renders the Sign Up page for user registration.
+ *
+ * This component manages the state for user input fields such as name, email, and password. It provides functionality for both email/password sign-up and social sign-in using GitHub or Slack. The component handles loading states and displays success or error messages based on the outcome of the sign-up process. It also redirects users to the dashboard upon successful account creation.
+ *
+ * @returns A JSX element representing the Sign Up page.
+ */
 export default function SignUpPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
