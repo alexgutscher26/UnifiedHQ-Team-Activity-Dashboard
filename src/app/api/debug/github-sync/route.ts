@@ -5,6 +5,15 @@ import { Octokit } from '@octokit/rest';
 
 const prisma = new PrismaClient();
 
+/**
+ * Handles the GET request to retrieve user-related GitHub data.
+ *
+ * This function first checks the user's session for authentication. If the user is authenticated, it checks for a GitHub connection and retrieves selected repositories and stored activities. It then tests GitHub API access and repository access for the first selected repository, returning relevant data in the response. If any errors occur during these processes, appropriate error messages are returned.
+ *
+ * @param request - The incoming NextRequest object containing request headers.
+ * @returns A JSON response containing user information, connection status, selected repositories, stored activities, and test results for GitHub and repository access.
+ * @throws Error If an unexpected error occurs during the execution of the function.
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
