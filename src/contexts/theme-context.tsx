@@ -46,12 +46,21 @@ export function CustomThemeProvider({
   };
 
   const applyThemeToDocument = (themeName: string) => {
-    // Remove existing theme classes
-    document.documentElement.removeAttribute('data-theme');
+    const updateTheme = () => {
+      // Remove existing theme classes
+      document.documentElement.removeAttribute('data-theme');
 
-    // Apply new theme
-    if (themeName !== 'default') {
-      document.documentElement.setAttribute('data-theme', themeName);
+      // Apply new theme
+      if (themeName !== 'default') {
+        document.documentElement.setAttribute('data-theme', themeName);
+      }
+    };
+
+    // Use View Transition API if supported for smoother animations
+    if ('startViewTransition' in document) {
+      (document as any).startViewTransition(updateTheme);
+    } else {
+      updateTheme();
     }
   };
 

@@ -277,8 +277,30 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    transition:
+      background-color 0.3s ease-in-out,
+      border-color 0.3s ease-in-out,
+      color 0.3s ease-in-out;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Theme transition animations */
+:root,
+[data-theme] {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* Performance optimization */
+:root {
+  will-change: background-color;
+}
+
+/* Accessibility - Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
   }
 }

@@ -128,7 +128,7 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 - [x] Theme persistence in user preferences
 - [x] System theme detection
 - [x] Custom theme variables
-- [ ] Theme switching animations
+- [x] Theme switching animations
 
 ### Error Handling
 - [ ] Global error boundary implementation

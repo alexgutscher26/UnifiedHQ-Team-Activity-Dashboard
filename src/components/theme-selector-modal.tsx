@@ -27,7 +27,7 @@ export function ThemeSelectorModal({ open, onClose }: ThemeSelectorModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className='sm:max-w-md animate-in fade-in-0 zoom-in-95 duration-200'>
         <DialogHeader>
           <DialogTitle>Choose Theme</DialogTitle>
           <DialogDescription>
@@ -68,7 +68,7 @@ function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
   return (
     <button
       onClick={onSelect}
-      className={`relative p-4 rounded-lg border-2 transition-all hover:scale-105 ${
+      className={`relative p-4 rounded-lg border-2 transition-all duration-150 hover:scale-105 active:scale-95 ${
         isSelected
           ? 'border-primary bg-primary/5'
           : 'border-border hover:border-primary/50'
@@ -77,22 +77,24 @@ function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
       <div className='space-y-3'>
         <div className='flex items-center justify-between'>
           <h3 className='font-medium text-sm'>{theme.label}</h3>
-          {isSelected && <IconCheck className='h-4 w-4 text-primary' />}
+          {isSelected && (
+            <IconCheck className='h-4 w-4 text-primary animate-in fade-in-0 zoom-in-95 duration-200' />
+          )}
         </div>
 
         <div className='flex gap-2'>
           <div
-            className='w-6 h-6 rounded-full border border-border'
+            className='w-6 h-6 rounded-full border border-border transition-transform duration-150 hover:scale-110'
             style={{ backgroundColor: theme.colors.light.primary }}
             title='Primary'
           />
           <div
-            className='w-6 h-6 rounded-full border border-border'
+            className='w-6 h-6 rounded-full border border-border transition-transform duration-150 hover:scale-110'
             style={{ backgroundColor: theme.colors.light.secondary }}
             title='Secondary'
           />
           <div
-            className='w-6 h-6 rounded-full border border-border'
+            className='w-6 h-6 rounded-full border border-border transition-transform duration-150 hover:scale-110'
             style={{ backgroundColor: theme.colors.light.accent }}
             title='Accent'
           />
