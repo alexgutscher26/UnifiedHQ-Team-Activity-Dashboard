@@ -9,6 +9,15 @@ import {
 
 const prisma = new PrismaClient();
 
+/**
+ * Handles the GET request to retrieve user activity and connection information.
+ *
+ * This function first checks the user's session for authentication. If the user is authenticated, it retrieves the user's GitHub connection status, selected repository count, stored activities, GitHub activities, and connections from the database. The results are then formatted and returned in a JSON response. If any error occurs during the process, it logs the error and returns a 500 status with an error message.
+ *
+ * @param request - The incoming NextRequest object containing the request headers.
+ * @returns A JSON response containing user activity and connection information.
+ * @throws Error If an error occurs during the retrieval process.
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
