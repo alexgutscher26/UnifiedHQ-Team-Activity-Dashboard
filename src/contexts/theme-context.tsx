@@ -1,0 +1,77 @@
+'use client';
+
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { getDefaultTheme, getAllThemes, type ThemeConfig } from '@/lib/themes';
+
+interface CustomThemeContextType {
+  currentTheme: ThemeConfig;
+  setTheme: (themeName: string) => void;
+  availableThemes: ThemeConfig[];
+}
+
+const CustomThemeContext = createContext<CustomThemeContextType | undefined>(
+  undefined
+);
+
+const THEME_STORAGE_KEY = 'custom-theme';
+
+export function CustomThemeProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [currentTheme, setCurrentTheme] =
+    useState<ThemeConfig>(getDefaultTheme());
+  const [availableThemes] = useState<ThemeConfig[]>(getAllThemes());
+
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme) {
+      const theme = availableThemes.find(t => t.name === savedTheme);
+      if (theme) {
+        setCurrentTheme(theme);
+        applyThemeToDocument(theme.name);
+      }
+    }
+  }, [availableThemes]);
+
+  const setTheme = (themeName: string) => {
+    const theme = availableThemes.find(t => t.name === themeName);
+    if (theme) {
+      setCurrentTheme(theme);
+      localStorage.setItem(THEME_STORAGE_KEY, themeName);
+      applyThemeToDocument(themeName);
+    }
+  };
+
+  const applyThemeToDocument = (themeName: string) => {
+    // Remove existing theme classes
+    document.documentElement.removeAttribute('data-theme');
+
+    // Apply new theme
+    if (themeName !== 'default') {
+      document.documentElement.setAttribute('data-theme', themeName);
+    }
+  };
+
+  return (
+    <CustomThemeContext.Provider
+      value={{
+        currentTheme,
+        setTheme,
+        availableThemes,
+      }}
+    >
+      {children}
+    </CustomThemeContext.Provider>
+  );
+}
+
+export function useCustomTheme() {
+  const context = useContext(CustomThemeContext);
+  if (context === undefined) {
+    throw new Error('useCustomTheme must be used within a CustomThemeProvider');
+  }
+  return context;
+}
