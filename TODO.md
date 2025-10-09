@@ -460,7 +460,6 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 - [ ] Code duplication in similar components
 - [ ] Inconsistent naming conventions
 - [ ] Missing JSDoc comments
-- [ ] Unused dependencies in package.json
 - [ ] Console.log statements in production code
 
 ## 📝 DOCUMENTATION NEEDED

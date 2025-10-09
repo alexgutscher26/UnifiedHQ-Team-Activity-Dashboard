@@ -4,6 +4,7 @@ import {
   IconBrandNotion,
   IconBrandSlack,
   IconSparkles,
+  IconWifi,
 } from '@tabler/icons-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,7 @@ import {
 export function SectionCards() {
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [eventSource, setEventSource] = useState<EventSource | null>(null);
 
   // Memory leak prevention
   useMemoryLeakPrevention('SectionCards');
@@ -104,8 +106,61 @@ export function SectionCards() {
     }
   };
 
+  // Connect to live updates for real-time GitHub stats
+  const connectToLiveUpdates = () => {
+    try {
+      const es = new EventSource('/api/activities/live', {
+        withCredentials: true,
+      });
+      setEventSource(es);
+
+      es.onopen = () => {
+        console.log('✅ SectionCards connected to live updates');
+      };
+
+      es.onmessage = event => {
+        try {
+          const data = JSON.parse(event.data);
+
+          if (
+            data.type === 'activity_update' &&
+            data.data.type === 'sync_completed'
+          ) {
+            // Refresh GitHub stats when sync is completed
+            console.log('🔄 Refreshing GitHub stats after sync');
+            loadStats();
+          }
+        } catch (error) {
+          console.error('Error parsing SSE message in SectionCards:', error);
+        }
+      };
+
+      es.onerror = error => {
+        console.error('❌ SectionCards SSE connection error:', error);
+      };
+    } catch (error) {
+      console.error('Failed to connect SectionCards to live updates:', error);
+    }
+  };
+
   useEffect(() => {
     loadStats();
+    connectToLiveUpdates();
+
+    // Set up periodic refresh every 2 minutes for GitHub stats
+    const interval = setTimeout(() => {
+      console.log('🔄 Periodic GitHub stats refresh');
+      loadStats();
+    }, 120000); // 2 minutes
+
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+      if (interval) {
+        clearTimeout(interval);
+      }
+    };
   }, []);
 
   const LoadingCard = () => (
@@ -194,6 +249,13 @@ export function SectionCards() {
                 <CardDescription className='flex items-center gap-2'>
                   <IconBrandGithub className='size-4' />
                   GitHub Activity
+                  {eventSource &&
+                    eventSource.readyState === EventSource.OPEN && (
+                      <IconWifi
+                        className='size-3 text-green-500'
+                        title='Live updates active'
+                      />
+                    )}
                 </CardDescription>
                 <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
                   {stats.github.count}
