@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { IconCirclePlusFilled, IconMail, type Icon } from '@tabler/icons-react';
 
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,16 @@ export function NavMain({
     icon?: Icon;
   }[];
 }) {
+  const router = useRouter();
+
+  const handleNavigation = (url: string) => {
+    if (url === '#') {
+      // Handle placeholder links - you can add specific logic here
+      console.log('Placeholder link clicked');
+      return;
+    }
+    router.push(url);
+  };
   return (
     <SidebarGroup>
       <SidebarGroupContent className='flex flex-col gap-2'>
@@ -48,6 +59,7 @@ export function NavMain({
               <SidebarMenuButton
                 tooltip={item.title}
                 className='cursor-pointer'
+                onClick={() => handleNavigation(item.url)}
               >
                 {item.icon && <item.icon />}
                 <span>{item.title}</span>

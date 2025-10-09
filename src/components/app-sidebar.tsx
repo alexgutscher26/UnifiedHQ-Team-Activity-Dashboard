@@ -41,11 +41,6 @@ const data = {
       url: '#',
       icon: IconSparkles,
     },
-    {
-      title: 'Integrations',
-      url: '/integrations',
-      icon: IconSettings,
-    },
   ],
   navSecondary: [
     {
