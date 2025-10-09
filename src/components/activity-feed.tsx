@@ -109,6 +109,15 @@ const formatTimestamp = (timestamp: Date | string) => {
   }
 };
 
+/**
+ * Render the activity feed component that displays recent activities from connected integrations.
+ *
+ * This component manages the state of activities, loading status, and live updates through EventSource.
+ * It fetches activities from the server, handles live updates, and provides a refresh mechanism.
+ * The component also manages UI states for loading, refreshing, and displaying activity updates with appropriate fade effects.
+ *
+ * @returns {JSX.Element} The rendered activity feed component.
+ */
 export function ActivityFeed() {
   const { toast } = useToast();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -137,6 +146,14 @@ export function ActivityFeed() {
     }
   }, [activities]);
 
+  /**
+   * Establish a connection to live updates via Server-Sent Events (SSE).
+   *
+   * The function creates an EventSource to listen for live updates from the server. It handles various message types, including connection confirmation, errors, heartbeat signals, and activity updates. On receiving an 'activity_update' message with a 'sync_completed' type, it triggers a fetch for activities and displays a toast notification. Error handling is implemented to manage connection issues and notify the user accordingly.
+   *
+   * @returns void
+   * @throws Error If the connection to live updates fails.
+   */
   const connectToLiveUpdates = () => {
     try {
       // Create EventSource with credentials
