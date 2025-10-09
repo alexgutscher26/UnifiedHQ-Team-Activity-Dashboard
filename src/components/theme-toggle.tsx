@@ -17,6 +17,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 
+/**
+ * Renders a theme toggle dropdown menu for selecting light, dark, or system themes.
+ */
 export function ThemeToggle() {
   const { setTheme, theme } = useTheme();
 
