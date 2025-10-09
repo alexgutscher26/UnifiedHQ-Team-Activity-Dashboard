@@ -167,7 +167,7 @@ export function RepositorySelector({ isConnected }: RepositorySelectorProps) {
       <DialogTrigger asChild>
         <Button variant='outline' size='sm'>
           <IconSettings className='size-4 mr-2' />
-          Manage Repositories
+          Manage Repos
         </Button>
       </DialogTrigger>
       <DialogContent className='max-w-4xl max-h-[80vh] overflow-hidden flex flex-col'>
