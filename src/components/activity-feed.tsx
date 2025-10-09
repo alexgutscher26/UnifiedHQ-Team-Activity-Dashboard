@@ -145,9 +145,10 @@ export function ActivityFeed() {
         // Check if there are new activities
         if (!silent && activities.length > 0) {
           const hasNewActivities = newActivities.some(
-            newActivity =>
+            (newActivity: Activity) =>
               !activities.some(
-                existingActivity => existingActivity.id === newActivity.id
+                (existingActivity: Activity) =>
+                  existingActivity.id === newActivity.id
               )
           );
 
