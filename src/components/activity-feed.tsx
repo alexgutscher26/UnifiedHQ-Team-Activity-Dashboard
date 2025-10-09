@@ -30,7 +30,7 @@ interface Activity {
   source: string;
   title: string;
   description?: string;
-  timestamp: Date;
+  timestamp: Date | string;
   externalId?: string;
   metadata?: any;
 }
@@ -61,10 +61,12 @@ const getActivityColor = (type: string) => {
   }
 };
 
-const formatTimestamp = (timestamp: Date) => {
+const formatTimestamp = (timestamp: Date | string) => {
   const now = new Date();
+  const timestampDate =
+    timestamp instanceof Date ? timestamp : new Date(timestamp);
   const diffInHours = Math.floor(
-    (now.getTime() - timestamp.getTime()) / (1000 * 60 * 60)
+    (now.getTime() - timestampDate.getTime()) / (1000 * 60 * 60)
   );
 
   if (diffInHours < 1) {
