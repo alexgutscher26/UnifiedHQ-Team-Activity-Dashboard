@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import {
@@ -21,7 +21,7 @@ interface Integration {
 
 export function IntegrationsList() {
   const router = useRouter();
-  const [integrations] = useState<Integration[]>([
+  const [integrations, setIntegrations] = useState<Integration[]>([
     {
       id: 'notion',
       title: 'Notion',
@@ -41,9 +41,49 @@ export function IntegrationsList() {
       title: 'GitHub',
       icon: IconBrandGithub,
       connected: false,
-      status: 'coming-soon',
+      status: 'disconnected',
     },
   ]);
+
+  // Fetch GitHub connection status
+  useEffect(() => {
+    const fetchGitHubStatus = async () => {
+      try {
+        const response = await fetch('/api/integrations/github/sync');
+        if (response.ok) {
+          const data = await response.json();
+          setIntegrations(prev =>
+            prev.map(integration =>
+              integration.id === 'github'
+                ? {
+                    ...integration,
+                    connected: data.connected,
+                    status: data.connected ? 'connected' : 'disconnected',
+                  }
+                : integration
+            )
+          );
+        }
+      } catch (error) {
+        console.error('Failed to fetch GitHub status:', error);
+      }
+    };
+
+    fetchGitHubStatus();
+
+    // Refresh status when the page becomes visible (user returns from integrations page)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchGitHubStatus();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const handleIntegrationClick = (integration: Integration) => {
     // Navigate to integrations page
@@ -68,7 +108,7 @@ export function IntegrationsList() {
       case 'connected':
         return 'Connected';
       case 'disconnected':
-        return 'Disconnected';
+        return 'Not Connected';
       case 'coming-soon':
         return 'Coming Soon';
       default:
