@@ -34,6 +34,13 @@ import {
   IconRocket,
 } from '@tabler/icons-react';
 
+/**
+ * Renders the Integrations Page component for managing GitHub and other integrations.
+ *
+ * This component handles the connection and synchronization with GitHub, including checking the connection status, fetching statistics, and managing user interactions for connecting, syncing, and disconnecting. It also displays integration cards for GitHub, Notion, and Slack, showing their statuses and features. The component utilizes hooks for state management and side effects, ensuring a responsive user experience.
+ *
+ * @returns {JSX.Element} The rendered Integrations Page component.
+ */
 export function IntegrationsPage() {
   const { toast } = useToast();
   const [githubConnected, setGithubConnected] = useState(false);
@@ -73,6 +80,9 @@ export function IntegrationsPage() {
     }
   };
 
+  /**
+   * Initiates the GitHub connection process and handles loading state.
+   */
   const handleGithubConnect = async () => {
     setIsLoading(true);
     try {
@@ -88,6 +98,11 @@ export function IntegrationsPage() {
     }
   };
 
+  /**
+   * Handles the synchronization of GitHub activity.
+   *
+   * This function initiates a sync process by setting the syncing state and progress. It simulates progress updates for user experience while making a POST request to the GitHub sync API. Upon receiving a response, it updates the last sync time and fetches updated statistics if the sync is successful. In case of errors, it handles token expiration and other failures by displaying appropriate messages to the user. Finally, it resets the syncing state and progress after completion.
+   */
   const handleGithubSync = async () => {
     setIsSyncing(true);
     setSyncProgress(0);
