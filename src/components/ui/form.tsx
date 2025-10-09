@@ -23,6 +23,9 @@ interface FormLabelProps {
   className?: string;
 }
 
+/**
+ * Renders a label element with optional required indicator.
+ */
 export function FormLabel({
   children,
   htmlFor,
@@ -49,6 +52,9 @@ interface FormErrorMessageProps {
   className?: string;
 }
 
+/**
+ * Renders an error message if children are provided.
+ */
 export function FormErrorMessage({
   children,
   className,
@@ -83,6 +89,22 @@ interface ValidatedInputProps
   required?: boolean;
 }
 
+/**
+ * Renders a validated input field with error handling and optional description.
+ *
+ * The function generates a unique field ID if none is provided, utilizes the useFieldValidation hook to manage validation state, and handles blur events to trigger validation. It conditionally displays a label, description, and error message based on the validation results and external error props.
+ *
+ * @param label - The label for the input field.
+ * @param description - An optional description for the input field.
+ * @param validation - Validation rules to apply to the input.
+ * @param validateOnChange - A flag indicating whether to validate on change (default is true).
+ * @param error - An external error message to display.
+ * @param required - A flag indicating whether the input is required.
+ * @param className - Additional CSS classes for styling the input.
+ * @param id - An optional ID for the input field.
+ * @param props - Additional props to pass to the input element.
+ * @returns A JSX element representing the validated input field.
+ */
 export function ValidatedInput({
   label,
   description,
@@ -114,6 +136,9 @@ export function ValidatedInput({
   const error = externalError || validationError;
   const hasError = touched && error;
 
+  /**
+   * Handles the blur event for an input element, validating if necessary.
+   */
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     if (validation) {
       validate();
@@ -155,6 +180,21 @@ interface ValidatedTextareaProps
   required?: boolean;
 }
 
+/**
+ * Renders a validated textarea component with error handling.
+ *
+ * This component utilizes the useFieldValidation hook to manage validation state and error messages. It generates a unique field ID if none is provided, and handles blur events to trigger validation. The textarea's appearance is conditionally styled based on validation results, and it displays any associated error messages.
+ *
+ * @param label - The label for the textarea.
+ * @param description - Additional description for the textarea.
+ * @param validation - Validation rules for the textarea.
+ * @param validateOnChange - Flag to determine if validation should occur on change (default is true).
+ * @param error - External error message to display.
+ * @param required - Indicates if the textarea is required.
+ * @param className - Additional CSS classes for styling.
+ * @param id - Optional custom ID for the textarea.
+ * @param props - Additional props to be passed to the textarea element.
+ */
 export function ValidatedTextarea({
   label,
   description,
@@ -226,6 +266,24 @@ interface ValidatedSelectProps
   placeholder?: string;
 }
 
+/**
+ * Renders a validated select input field with error handling.
+ *
+ * This component utilizes the useFieldValidation hook to manage validation state and error messages. It generates a unique field ID if none is provided, handles blur events to trigger validation, and displays error messages based on validation results or external errors. The select options are dynamically generated from the provided options array.
+ *
+ * @param label - The label for the select input.
+ * @param description - Additional description for the select input.
+ * @param validation - Validation rules for the select input.
+ * @param validateOnChange - Flag to determine if validation should occur on change (default is true).
+ * @param error - External error message to display.
+ * @param required - Flag indicating if the field is required.
+ * @param options - Array of options to display in the select input.
+ * @param placeholder - Placeholder text for the select input.
+ * @param className - Additional CSS classes for styling the select input.
+ * @param id - Custom ID for the select input.
+ * @param props - Additional props to pass to the select element.
+ * @returns A JSX element representing the validated select input field.
+ */
 export function ValidatedSelect({
   label,
   description,
@@ -256,6 +314,9 @@ export function ValidatedSelect({
   const error = externalError || validationError;
   const hasError = touched && error;
 
+  /**
+   * Handles the blur event for a select element, validating if necessary.
+   */
   const handleBlur = (e: React.FocusEvent<HTMLSelectElement>) => {
     if (validation) {
       validate();
@@ -317,6 +378,9 @@ interface FormActionsProps {
   className?: string;
 }
 
+/**
+ * Renders a div containing form action elements with optional className.
+ */
 export function FormActions({ children, className }: FormActionsProps) {
   return (
     <div className={cn('flex items-center gap-4', className)}>{children}</div>

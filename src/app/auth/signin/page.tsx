@@ -20,6 +20,13 @@ import { ValidatedInput, FormGroup, FormActions } from '@/components/ui/form';
 import { useFormValidation } from '@/lib/validation';
 import { validationSchemas } from '@/lib/validation';
 
+/**
+ * Renders the Sign In page with options for email/password and social sign-in.
+ *
+ * This component manages the sign-in process, including form validation and handling both email/password and social sign-in methods. It utilizes hooks to manage loading states and errors, and retrieves the last used login method for user convenience. The form submission is handled asynchronously, with appropriate error handling for both sign-in methods.
+ *
+ * @returns {JSX.Element} The rendered Sign In page component.
+ */
 export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');

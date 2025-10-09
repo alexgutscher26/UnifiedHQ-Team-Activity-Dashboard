@@ -37,6 +37,15 @@ export default function SignUpPage() {
     validationSchemas.signUp
   );
 
+  /**
+   * Handles the email sign-up process for a user.
+   *
+   * This function prevents the default form submission, validates the form, and checks if the password matches the confirmation.
+   * It then initiates the sign-up process using the authClient, handling success and error responses accordingly.
+   * Loading states are managed throughout the process to provide feedback to the user.
+   *
+   * @param e - The form event triggered by the sign-up form submission.
+   */
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 

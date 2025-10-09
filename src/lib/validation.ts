@@ -23,6 +23,9 @@ export class Validator {
   public rules: Record<string, ValidationRule> = {};
   private customMessages: Record<string, string> = {};
 
+  /**
+   * Adds a validation rule for a specified field with an optional custom message.
+   */
   addRule(field: string, rule: ValidationRule, message?: string) {
     this.rules[field] = rule;
     if (message) {
@@ -50,6 +53,16 @@ export class Validator {
     };
   }
 
+  /**
+   * Validates a field based on specified rules and returns an error message if validation fails.
+   *
+   * The function checks for required fields, minimum and maximum length, pattern matching, email and URL validity, numeric checks, positive number constraints, integer validation, and any custom validation rules. It returns a custom message if validation fails or null if the value is valid.
+   *
+   * @param field - The name of the field being validated.
+   * @param value - The value to validate against the rules.
+   * @param rule - The validation rules to apply.
+   * @returns A string containing the error message if validation fails, or null if the value is valid.
+   */
   private validateField(
     field: string,
     value: any,
@@ -151,6 +164,9 @@ export class Validator {
     return null;
   }
 
+  /**
+   * Formats a field name by adding spaces before capital letters and capitalizing the first letter.
+   */
   private formatFieldName(field: string): string {
     return field
       .replace(/([A-Z])/g, ' $1')
@@ -158,11 +174,17 @@ export class Validator {
       .trim();
   }
 
+  /**
+   * Validates if the provided email string is in a correct format.
+   */
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
+  /**
+   * Checks if the provided URL is valid.
+   */
   private isValidUrl(url: string): boolean {
     try {
       new URL(url);
@@ -306,6 +328,9 @@ export const validationSchemas = {
 };
 
 // Utility functions
+/**
+ * Validates the given form data against a schema.
+ */
 export function validateFormData<T extends Record<string, any>>(
   data: T,
   schema: Validator
@@ -313,6 +338,9 @@ export function validateFormData<T extends Record<string, any>>(
   return schema.validate(data);
 }
 
+/**
+ * Validates a field against specified rules and returns any validation errors.
+ */
 export function validateField(
   field: string,
   value: any,
@@ -325,6 +353,9 @@ export function validateField(
 }
 
 // Real-time validation hook
+/**
+ * Custom hook for field validation in a form.
+ */
 export function useFieldValidation(
   field: string,
   value: any,
@@ -344,6 +375,9 @@ export function useFieldValidation(
     }
   }, [field, value, memoizedRules, validateOnChange, touched]);
 
+  /**
+   * Validates a field and sets the error state.
+   */
   const validate = () => {
     setTouched(true);
     const fieldError = validateField(field, value, rules);
@@ -366,6 +400,15 @@ export function useFieldValidation(
 }
 
 // Form validation hook
+/**
+ * Custom hook for managing form validation and state.
+ *
+ * This hook initializes form data, tracks field errors and touched states, and provides methods to update fields, validate individual fields or the entire form, reset the form state, and check field and form validity. It leverages a provided schema for validation and maintains the state of the form data, errors, and touched fields.
+ *
+ * @param initialData - The initial state of the form data.
+ * @param schema - The validation schema used to validate the form fields.
+ * @returns An object containing the form data, errors, touched fields, and methods for updating fields, validating fields and the form, resetting the form, and checking validity.
+ */
 export function useFormValidation<T extends Record<string, any>>(
   initialData: T,
   schema: Validator
@@ -386,6 +429,9 @@ export function useFormValidation<T extends Record<string, any>>(
     return fieldError === null;
   };
 
+  /**
+   * Validates the form data and sets error states.
+   */
   const validateForm = () => {
     const result = schema.validate(data);
     setErrors(result.errors);
@@ -401,14 +447,23 @@ export function useFormValidation<T extends Record<string, any>>(
     setTouched({});
   };
 
+  /**
+   * Returns the error message for a specified field if it has been touched.
+   */
   const getFieldError = (field: keyof T) => {
     return touched[field] ? errors[field] : '';
   };
 
+  /**
+   * Checks if a form field is valid based on its touched and error status.
+   */
   const isFieldValid = (field: keyof T) => {
     return !touched[field] || !errors[field];
   };
 
+  /**
+   * Checks if the form is valid by ensuring there are no errors.
+   */
   const isFormValid = () => {
     return Object.values(errors).every(error => !error);
   };
