@@ -7,6 +7,24 @@ import {
   getSelectedRepositoryCount,
 } from '@/lib/integrations/github';
 
+// Helper function to broadcast updates to connected users
+function broadcastToUser(userId: string, data: any) {
+  if (global.userConnections?.has(userId)) {
+    const controller = global.userConnections.get(userId);
+    try {
+      const message = JSON.stringify({
+        type: 'activity_update',
+        data,
+        timestamp: new Date().toISOString(),
+      });
+      controller.enqueue(`data: ${message}\n\n`);
+    } catch (error) {
+      console.error('Failed to broadcast to user:', error);
+      global.userConnections?.delete(userId);
+    }
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
@@ -44,6 +62,18 @@ export async function POST(request: NextRequest) {
     // Fetch and save GitHub activity
     const activities = await fetchGithubActivity(userId);
     await saveGithubActivities(userId, activities);
+
+    // Broadcast update to connected clients
+    try {
+      broadcastToUser(userId, {
+        type: 'sync_completed',
+        count: activities.length,
+        selectedRepositories: selectedRepoCount,
+        message: `Synced ${activities.length} GitHub activities from ${selectedRepoCount} selected repositories`,
+      });
+    } catch (error) {
+      console.error('Failed to broadcast sync update:', error);
+    }
 
     return NextResponse.json({
       success: true,

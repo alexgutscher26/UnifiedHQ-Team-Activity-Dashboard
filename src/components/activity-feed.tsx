@@ -11,6 +11,8 @@ import {
   IconGitCommit,
   IconLoader2,
   IconRefresh,
+  IconWifi,
+  IconWifiOff,
 } from '@tabler/icons-react';
 import {
   Card,
@@ -114,9 +116,18 @@ export function ActivityFeed() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
+  const [isLiveConnected, setIsLiveConnected] = useState(false);
+  const [eventSource, setEventSource] = useState<EventSource | null>(null);
 
   useEffect(() => {
     fetchActivities();
+    connectToLiveUpdates();
+
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -125,6 +136,62 @@ export function ActivityFeed() {
       setShowBottomFade(true); // Show bottom fade initially if there are activities
     }
   }, [activities]);
+
+  const connectToLiveUpdates = () => {
+    try {
+      const es = new EventSource('/api/activities/live');
+      setEventSource(es);
+
+      es.onopen = () => {
+        setIsLiveConnected(true);
+        console.log('Connected to live updates');
+      };
+
+      es.onmessage = event => {
+        try {
+          const data = JSON.parse(event.data);
+
+          switch (data.type) {
+            case 'connected':
+              console.log('Live updates connected:', data.message);
+              break;
+
+            case 'heartbeat':
+              // Keep connection alive
+              break;
+
+            case 'activity_update':
+              if (data.data.type === 'sync_completed') {
+                // Refresh activities when sync is completed
+                fetchActivities();
+                toast({
+                  title: 'Live Update',
+                  description: data.data.message,
+                });
+              }
+              break;
+          }
+        } catch (error) {
+          console.error('Error parsing SSE message:', error);
+        }
+      };
+
+      es.onerror = error => {
+        console.error('SSE connection error:', error);
+        setIsLiveConnected(false);
+
+        // Attempt to reconnect after 5 seconds
+        setTimeout(() => {
+          if (es.readyState === EventSource.CLOSED) {
+            connectToLiveUpdates();
+          }
+        }, 5000);
+      };
+    } catch (error) {
+      console.error('Failed to connect to live updates:', error);
+      setIsLiveConnected(false);
+    }
+  };
 
   const fetchActivities = async () => {
     try {
@@ -240,19 +307,35 @@ export function ActivityFeed() {
               Latest updates from your connected integrations
             </CardDescription>
           </div>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            {isRefreshing ? (
-              <IconLoader2 className='size-4 mr-2 animate-spin' />
-            ) : (
-              <IconRefresh className='size-4 mr-2' />
-            )}
-            Refresh
-          </Button>
+          <div className='flex items-center gap-2'>
+            {/* Live connection indicator */}
+            <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+              {isLiveConnected ? (
+                <>
+                  <IconWifi className='size-3 text-green-500' />
+                  <span>Live</span>
+                </>
+              ) : (
+                <>
+                  <IconWifiOff className='size-3 text-red-500' />
+                  <span>Offline</span>
+                </>
+              )}
+            </div>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? (
+                <IconLoader2 className='size-4 mr-2 animate-spin' />
+              ) : (
+                <IconRefresh className='size-4 mr-2' />
+              )}
+              Refresh
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>

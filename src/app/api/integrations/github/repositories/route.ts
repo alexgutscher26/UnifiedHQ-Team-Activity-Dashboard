@@ -5,6 +5,32 @@ import { PrismaClient } from '@/generated/prisma';
 
 const prisma = new PrismaClient();
 
+// Helper function to broadcast repository changes
+function broadcastRepositoryChange(
+  userId: string,
+  action: 'added' | 'removed',
+  repoName: string
+) {
+  if (global.userConnections?.has(userId)) {
+    const controller = global.userConnections.get(userId);
+    try {
+      const message = JSON.stringify({
+        type: 'repository_update',
+        data: {
+          action,
+          repoName,
+          message: `Repository ${repoName} ${action}`,
+        },
+        timestamp: new Date().toISOString(),
+      });
+      controller.enqueue(`data: ${message}\n\n`);
+    } catch (error) {
+      console.error('Failed to broadcast repository change:', error);
+      global.userConnections?.delete(userId);
+    }
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
@@ -124,6 +150,9 @@ export async function POST(request: NextRequest) {
         isPrivate: isPrivate || false,
       },
     });
+
+    // Broadcast repository change
+    broadcastRepositoryChange(user.id, 'added', repoName);
 
     return NextResponse.json({ message: 'Repository added successfully' });
   } catch (error: any) {
