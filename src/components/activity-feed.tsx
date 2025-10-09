@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { useRealTime } from '@/hooks/use-realtime';
 
 interface Activity {
   id: string;
@@ -84,24 +85,56 @@ export function ActivityFeed() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
+  const [realTimeEnabled, setRealTimeEnabled] = useState(true);
 
   useEffect(() => {
     fetchActivities();
   }, []);
 
-  const fetchActivities = async () => {
+  // Set up real-time updates
+  const { isActive } = useRealTime({
+    interval: 30000, // 30 seconds
+    enabled: realTimeEnabled,
+    onUpdate: () => fetchActivities(true), // Silent refresh
+  });
+
+  const fetchActivities = async (silent = false) => {
     try {
       const response = await fetch('/api/activities');
       if (response.ok) {
         const data = await response.json();
-        setActivities(data.activities || []);
+        const newActivities = data.activities || [];
+
+        // Check if there are new activities
+        if (!silent && activities.length > 0) {
+          const hasNewActivities = newActivities.some(
+            newActivity =>
+              !activities.some(
+                existingActivity => existingActivity.id === newActivity.id
+              )
+          );
+
+          if (hasNewActivities) {
+            toast({
+              title: 'New Activity',
+              description: 'New activities have been detected!',
+              duration: 3000,
+            });
+          }
+        }
+
+        setActivities(newActivities);
+        setLastSyncTime(new Date());
       } else {
         console.error('Failed to fetch activities');
       }
     } catch (error) {
       console.error('Error fetching activities:', error);
     } finally {
-      setIsLoading(false);
+      if (!silent) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -116,6 +149,7 @@ export function ActivityFeed() {
       if (syncResponse.ok) {
         // Refresh activities after sync
         await fetchActivities();
+        setLastSyncTime(new Date());
         toast({
           title: 'Success',
           description: 'Activities refreshed successfully',
@@ -189,24 +223,53 @@ export function ActivityFeed() {
             <CardTitle className='flex items-center gap-2'>
               <IconGitCommit className='size-5' />
               Recent Activity
+              <div className='flex items-center gap-1 ml-2'>
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                  }`}
+                  title={
+                    isActive
+                      ? 'Real-time updates active'
+                      : 'Real-time updates paused'
+                  }
+                />
+                <span className='text-xs text-muted-foreground'>
+                  {isActive ? 'Live' : 'Paused'}
+                </span>
+              </div>
             </CardTitle>
             <CardDescription>
               Latest updates from your connected integrations
+              {lastSyncTime && (
+                <span className='block text-xs mt-1'>
+                  Last updated: {formatTimestamp(lastSyncTime)}
+                </span>
+              )}
             </CardDescription>
           </div>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            {isRefreshing ? (
-              <IconLoader2 className='size-4 mr-2 animate-spin' />
-            ) : (
-              <IconRefresh className='size-4 mr-2' />
-            )}
-            Refresh
-          </Button>
+          <div className='flex gap-2'>
+            <Button
+              variant={realTimeEnabled ? 'default' : 'outline'}
+              size='sm'
+              onClick={() => setRealTimeEnabled(!realTimeEnabled)}
+            >
+              {realTimeEnabled ? 'Live' : 'Paused'}
+            </Button>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? (
+                <IconLoader2 className='size-4 mr-2 animate-spin' />
+              ) : (
+                <IconRefresh className='size-4 mr-2' />
+              )}
+              Refresh
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
