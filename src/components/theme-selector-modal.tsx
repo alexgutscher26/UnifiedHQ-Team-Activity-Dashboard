@@ -17,9 +17,15 @@ interface ThemeSelectorModalProps {
   onClose: () => void;
 }
 
+/**
+ * Renders a modal for selecting a theme.
+ */
 export function ThemeSelectorModal({ open, onClose }: ThemeSelectorModalProps) {
   const { currentTheme, setTheme, availableThemes } = useCustomTheme();
 
+  /**
+   * Handles the theme selection by setting the theme and closing the selector.
+   */
   const handleThemeSelect = (theme: ThemeConfig) => {
     setTheme(theme.name);
     onClose();
@@ -64,6 +70,9 @@ interface ThemeCardProps {
   onSelect: () => void;
 }
 
+/**
+ * Renders a themed card button with color indicators and selection state.
+ */
 function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
   return (
     <button
