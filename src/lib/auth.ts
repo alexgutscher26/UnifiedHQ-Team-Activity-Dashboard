@@ -19,7 +19,11 @@ export const auth = betterAuth({
     enabled: true,
   },
   socialProviders: {
-    // GitHub integration removed - can be re-added later
+    github: {
+      clientId: process.env.GH_CLIENT_ID as string,
+      clientSecret: process.env.GH_CLIENT_SECRET as string,
+      scope: ['read:user', 'repo', 'read:org'],
+    },
     // slack: {
     //     clientId: process.env.SLACK_CLIENT_ID as string,
     //     clientSecret: process.env.SLACK_CLIENT_SECRET as string,
@@ -30,6 +34,33 @@ export const auth = betterAuth({
       enabled: true,
       allowDifferentEmails: true,
       updateUserInfoOnLink: true,
+    },
+  },
+  events: {
+    async signInSuccess({ user, account }: { user: any; account: any }) {
+      if (account?.provider === 'github' && account?.accessToken) {
+        await prisma.connection.upsert({
+          where: {
+            userId_type: {
+              userId: user.id,
+              type: 'github',
+            },
+          },
+          update: {
+            accessToken: account.accessToken,
+            refreshToken: account.refreshToken,
+            expiresAt: account.accessTokenExpiresAt,
+            updatedAt: new Date(),
+          },
+          create: {
+            userId: user.id,
+            type: 'github',
+            accessToken: account.accessToken,
+            refreshToken: account.refreshToken,
+            expiresAt: account.accessTokenExpiresAt,
+          },
+        });
+      }
     },
   },
   plugins: [

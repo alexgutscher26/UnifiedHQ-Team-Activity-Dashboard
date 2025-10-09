@@ -31,6 +31,9 @@ model User {
   oauthaccesstokens OauthAccessToken[]
   oauthconsents     OauthConsent[]
   preferences       UserPreferences?
+  connections       Connection[]
+  activities        Activity[]
+  selectedRepositories SelectedRepository[]
 
   @@unique([email])
   @@map("user")
@@ -163,4 +166,51 @@ model UserPreferences {
 
   @@unique([userId])
   @@map("userPreferences")
+}
+
+model SelectedRepository {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repoId      Int      // GitHub repository ID
+  repoName    String   // Full repository name (owner/repo)
+  repoOwner   String   // Repository owner
+  repoUrl     String   // Repository URL
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, repoId])
+  @@map("selectedRepository")
+}
+
+model Connection {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String   // 'github' | 'notion' | 'slack'
+  accessToken String
+  refreshToken String?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, type])
+  @@map("connection")
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source      String   // 'github' | 'notion' | 'slack'
+  title       String
+  description String?
+  timestamp   DateTime @default(now())
+  externalId  String?  // GitHub event ID to prevent duplicates
+  metadata    Json?    // Store additional event data
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, source, externalId])
+  @@map("activity")
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -8,14 +9,174 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { RepositorySelector } from '@/components/repository-selector';
 import {
   IconBrandNotion,
   IconBrandSlack,
+  IconBrandGithub,
   IconCheck,
+  IconLoader2,
+  IconRefresh,
 } from '@tabler/icons-react';
 
 export function IntegrationsPage() {
+  const { toast } = useToast();
+  const [githubConnected, setGithubConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Check GitHub connection status on mount
+  useEffect(() => {
+    checkGithubStatus();
+  }, []);
+
+  const checkGithubStatus = async () => {
+    try {
+      const response = await fetch('/api/github/sync');
+      const data = await response.json();
+      setGithubConnected(data.connected);
+    } catch (error) {
+      console.error('Failed to check GitHub status:', error);
+    }
+  };
+
+  const handleGithubConnect = async () => {
+    setIsLoading(true);
+    try {
+      window.location.href = '/api/integrations/github/connect';
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to connect to GitHub. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGithubSync = async () => {
+    setIsSyncing(true);
+    try {
+      const response = await fetch('/api/github/sync', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: 'Success',
+          description: data.message,
+        });
+      } else {
+        if (data.code === 'TOKEN_EXPIRED') {
+          setGithubConnected(false);
+          toast({
+            title: 'GitHub Token Expired',
+            description: 'Please reconnect your GitHub account.',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Error',
+            description: data.error || 'Failed to sync GitHub activity',
+            variant: 'destructive',
+          });
+        }
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to sync GitHub activity. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleGithubDisconnect = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/integrations/github/disconnect', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setGithubConnected(false);
+        toast({
+          title: 'Success',
+          description: data.message,
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to disconnect GitHub',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to disconnect GitHub. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const integrations = [
+    {
+      id: 'github',
+      name: 'GitHub',
+      description:
+        'Track commits, pull requests, issues, and repository activity',
+      icon: IconBrandGithub,
+      connected: githubConnected,
+      color: 'bg-gray-900',
+      status: githubConnected ? 'Connected' : 'Available',
+      statusColor: githubConnected ? 'bg-green-500' : 'bg-blue-500',
+      action: githubConnected ? (
+        <div className='flex gap-2'>
+          <RepositorySelector isConnected={githubConnected} />
+          <Button
+            size='sm'
+            variant='outline'
+            onClick={handleGithubSync}
+            disabled={isSyncing}
+          >
+            {isSyncing ? (
+              <IconLoader2 className='size-4 mr-2 animate-spin' />
+            ) : (
+              <IconRefresh className='size-4 mr-2' />
+            )}
+            Sync
+          </Button>
+          <Button
+            size='sm'
+            variant='destructive'
+            onClick={handleGithubDisconnect}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <IconLoader2 className='size-4 mr-2 animate-spin' />
+            ) : null}
+            Disconnect
+          </Button>
+        </div>
+      ) : (
+        <Button size='sm' onClick={handleGithubConnect} disabled={isLoading}>
+          {isLoading ? (
+            <IconLoader2 className='size-4 mr-2 animate-spin' />
+          ) : null}
+          Connect
+        </Button>
+      ),
+    },
     {
       id: 'notion',
       name: 'Notion',
@@ -78,15 +239,18 @@ export function IntegrationsPage() {
                           </div>
                         </div>
                       </div>
-                      {integration.connected && (
-                        <Badge
-                          variant='secondary'
-                          className='bg-green-100 text-green-800'
-                        >
-                          <IconCheck className='size-3 mr-1' />
-                          Active
-                        </Badge>
-                      )}
+                      <div className='flex items-center gap-2'>
+                        {integration.connected && (
+                          <Badge
+                            variant='secondary'
+                            className='bg-green-100 text-green-800'
+                          >
+                            <IconCheck className='size-3 mr-1' />
+                            Active
+                          </Badge>
+                        )}
+                        {integration.action}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
