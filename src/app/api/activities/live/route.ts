@@ -3,15 +3,32 @@ import { auth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    // Try to get session from cookies first
     const session = await auth.api.getSession({
       headers: request.headers,
     });
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      // Return SSE error message instead of JSON
+      return new Response(
+        `data: ${JSON.stringify({
+          type: 'error',
+          message: 'Unauthorized - please refresh the page',
+          timestamp: new Date().toISOString(),
+        })}\n\n`,
+        {
+          status: 401,
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+          },
+        }
+      );
     }
 
     const userId = session.user.id;
+    console.log(`[SSE] User ${userId} connecting to live updates`);
 
     // Create a readable stream for SSE
     const stream = new ReadableStream({

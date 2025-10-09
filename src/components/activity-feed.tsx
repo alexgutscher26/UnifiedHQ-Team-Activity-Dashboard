@@ -139,21 +139,36 @@ export function ActivityFeed() {
 
   const connectToLiveUpdates = () => {
     try {
-      const es = new EventSource('/api/activities/live');
+      // Create EventSource with credentials
+      const es = new EventSource('/api/test-sse', {
+        withCredentials: true,
+      });
       setEventSource(es);
 
       es.onopen = () => {
         setIsLiveConnected(true);
-        console.log('Connected to live updates');
+        console.log('✅ Connected to live updates');
       };
 
       es.onmessage = event => {
         try {
           const data = JSON.parse(event.data);
+          console.log('📨 SSE message received:', data.type);
 
           switch (data.type) {
             case 'connected':
               console.log('Live updates connected:', data.message);
+              break;
+
+            case 'error':
+              console.error('SSE error:', data.message);
+              toast({
+                title: 'Connection Error',
+                description: data.message,
+                variant: 'destructive',
+              });
+              es.close();
+              setIsLiveConnected(false);
               break;
 
             case 'heartbeat':
@@ -177,15 +192,15 @@ export function ActivityFeed() {
       };
 
       es.onerror = error => {
-        console.error('SSE connection error:', error);
+        console.error('❌ SSE connection error:', error);
         setIsLiveConnected(false);
 
-        // Attempt to reconnect after 5 seconds
-        setTimeout(() => {
-          if (es.readyState === EventSource.CLOSED) {
-            connectToLiveUpdates();
-          }
-        }, 5000);
+        // Don't auto-reconnect on error, let user manually refresh
+        toast({
+          title: 'Connection Lost',
+          description: 'Live updates disconnected. Please refresh the page.',
+          variant: 'destructive',
+        });
       };
     } catch (error) {
       console.error('Failed to connect to live updates:', error);
