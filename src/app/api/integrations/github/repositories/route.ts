@@ -60,7 +60,6 @@ export async function GET(request: NextRequest) {
       updatedAt: repo.updated_at,
       language: repo.language,
       stars: repo.stargazers_count,
-      pushedAt: repo.pushed_at,
     }));
 
     return NextResponse.json({

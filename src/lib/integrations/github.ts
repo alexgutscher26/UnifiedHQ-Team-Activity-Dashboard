@@ -14,7 +14,7 @@ export interface GitHubActivity {
 
 export interface GitHubEvent {
   id: string;
-  type: string;
+  type: string | null;
   actor: {
     login: string;
     display_login?: string;
@@ -25,7 +25,7 @@ export interface GitHubEvent {
     id: number;
   };
   payload?: any;
-  created_at: string;
+  created_at: string | null;
   public: boolean;
 }
 
@@ -67,68 +67,17 @@ export async function fetchGithubActivity(
   });
 
   try {
-    console.log('GitHub Activity Debug - Starting fetch...');
-    console.log(
-      'Selected repositories:',
-      selectedRepos.map(r => ({ id: r.repoId, name: r.repoName }))
-    );
-    console.log('Access token exists:', !!connection.accessToken);
-
-    // Test the token by getting user info first
-    const { data: user } = await octokit.rest.users.getAuthenticated();
-
-    if (!user.login) {
-      throw new Error('Unable to get authenticated user information');
-    }
-
-    console.log('Authenticated user:', user.login);
-
-    // Try to fetch user events - use a simpler approach first
-    let events: any[] = [];
-    try {
-      const response =
-        await octokit.rest.activity.listEventsForAuthenticatedUser({
-          per_page: 50,
-          username: '',
-        });
-      events = response.data;
-      console.log(`Fetched ${events.length} events from GitHub`);
-    } catch (apiError: any) {
-      console.error('GitHub API Error:', apiError);
-      console.error('API Error Status:', apiError.status);
-      console.error('API Error Message:', apiError.message);
-
-      // If the authenticated user events fail, try public events as fallback
-      console.log('Trying fallback to public events...');
-      const publicResponse =
-        await octokit.rest.activity.listPublicEventsForUser({
-          username: user.login,
-          per_page: 50,
-        });
-      events = publicResponse.data;
-      console.log(`Fetched ${events.length} public events as fallback`);
-    }
+    // Fetch user events (public activity)
+    const { data: events } =
+      await octokit.rest.activity.listPublicEventsForUser({
+        username: (await octokit.rest.users.getAuthenticated()).data.login,
+        per_page: 50, // Increased to get more events for filtering
+      });
 
     // Filter events to only include selected repositories
     const filteredEvents = events.filter(event =>
       selectedRepoIds.has(event.repo.id)
     );
-
-    console.log(`GitHub Activity Debug:
-      - Total events fetched: ${events.length}
-      - Selected repositories: ${selectedRepoIds.size}
-      - Filtered events: ${filteredEvents.length}
-      - Selected repo IDs: ${Array.from(selectedRepoIds).join(', ')}
-      - Event repo IDs: ${events.map(e => e.repo.id).join(', ')}
-      - Event repo names: ${events.map(e => e.repo.name).join(', ')}
-    `);
-
-    if (filteredEvents.length === 0 && events.length > 0) {
-      console.log('No events match selected repositories. This could mean:');
-      console.log('1. No recent activity in selected repositories');
-      console.log('2. Repository IDs are incorrect');
-      console.log('3. Events are from different repositories');
-    }
 
     return filteredEvents.map(mapGitHubEventToActivity);
   } catch (error: any) {
@@ -151,7 +100,7 @@ function mapGitHubEventToActivity(event: GitHubEvent): GitHubActivity {
   let title = '';
   let description = '';
 
-  switch (event.type) {
+  switch (event.type || 'UnknownEvent') {
     case 'PushEvent':
       const commits = event.payload?.commits || [];
       const commitCount = commits.length;
@@ -228,7 +177,7 @@ function mapGitHubEventToActivity(event: GitHubEvent): GitHubActivity {
     source: 'github',
     title,
     description,
-    timestamp: new Date(event.created_at),
+    timestamp: new Date(event.created_at || new Date()),
     externalId: event.id,
     metadata: {
       eventType: event.type,
@@ -313,13 +262,6 @@ export async function getGithubActivities(
     const repoId = metadata?.repo?.id;
     return repoId && selectedRepoIds.has(repoId);
   });
-
-  console.log(`getGithubActivities Debug:
-    - Selected repositories: ${selectedRepoIds.size}
-    - Total stored activities: ${activities.length}
-    - Filtered activities: ${filteredActivities.length}
-    - Selected repo IDs: ${Array.from(selectedRepoIds).join(', ')}
-  `);
 
   return filteredActivities.slice(0, limit).map(activity => ({
     source: activity.source as 'github',

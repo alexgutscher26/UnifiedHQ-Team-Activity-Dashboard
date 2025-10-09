@@ -213,21 +213,15 @@ export function ActivityFeed() {
         {activities.length === 0 ? (
           <div className='text-center py-8'>
             <p className='text-muted-foreground mb-4'>
-              No activity found. Make sure you've selected repositories and
-              synced your GitHub data.
+              No activity found. Connect your integrations and select
+              repositories to see activity here.
             </p>
             <div className='flex gap-2 justify-center'>
               <Button
                 variant='outline'
-                onClick={handleRefresh}
-                disabled={isRefreshing}
+                onClick={() => (window.location.href = '/integrations')}
               >
-                {isRefreshing ? (
-                  <IconLoader2 className='size-4 mr-2 animate-spin' />
-                ) : (
-                  <IconRefresh className='size-4 mr-2' />
-                )}
-                Sync Now
+                Go to Integrations
               </Button>
               <Button
                 variant='outline'

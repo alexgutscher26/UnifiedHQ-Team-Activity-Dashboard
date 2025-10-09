@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       source: activity.source,
       title: activity.title,
       description: activity.description,
-      timestamp: activity.timestamp.toISOString(), // Convert to ISO string for JSON serialization
+      timestamp: activity.timestamp,
       externalId: activity.externalId,
       metadata: activity.metadata,
     }));
