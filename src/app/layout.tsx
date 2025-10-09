@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   generator: 'v0.app',
 };
 
+/**
+ * Renders the root layout of the application with theme and error handling.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
