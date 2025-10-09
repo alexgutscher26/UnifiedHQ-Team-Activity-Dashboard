@@ -1,4 +1,5 @@
 // Validation utilities and schemas for form inputs
+import React from 'react';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -333,12 +334,15 @@ export function useFieldValidation(
   const [error, setError] = React.useState<string | null>(null);
   const [touched, setTouched] = React.useState(false);
 
+  // Memoize the rules to prevent infinite re-renders
+  const memoizedRules = React.useMemo(() => rules, [JSON.stringify(rules)]);
+
   React.useEffect(() => {
     if (validateOnChange && touched) {
-      const fieldError = validateField(field, value, rules);
+      const fieldError = validateField(field, value, memoizedRules);
       setError(fieldError);
     }
-  }, [field, value, rules, validateOnChange, touched]);
+  }, [field, value, memoizedRules, validateOnChange, touched]);
 
   const validate = () => {
     setTouched(true);

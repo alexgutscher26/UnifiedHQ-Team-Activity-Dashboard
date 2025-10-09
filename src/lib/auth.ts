@@ -28,16 +28,24 @@ export const auth = betterAuth({
     //     clientSecret: process.env.SLACK_CLIENT_SECRET as string,
     // },
   },
+  account: {
+    accountLinking: {
+      enabled: true,
+      allowDifferentEmails: true,
+      updateUserInfoOnLink: true,
+    },
+  },
   plugins: [
-    dymoEmailPlugin({
-      apiKey: process.env.DYMO_API_KEY as string,
-      applyToLogin: true, // recommended
-      applyToOAuth: true, // validate OAuth emails
-      emailRules: {
-        // These are the default rules defined for email validation.
-        deny: ['FRAUD', 'INVALID', 'NO_MX_RECORDS', 'NO_REPLY_EMAIL'],
-      },
-    }),
+    // Temporarily disabled Dymo plugin due to API plan limitations
+    // dymoEmailPlugin({
+    //   apiKey: process.env.DYMO_API_KEY as string,
+    //   applyToLogin: true, // recommended
+    //   applyToOAuth: true, // validate OAuth emails
+    //   emailRules: {
+    //     // These are the default rules defined for email validation.
+    //     deny: ['FRAUD', 'INVALID', 'NO_MX_RECORDS', 'NO_REPLY_EMAIL'],
+    //   },
+    // }),
     openAPI(),
     multiSession(),
     haveIBeenPwned({

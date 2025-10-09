@@ -49,26 +49,34 @@ export function GitHubConnection({
         onConnectionUpdate?.(false);
       }
     } catch (err) {
+      console.error('Error checking GitHub connection:', err);
       setIsConnected(false);
       onConnectionUpdate?.(false);
     }
   };
 
-  const connectGitHub = async () => {
+  const connectGitHub = () => {
     setIsLoading(true);
     setError(null);
 
-    try {
-      await authClient.signIn.social({
+    // Use the authClient method but don't await it
+    // This will cause a redirect to GitHub
+    authClient
+      .linkSocial({
         provider: 'github',
-        callbackURL: '/dashboard',
+        callbackURL: '/integrations',
+      })
+      .catch(error => {
+        // Only handle errors that aren't redirects
+        if (
+          error.name !== 'AbortError' &&
+          !error.message.includes('redirect')
+        ) {
+          console.error('GitHub OAuth error:', error);
+          setError('Failed to connect to GitHub. Please try again.');
+          setIsLoading(false);
+        }
       });
-    } catch (error) {
-      console.error('GitHub OAuth error:', error);
-      setError('Failed to connect to GitHub. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const disconnectGitHub = async () => {

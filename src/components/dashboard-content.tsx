@@ -1,15 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActivityFeed } from '@/components/activity-feed';
 import { AISummary } from '@/components/ai-summary';
 import { SectionCards } from '@/components/section-cards';
+import { GitHubConnectionPrompt } from '@/components/github-connection-prompt';
 import {
   ActivityFeedErrorBoundary,
   GitHubErrorBoundary,
 } from '@/components/error-boundaries';
 import { LoadingState, LoadingCard } from '@/components/ui/loading';
 import { useLoading } from '@/hooks/use-loading';
+import { useAuthStatus } from '@/hooks/use-auth-status';
 import { Repository } from '@/lib/github';
 import { loadUserPreferences } from '@/lib/user-preferences';
 import {
@@ -21,54 +23,27 @@ import {
 export function DashboardContent() {
   const [selectedRepository, setSelectedRepository] =
     useState<Repository | null>(null);
-  const [isGitHubConnected, setIsGitHubConnected] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Memory leak prevention
   useMemoryLeakPrevention('DashboardContent');
   const { setTimeout, clearTimeout } = useSafeTimer();
 
-  // Check GitHub connection status on mount
-  const checkGitHubStatus = async () => {
-    try {
-      const response = await fetch('/api/github/status', {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setIsGitHubConnected(data.success && data.connected);
-      }
-    } catch (error) {
-      console.error('Error checking GitHub status:', error);
-      // Set to false on error to prevent hanging
-      setIsGitHubConnected(false);
-    }
-  };
+  // Get user's authentication status
+  const {
+    authStatus,
+    isLoading: authLoading,
+    error: authError,
+    refetch: refetchAuth,
+  } = useAuthStatus();
 
-  // Load GitHub status and saved repository on mount
-  React.useEffect(() => {
-    const loadData = async () => {
+  // Load saved repository preferences when auth status is available
+  useEffect(() => {
+    const loadPreferences = async () => {
+      if (!authStatus) return;
+
       try {
-        // Add timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) => {
-          const timer = setTimeout(
-            () => reject(new Error('Loading timeout')),
-            3000
-          );
-          return timer;
-        });
-
-        // Run both operations in parallel for faster loading
-        const [githubStatus, preferences] = (await Promise.race([
-          Promise.all([
-            checkGitHubStatus(),
-            loadUserPreferences().catch(() => null), // Don't fail if preferences can't be loaded
-          ]),
-          timeoutPromise,
-        ])) as [any, any];
+        const preferences = await loadUserPreferences().catch(() => null);
 
         if (
           preferences?.githubRepoId &&
@@ -89,18 +64,17 @@ export function DashboardContent() {
           setSelectedRepository(savedRepo);
         }
       } catch (error) {
-        console.error('Error loading data:', error);
-        // Set default values on error
-        setIsGitHubConnected(false);
+        console.error('Error loading preferences:', error);
       } finally {
         setIsInitialized(true);
       }
     };
 
-    loadData();
-  }, []);
+    loadPreferences();
+  }, [authStatus]);
 
-  if (!isInitialized) {
+  // Show loading state while auth status is loading or data is initializing
+  if (authLoading || !isInitialized) {
     return (
       <div className='flex flex-1 flex-col'>
         <div className='@container/main flex flex-1 flex-col gap-2'>
@@ -120,6 +94,35 @@ export function DashboardContent() {
     );
   }
 
+  // Show error state if auth status failed to load
+  if (authError) {
+    return (
+      <div className='flex flex-1 flex-col'>
+        <div className='@container/main flex flex-1 flex-col gap-2'>
+          <div className='flex flex-col gap-4 py-4 md:gap-6 md:py-6'>
+            <div className='mx-4 lg:mx-6 p-4 border border-red-200 bg-red-50 rounded-lg'>
+              <h3 className='text-red-800 font-medium'>
+                Error loading dashboard
+              </h3>
+              <p className='text-red-600 text-sm mt-1'>{authError}</p>
+              <button
+                onClick={refetchAuth}
+                className='mt-2 text-sm text-red-700 hover:text-red-800 underline'
+              >
+                Try again
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Determine what to show based on user's signup method and GitHub connection
+  const showGitHubPrompt =
+    authStatus?.signupMethod === 'email' && !authStatus?.isGitHubConnected;
+  const showActivityFeed = authStatus?.isGitHubConnected;
+
   return (
     <div className='flex flex-1 flex-col'>
       <div className='@container/main flex flex-1 flex-col gap-2'>
@@ -127,11 +130,26 @@ export function DashboardContent() {
           <GitHubErrorBoundary>
             <SectionCards />
           </GitHubErrorBoundary>
+
           <div className='grid grid-cols-1 gap-4 px-4 lg:grid-cols-3 lg:gap-6 lg:px-6'>
             <div className='lg:col-span-2'>
-              <ActivityFeedErrorBoundary>
-                <ActivityFeed selectedRepository={selectedRepository} />
-              </ActivityFeedErrorBoundary>
+              {showGitHubPrompt ? (
+                <GitHubConnectionPrompt
+                  onConnectionUpdate={connected => {
+                    if (connected) {
+                      refetchAuth();
+                    }
+                  }}
+                />
+              ) : showActivityFeed ? (
+                <ActivityFeedErrorBoundary>
+                  <ActivityFeed selectedRepository={selectedRepository} />
+                </ActivityFeedErrorBoundary>
+              ) : (
+                <div className='p-6 text-center text-muted-foreground'>
+                  <p>Loading activity feed...</p>
+                </div>
+              )}
             </div>
             <div className='lg:col-span-1'>
               <GitHubErrorBoundary>
@@ -139,7 +157,6 @@ export function DashboardContent() {
               </GitHubErrorBoundary>
             </div>
           </div>
-          {/* Integration components moved to /integrations page */}
         </div>
       </div>
     </div>

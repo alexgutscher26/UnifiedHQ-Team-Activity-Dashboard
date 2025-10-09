@@ -156,7 +156,6 @@ export function handleCors(req: NextRequest): NextResponse | null {
   const origin = req.headers.get('origin');
   const allowedOrigins = [
     'http://localhost:3000',
-    'http://localhost:3001',
     process.env.NEXT_PUBLIC_APP_URL,
   ].filter(Boolean);
 

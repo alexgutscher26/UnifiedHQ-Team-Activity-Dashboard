@@ -94,7 +94,10 @@ export function ValidatedInput({
   id,
   ...props
 }: ValidatedInputProps) {
-  const fieldId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+  const fieldId = React.useMemo(
+    () => id || `input-${Math.random().toString(36).substr(2, 9)}`,
+    [id]
+  );
 
   const {
     error: validationError,
