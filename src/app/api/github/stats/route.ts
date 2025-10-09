@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { PrismaClient } from '@/generated/prisma';
+import { GitHubCacheManager } from '@/lib/integrations/github-cached';
 
 const prisma = new PrismaClient();
 
@@ -89,6 +90,9 @@ export async function GET(request: NextRequest) {
 
     const detailsText = details.length > 0 ? details.join(', ') : 'No activity';
 
+    // Get cache statistics
+    const cacheStats = GitHubCacheManager.getStats();
+
     return NextResponse.json({
       count: totalActivity,
       status: totalActivity > 0 ? 'Active' : 'Inactive',
@@ -98,6 +102,10 @@ export async function GET(request: NextRequest) {
         commits: commitCount,
         pullRequests: prCount,
         reviews: reviewCount,
+      },
+      cache: {
+        memoryCache: cacheStats,
+        databaseCache: 'enabled',
       },
     });
   } catch (error) {

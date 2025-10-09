@@ -34,6 +34,7 @@ model User {
   connections       Connection[]
   activities        Activity[]
   selectedRepositories SelectedRepository[]
+  githubCache       GitHubCache[]
 
   @@unique([email])
   @@map("user")
@@ -213,4 +214,18 @@ model Activity {
 
   @@unique([userId, source, externalId])
   @@map("activity")
+}
+
+model GitHubCache {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cacheKey  String   // Unique cache key for this user's data
+  data      Json     // Cached GitHub API response data
+  timestamp DateTime @default(now())
+  ttl       Int      // Time to live in milliseconds
+  createdAt DateTime @default(now())
+
+  @@unique([userId, cacheKey])
+  @@map("github_cache")
 }

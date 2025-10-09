@@ -5,7 +5,7 @@ import {
   saveGithubActivities,
   isGithubConnected,
   getSelectedRepositoryCount,
-} from '@/lib/integrations/github';
+} from '@/lib/integrations/github-cached';
 
 export async function POST(request: NextRequest) {
   try {
