@@ -6,6 +6,17 @@ import { PrismaClient } from '@/generated/prisma';
 const prisma = new PrismaClient();
 
 // Helper function to broadcast repository changes
+/**
+ * Broadcasts a change in a repository to the connected user.
+ *
+ * This function checks if the user identified by userId has an active connection. If so, it constructs a message
+ * containing the action (either 'added' or 'removed') and the repository name, then attempts to send this message
+ * to the user. In case of an error during the broadcasting process, it logs the error and removes the user's connection.
+ *
+ * @param {string} userId - The ID of the user to whom the repository change is being broadcasted.
+ * @param {'added' | 'removed'} action - The action indicating whether a repository was added or removed.
+ * @param {string} repoName - The name of the repository that was changed.
+ */
 function broadcastRepositoryChange(
   userId: string,
   action: 'added' | 'removed',
@@ -31,6 +42,17 @@ function broadcastRepositoryChange(
   }
 }
 
+/**
+ * Handles the GET request to fetch user repositories from GitHub.
+ *
+ * This function first retrieves the current user and checks for authorization.
+ * It then fetches the GitHub connection for the user and retrieves the user's repositories using the Octokit library.
+ * The repositories are formatted to include selection status based on the user's selected repositories stored in the database.
+ *
+ * @param request - The incoming NextRequest object.
+ * @returns A JSON response containing the formatted repositories and their total count.
+ * @throws Error If the GitHub token is expired or if there is a failure in fetching repositories.
+ */
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
@@ -109,6 +131,15 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * Handles the POST request to add a repository to the user's selected list.
+ *
+ * The function first retrieves the current user and checks for authorization. It then parses the request body for required fields. If any required fields are missing, it responds with a 400 status. If all fields are present, it upserts the repository information into the database and broadcasts the change. Finally, it returns a success message or handles any errors that occur during the process.
+ *
+ * @param request - The NextRequest object containing the request data.
+ * @returns A JSON response indicating the success or failure of the operation.
+ * @throws Error If an error occurs while processing the request.
+ */
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
