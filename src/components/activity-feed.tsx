@@ -99,6 +99,13 @@ export function ActivityFeed() {
     onUpdate: () => fetchActivities(true), // Silent refresh
   });
 
+  /**
+   * Fetch activities from the API and update the state accordingly.
+   *
+   * This function retrieves activities from the '/api/activities' endpoint. If new activities are detected and the silent flag is not set, a toast notification is displayed. The function also updates the activities state and the last synchronization time. In case of an error during the fetch operation, it logs the error to the console. Finally, it ensures that the loading state is updated based on the silent flag.
+   *
+   * @param silent - A boolean flag indicating whether to suppress notifications and loading state updates.
+   */
   const fetchActivities = async (silent = false) => {
     try {
       const response = await fetch('/api/activities');
@@ -138,6 +145,15 @@ export function ActivityFeed() {
     }
   };
 
+  /**
+   * Handles the refresh of activities by synchronizing with GitHub.
+   *
+   * This function sets the refreshing state to true, triggers a GitHub sync via a POST request,
+   * and processes the response. If the sync is successful, it fetches the latest activities,
+   * updates the last sync time, and displays a success message. In case of an error, it checks
+   * for specific error codes and displays appropriate error messages. Finally, it resets the
+   * refreshing state to false.
+   */
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
