@@ -20,6 +20,9 @@ const sizeMap = {
   xl: 64,
 };
 
+/**
+ * Renders an avatar image with specified properties.
+ */
 export const AvatarImage: React.FC<AvatarImageProps> = ({
   src,
   alt,
