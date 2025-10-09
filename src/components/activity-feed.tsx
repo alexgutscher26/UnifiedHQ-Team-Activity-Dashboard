@@ -80,6 +80,13 @@ const formatTimestamp = (timestamp: Date | string) => {
   }
 };
 
+/**
+ * Renders the Activity Feed component that displays recent activities from connected integrations.
+ *
+ * This component manages the state for activities, loading, and syncing with GitHub. It fetches activities from the API, handles real-time updates, and provides a refresh mechanism. The component also displays loading states and error messages based on the success or failure of API calls. It utilizes hooks for state management and side effects, ensuring a responsive user experience.
+ *
+ * @returns A JSX element representing the Activity Feed.
+ */
 export function ActivityFeed() {
   const { toast } = useToast();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -104,7 +111,7 @@ export function ActivityFeed() {
   /**
    * Fetch activities from the API and update the state accordingly.
    *
-   * This function retrieves activities from the '/api/activities' endpoint. If new activities are detected and the silent flag is not set, a toast notification is displayed. The function also updates the activities state and the last synchronization time. In case of an error during the fetch operation, it logs the error to the console. Finally, it ensures that the loading state is updated based on the silent flag.
+   * This asynchronous function retrieves activities from the '/api/activities' endpoint. If new activities are detected and the silent flag is not set, a toast notification is displayed. The function also attempts to synchronize with GitHub if no activities are found and updates the activities state and the last synchronization time. Errors during the fetch operation are logged to the console, and the loading state is updated based on the silent flag.
    *
    * @param silent - A boolean flag indicating whether to suppress notifications and loading state updates.
    */
