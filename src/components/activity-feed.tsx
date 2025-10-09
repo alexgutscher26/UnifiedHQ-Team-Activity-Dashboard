@@ -118,14 +118,28 @@ export function ActivityFeed() {
   const [showBottomFade, setShowBottomFade] = useState(false);
   const [isLiveConnected, setIsLiveConnected] = useState(false);
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
+  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(
+    null
+  );
 
   useEffect(() => {
     fetchActivities();
     connectToLiveUpdates();
 
+    // Set up auto-refresh every 60 seconds
+    const interval = setInterval(() => {
+      console.log('🔄 Auto-refreshing activities...');
+      fetchActivities();
+    }, 60000); // 60 seconds
+
+    setRefreshInterval(interval);
+
     return () => {
       if (eventSource) {
         eventSource.close();
+      }
+      if (interval) {
+        clearInterval(interval);
       }
     };
   }, []);
@@ -140,7 +154,7 @@ export function ActivityFeed() {
   const connectToLiveUpdates = () => {
     try {
       // Create EventSource with credentials
-      const es = new EventSource('/api/test-sse', {
+      const es = new EventSource('/api/activities/live', {
         withCredentials: true,
       });
       setEventSource(es);
