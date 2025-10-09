@@ -1,8 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-import { GitHubConnection } from '@/components/github-connection';
-import { RepositorySelector } from '@/components/repository-selector';
 import {
   Card,
   CardContent,
@@ -12,39 +9,13 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  IconBrandGithub,
   IconBrandNotion,
   IconBrandSlack,
   IconCheck,
-  IconX,
 } from '@tabler/icons-react';
-import { Repository } from '@/lib/github';
 
 export function IntegrationsPage() {
-  const [selectedRepository, setSelectedRepository] =
-    useState<Repository | null>(null);
-  const [isGitHubConnected, setIsGitHubConnected] = useState(false);
-
-  const handleConnectionUpdate = (connected: boolean) => {
-    setIsGitHubConnected(connected);
-    if (connected) {
-      // Reset selected repository when reconnecting
-      setSelectedRepository(null);
-    }
-  };
-
   const integrations = [
-    {
-      id: 'github',
-      name: 'GitHub',
-      description:
-        'Connect your GitHub account to track commits, pull requests, and repository activity',
-      icon: IconBrandGithub,
-      connected: isGitHubConnected,
-      color: 'bg-gray-900',
-      status: isGitHubConnected ? 'Connected' : 'Not Connected',
-      statusColor: isGitHubConnected ? 'bg-green-500' : 'bg-gray-300',
-    },
     {
       id: 'notion',
       name: 'Notion',
@@ -127,33 +98,6 @@ export function IntegrationsPage() {
               ))}
             </div>
           </div>
-
-          {/* GitHub Integration Details */}
-          {isGitHubConnected && (
-            <div className='px-4 lg:px-6 space-y-6'>
-              <div className='space-y-2'>
-                <h2 className='text-2xl font-semibold'>GitHub Configuration</h2>
-                <p className='text-muted-foreground'>
-                  Configure your GitHub integration settings
-                </p>
-              </div>
-
-              <div className='space-y-4'>
-                <GitHubConnection onConnectionUpdate={handleConnectionUpdate} />
-                <RepositorySelector
-                  onRepositorySelect={setSelectedRepository}
-                  selectedRepository={selectedRepository}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* GitHub Integration Setup */}
-          {!isGitHubConnected && (
-            <div className='px-4 lg:px-6'>
-              <GitHubConnection onConnectionUpdate={handleConnectionUpdate} />
-            </div>
-          )}
         </div>
       </div>
     </div>
