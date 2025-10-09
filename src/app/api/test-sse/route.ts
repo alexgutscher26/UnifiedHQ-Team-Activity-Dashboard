@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * Handles a GET request to establish a Server-Sent Events (SSE) connection.
+ *
+ * This function initiates an SSE stream that sends a test message upon connection and periodically sends heartbeat messages every 5 seconds. It also handles connection closure by cleaning up the interval and closing the stream. In case of errors during message sending or connection establishment, appropriate error messages are logged, and a JSON response is returned with a failure status.
+ *
+ * @param request - The NextRequest object representing the incoming request.
+ */
 export async function GET(request: NextRequest) {
   try {
     console.log('[SSE Test] Connection attempt');
