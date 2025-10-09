@@ -19,6 +19,15 @@ interface Integration {
   description?: string;
 }
 
+/**
+ * Renders a list of integrations with their connection statuses.
+ *
+ * The function initializes a state for integrations and fetches the GitHub connection status on component mount.
+ * It updates the integration status based on the fetched data and handles visibility changes to refresh the status.
+ * The component also provides a button to navigate to the integrations page and displays the status of each integration with appropriate colors and text.
+ *
+ * @returns {JSX.Element} The rendered integrations list component.
+ */
 export function IntegrationsList() {
   const router = useRouter();
   const [integrations, setIntegrations] = useState<Integration[]>([
@@ -103,6 +112,15 @@ export function IntegrationsList() {
     }
   };
 
+  /**
+   * Returns a user-friendly status text based on the provided integration status.
+   *
+   * The function evaluates the input status and returns a corresponding string that
+   * represents the connection state. It handles specific cases for 'connected',
+   * 'disconnected', and 'coming-soon', while returning 'Unknown' for any other status.
+   *
+   * @param status - The current status of the integration.
+   */
   const getStatusText = (status: Integration['status']) => {
     switch (status) {
       case 'connected':
