@@ -7,6 +7,15 @@ import {
 
 const prisma = new PrismaClient();
 
+/**
+ * Handles the GET request for GitHub authentication callback.
+ *
+ * This function processes the request by extracting search parameters, verifying the user, exchanging the authorization code for an access token, and storing the connection in the database. It also triggers an initial sync of GitHub activities for the user. If any errors occur during the process, appropriate redirects are made with error messages.
+ *
+ * @param request - The incoming NextRequest object containing the request details.
+ * @returns A NextResponse redirecting to the appropriate URL based on the outcome of the authentication process.
+ * @throws Error If an unexpected error occurs during the execution of the function.
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
