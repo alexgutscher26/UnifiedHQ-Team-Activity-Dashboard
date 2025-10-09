@@ -7,6 +7,15 @@ import {
   getSelectedRepositoryCount,
 } from '@/lib/integrations/github';
 
+/**
+ * Handles the POST request to sync GitHub activities for the authenticated user.
+ *
+ * This function retrieves the user's session and checks if they are authorized. It verifies if GitHub is connected and counts the selected repositories. If no repositories are selected, it returns a message indicating this. If everything is in order, it fetches the user's GitHub activity, saves it, and returns a success response with the activities. Error handling is included for various failure scenarios, including token expiration.
+ *
+ * @param request - The NextRequest object containing the request details.
+ * @returns A JSON response indicating the success or failure of the sync operation.
+ * @throws Error If the GitHub token is expired or invalid, or if there is a failure in syncing activities.
+ */
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
@@ -77,6 +86,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * Handles the GET request to check the GitHub connection status for the authenticated user.
+ *
+ * The function retrieves the user session from the request headers and checks if the user is authenticated.
+ * If authenticated, it verifies the GitHub connection status for the user and returns the appropriate message.
+ * In case of an error during the process, it logs the error and returns a 500 status response.
+ *
+ * @param request - The NextRequest object containing the request headers.
+ * @returns A JSON response indicating the GitHub connection status and a message.
+ * @throws Error If there is an internal server error during the process.
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
