@@ -35,6 +35,8 @@ export function useRealTime({
   }, [onUpdate]);
 
   useEffect(() => {
+    console.log('useRealTime effect triggered:', { enabled, interval });
+
     if (!enabled) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -43,13 +45,16 @@ export function useRealTime({
       return;
     }
 
+    console.log('Setting up real-time interval...');
     intervalRef.current = setInterval(() => {
+      console.log('Real-time update triggered');
       if (onUpdateRef.current) {
         onUpdateRef.current();
       }
     }, interval);
 
     return () => {
+      console.log('Cleaning up real-time interval');
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;

@@ -16,19 +16,23 @@ import { getGithubActivities } from '@/lib/integrations/github';
  */
 export async function GET(request: NextRequest) {
   try {
+    console.log('Activities API called');
     const session = await auth.api.getSession({
       headers: request.headers,
     });
 
     if (!session?.user) {
+      console.log('No session found, returning 401');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const userId = session.user.id;
     const limit = 5; // Limit to 5 most recent activities for the feed
+    console.log('Getting activities for user:', userId);
 
     // Get GitHub activities
     const githubActivities = await getGithubActivities(userId, limit);
+    console.log('GitHub activities retrieved:', githubActivities.length);
 
     // Convert to the format expected by the frontend
     const activities = githubActivities.map(activity => ({

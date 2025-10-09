@@ -87,16 +87,18 @@ export function ActivityFeed() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [realTimeEnabled, setRealTimeEnabled] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    fetchActivities();
+    console.log('ActivityFeed mounted, syncing and fetching activities...');
+    syncAndFetchActivities();
   }, []);
 
   // Set up real-time updates
   const { isActive } = useRealTime({
-    interval: 30000, // 30 seconds
+    interval: 60000, // 60 seconds - sync with GitHub every minute
     enabled: realTimeEnabled,
-    onUpdate: () => fetchActivities(true), // Silent refresh
+    onUpdate: () => syncAndFetchActivities(true), // Silent sync and refresh
   });
 
   /**
@@ -108,10 +110,37 @@ export function ActivityFeed() {
    */
   const fetchActivities = async (silent = false) => {
     try {
+      console.log('Fetching activities...', { silent });
       const response = await fetch('/api/activities');
       if (response.ok) {
         const data = await response.json();
         const newActivities = data.activities || [];
+        console.log('Activities fetched:', {
+          count: newActivities.length,
+          activities: newActivities,
+        });
+
+        // If no activities found and not silent, try to sync with GitHub
+        if (newActivities.length === 0 && !silent) {
+          console.log('No activities found, attempting to sync with GitHub...');
+          try {
+            const syncResponse = await fetch('/api/github/sync', {
+              method: 'POST',
+            });
+            if (syncResponse.ok) {
+              // Fetch activities again after sync
+              const retryResponse = await fetch('/api/activities');
+              if (retryResponse.ok) {
+                const retryData = await retryResponse.json();
+                setActivities(retryData.activities || []);
+                setLastSyncTime(new Date());
+                return;
+              }
+            }
+          } catch (syncError) {
+            console.error('Sync failed:', syncError);
+          }
+        }
 
         // Check if there are new activities
         if (!silent && activities.length > 0) {
@@ -141,6 +170,42 @@ export function ActivityFeed() {
     } finally {
       if (!silent) {
         setIsLoading(false);
+      }
+    }
+  };
+
+  /**
+   * Sync with GitHub and then fetch activities
+   */
+  const syncAndFetchActivities = async (silent = false) => {
+    try {
+      console.log('Syncing with GitHub and fetching activities...', { silent });
+
+      if (!silent) {
+        setIsSyncing(true);
+      }
+
+      // First sync with GitHub
+      const syncResponse = await fetch('/api/github/sync', {
+        method: 'POST',
+      });
+
+      if (syncResponse.ok) {
+        console.log('GitHub sync successful');
+        // Then fetch activities
+        await fetchActivities(silent);
+      } else {
+        console.error('GitHub sync failed:', syncResponse.status);
+        // Still try to fetch activities even if sync fails
+        await fetchActivities(silent);
+      }
+    } catch (error) {
+      console.error('Error in syncAndFetchActivities:', error);
+      // Still try to fetch activities even if sync fails
+      await fetchActivities(silent);
+    } finally {
+      if (!silent) {
+        setIsSyncing(false);
       }
     }
   };
@@ -242,16 +307,22 @@ export function ActivityFeed() {
               <div className='flex items-center gap-1 ml-2'>
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                    isSyncing
+                      ? 'bg-blue-500 animate-pulse'
+                      : isActive
+                        ? 'bg-green-500 animate-pulse'
+                        : 'bg-gray-400'
                   }`}
                   title={
-                    isActive
-                      ? 'Real-time updates active'
-                      : 'Real-time updates paused'
+                    isSyncing
+                      ? 'Syncing with GitHub...'
+                      : isActive
+                        ? 'Real-time updates active'
+                        : 'Real-time updates paused'
                   }
                 />
                 <span className='text-xs text-muted-foreground'>
-                  {isActive ? 'Live' : 'Paused'}
+                  {isSyncing ? 'Syncing...' : isActive ? 'Live' : 'Paused'}
                 </span>
               </div>
             </CardTitle>
