@@ -14,6 +14,9 @@ class GitHubCache {
   private cache = new Map<string, CacheEntry<any>>();
   private readonly defaultTTL = 5 * 60 * 1000; // 5 minutes
 
+  /**
+   * Stores data in the cache with a specified key and time-to-live.
+   */
   set<T>(key: string, data: T, ttl: number = this.defaultTTL): void {
     this.cache.set(key, {
       data,
@@ -35,15 +38,24 @@ class GitHubCache {
     return entry.data as T;
   }
 
+  /**
+   * Deletes a key from the cache.
+   */
   delete(key: string): void {
     this.cache.delete(key);
   }
 
+  /**
+   * Clears the cache.
+   */
   clear(): void {
     this.cache.clear();
   }
 
   // Generate cache key for GitHub API calls
+  /**
+   * Generates a key based on the operation and sorted parameters.
+   */
   generateKey(operation: string, params: Record<string, any>): string {
     const sortedParams = Object.keys(params)
       .sort()
@@ -53,6 +65,9 @@ class GitHubCache {
   }
 
   // Get cache statistics
+  /**
+   * Retrieves statistics about cache entries, including total, valid, and expired entries.
+   */
   getStats() {
     const now = Date.now();
     let validEntries = 0;
@@ -148,7 +163,18 @@ class CachedGitHubClient {
   }
 
   /**
-   * Get cached or fetch fresh data from GitHub API
+   * Get cached or fetch fresh data from GitHub API.
+   *
+   * This function first attempts to retrieve data from the cache using a generated key based on the user ID, operation, and parameters.
+   * If the data is not found in the cache, it fetches fresh data using the provided fetcher function and stores it in the cache for the specified time-to-live (ttl).
+   * In case of a rate limit error, it attempts to return expired cached data if available.
+   *
+   * @param operation - The operation name to identify the request.
+   * @param params - The parameters to be used for the request.
+   * @param ttl - The time-to-live for the cached data in seconds.
+   * @param fetcher - A function that fetches fresh data from the API.
+   * @returns The fetched or cached data.
+   * @throws Any error encountered during the fetching process, including rate limit errors.
    */
   private async cachedRequest<T>(
     operation: string,
@@ -195,7 +221,7 @@ class CachedGitHubClient {
   }
 
   /**
-   * Get user's repositories with caching
+   * Retrieves the user's repositories with caching.
    */
   async getRepositories(): Promise<any[]> {
     return this.cachedRequest(
@@ -238,7 +264,7 @@ class CachedGitHubClient {
   }
 
   /**
-   * Get repository pull requests with caching
+   * Fetches pull requests for a repository with caching.
    */
   async getPullRequests(
     owner: string,
@@ -263,7 +289,7 @@ class CachedGitHubClient {
   }
 
   /**
-   * Get repository issues with caching
+   * Fetches issues from a repository with caching support.
    */
   async getIssues(
     owner: string,
@@ -303,7 +329,7 @@ class CachedGitHubClient {
   }
 
   /**
-   * Get rate limit information with caching
+   * Retrieves rate limit information with caching.
    */
   async getRateLimit(): Promise<any> {
     return this.cachedRequest(
@@ -362,7 +388,14 @@ class DatabaseCache {
   }
 
   /**
-   * Get cached activities from database
+   * Retrieves cached activities from the database for a specific user.
+   *
+   * This function checks if a cache entry exists for the given userId and cacheKey.
+   * If found, it evaluates the age of the cache entry against its time-to-live (ttl).
+   * If the cache is expired, it deletes the entry and returns null. Otherwise, it returns the cached data as an array of GitHubActivity.
+   *
+   * @param userId - The ID of the user whose activities are being retrieved.
+   * @param cacheKey - The key associated with the cached activities.
    */
   static async getCachedActivities(
     userId: string,
@@ -399,7 +432,7 @@ class DatabaseCache {
   }
 
   /**
-   * Clear expired cache entries
+   * Clear expired cache entries older than 24 hours.
    */
   static async clearExpiredCache(): Promise<void> {
     const now = new Date();
@@ -413,7 +446,7 @@ class DatabaseCache {
   }
 
   /**
-   * Clear all cache for a user
+   * Clear all cache for a user.
    */
   static async clearUserCache(userId: string): Promise<void> {
     await prisma.githubCache.deleteMany({
@@ -423,7 +456,13 @@ class DatabaseCache {
 }
 
 /**
- * Enhanced GitHub activity fetcher with comprehensive caching
+ * Fetches GitHub activity for a specified user with comprehensive caching.
+ *
+ * This function retrieves the user's GitHub connection and selected repositories, then attempts to fetch cached activities from the database. If no cache is found, it fetches the activities from the GitHub API, processes commits, pull requests, and issues, and stores the results in the cache. It handles rate limits and errors gracefully, ensuring that the user is informed of any issues with their GitHub token.
+ *
+ * @param userId - The ID of the user whose GitHub activity is to be fetched.
+ * @returns A promise that resolves to an array of GitHubActivity objects.
+ * @throws Error If the GitHub connection is not found, the token is expired or invalid, or if fetching activities fails.
  */
 export async function fetchGithubActivity(
   userId: string
@@ -609,7 +648,17 @@ export async function fetchGithubActivity(
 }
 
 /**
- * Map GitHub event to our unified activity format
+ * Map GitHub event to our unified activity format.
+ *
+ * This function processes various types of GitHub events and constructs a unified activity object.
+ * It extracts relevant information such as the actor, repository name, and event-specific details
+ * to create a title and description for the activity. The function handles multiple event types,
+ * including PushEvent, PullRequestEvent, IssuesEvent, and others, ensuring that the output is
+ * consistent and informative.
+ *
+ * @param event - The GitHub event to be mapped, containing details about the actor, repository,
+ *                and event payload.
+ * @returns A GitHubActivity object representing the mapped activity.
  */
 function mapGitHubEventToActivity(event: GitHubEvent): GitHubActivity {
   const actor = event.actor.display_login || event.actor.login;
@@ -707,7 +756,7 @@ function mapGitHubEventToActivity(event: GitHubEvent): GitHubActivity {
 }
 
 /**
- * Save GitHub activities to the database, avoiding duplicates
+ * Save GitHub activities to the database, avoiding duplicates.
  */
 export async function saveGithubActivities(
   userId: string,
@@ -791,7 +840,7 @@ export async function getGithubActivities(
 }
 
 /**
- * Check if user has GitHub connected
+ * Checks if the user has a GitHub connection.
  */
 export async function isGithubConnected(userId: string): Promise<boolean> {
   const connection = await prisma.connection.findFirst({
@@ -804,7 +853,7 @@ export async function isGithubConnected(userId: string): Promise<boolean> {
 }
 
 /**
- * Get count of selected repositories for a user
+ * Retrieves the count of selected repositories for a given user.
  */
 export async function getSelectedRepositoryCount(
   userId: string
@@ -818,7 +867,13 @@ export async function getSelectedRepositoryCount(
 }
 
 /**
- * Disconnect GitHub integration
+ * Disconnect GitHub integration for a user.
+ *
+ * This function deletes all GitHub-related connections, selected repositories, and activities associated with the specified userId.
+ * It also clears the user's cache to ensure that no stale data remains. The function utilizes the prisma client to perform
+ * the deletions and interacts with the DatabaseCache to manage the user's cache.
+ *
+ * @param userId - The unique identifier of the user whose GitHub integration is to be disconnected.
  */
 export async function disconnectGithub(userId: string): Promise<void> {
   await prisma.connection.deleteMany({
