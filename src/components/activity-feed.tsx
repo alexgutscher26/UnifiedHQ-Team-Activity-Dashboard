@@ -107,6 +107,14 @@ const formatTimestamp = (timestamp: Date | string) => {
   }
 };
 
+/**
+ * Renders the activity feed component displaying recent activities from connected integrations.
+ *
+ * The component fetches activities from the API on mount and provides a refresh functionality to sync with GitHub.
+ * It handles loading states, error messages, and displays activities with relevant metadata, including links to GitHub when applicable.
+ *
+ * @returns A JSX element representing the activity feed.
+ */
 export function ActivityFeed() {
   const { toast } = useToast();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -133,6 +141,14 @@ export function ActivityFeed() {
     }
   };
 
+  /**
+   * Handles the refresh of activities by synchronizing with GitHub.
+   *
+   * This function sets a refreshing state, triggers a GitHub sync via a POST request,
+   * and processes the response. If the sync is successful, it fetches updated activities
+   * and displays a success message. In case of errors, it handles specific error codes
+   * and displays appropriate messages to the user. Finally, it resets the refreshing state.
+   */
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
@@ -268,6 +284,15 @@ export function ActivityFeed() {
               const payload = activity.metadata?.payload;
 
               // Get the GitHub URL for the activity
+              /**
+               * Retrieve the GitHub URL from the activity payload.
+               *
+               * This function checks if the activity source is 'github' and if the payload is defined.
+               * It then attempts to return the URL from the commit, pull request, or issue within the payload,
+               * in that order of priority. If none of these URLs are available, it returns null.
+               *
+               * @returns The GitHub URL from the activity payload, or null if not found.
+               */
               const getGitHubUrl = () => {
                 if (activity.source === 'github' && payload) {
                   if (payload.commit?.url) return payload.commit.url;
