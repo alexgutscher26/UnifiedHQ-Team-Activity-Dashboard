@@ -41,6 +41,17 @@ interface RepositorySelectorProps {
   isConnected: boolean;
 }
 
+/**
+ * Renders a dialog for selecting GitHub repositories to track.
+ *
+ * The component fetches repositories from an API when opened and allows users to select or deselect repositories.
+ * It manages loading states, displays error messages using toast notifications, and filters repositories based on a search term.
+ * The selected count is updated dynamically as repositories are toggled.
+ *
+ * @param {RepositorySelectorProps} props - The properties for the RepositorySelector component.
+ * @param {boolean} props.isConnected - Indicates if the user is connected to the GitHub integration.
+ * @returns {JSX.Element | null} The rendered component or null if not connected.
+ */
 export function RepositorySelector({ isConnected }: RepositorySelectorProps) {
   const { toast } = useToast();
   const [repositories, setRepositories] = useState<Repository[]>([]);
