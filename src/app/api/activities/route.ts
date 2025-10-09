@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     const userId = session.user.id;
-    const limit = 20; // Limit to 20 most recent activities
+    const limit = 5; // Limit to 5 most recent activities for the feed
 
     // Get GitHub activities
     const githubActivities = await getGithubActivities(userId, limit);

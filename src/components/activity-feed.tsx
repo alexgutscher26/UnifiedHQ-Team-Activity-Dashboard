@@ -238,8 +238,8 @@ export function ActivityFeed() {
             </div>
           </div>
         ) : (
-          <div className='space-y-4'>
-            {activities.map(activity => {
+          <div className='space-y-4 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100'>
+            {activities.slice(0, 5).map(activity => {
               const Icon = getActivityIcon(activity.source);
               const colorClass = getActivityColor(activity.source);
               const actor = activity.metadata?.actor;
@@ -283,6 +283,11 @@ export function ActivityFeed() {
                 </div>
               );
             })}
+            {activities.length > 5 && (
+              <div className='text-center text-xs text-muted-foreground pt-2 border-t'>
+                Showing 5 of {activities.length} activities
+              </div>
+            )}
           </div>
         )}
 

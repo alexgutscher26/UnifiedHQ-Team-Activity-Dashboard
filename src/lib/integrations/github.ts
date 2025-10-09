@@ -83,32 +83,60 @@ export async function fetchGithubActivity(
 
     console.log('Authenticated user:', user.login);
 
-    // Try to fetch user events - use a simpler approach first
+    // Fetch events from each selected repository individually
     let events: any[] = [];
-    try {
-      const response =
-        await octokit.rest.activity.listEventsForAuthenticatedUser({
-          per_page: 50,
-        });
-      events = response.data;
-      console.log(`Fetched ${events.length} events from GitHub`);
-    } catch (apiError: any) {
-      console.error('GitHub API Error:', apiError);
-      console.error('API Error Status:', apiError.status);
-      console.error('API Error Message:', apiError.message);
 
-      // If the authenticated user events fail, try public events as fallback
-      console.log('Trying fallback to public events...');
-      const publicResponse =
-        await octokit.rest.activity.listPublicEventsForUser({
-          username: user.login,
-          per_page: 50,
+    for (const selectedRepo of selectedRepos) {
+      try {
+        const [owner, repoName] = selectedRepo.repoName.split('/');
+        console.log(`Fetching events for ${selectedRepo.repoName}...`);
+
+        // Get repository events (both public and private)
+        const repoEvents = await octokit.rest.activity.listRepoEvents({
+          owner,
+          repo: repoName,
+          per_page: 30,
         });
-      events = publicResponse.data;
-      console.log(`Fetched ${events.length} public events as fallback`);
+
+        console.log(
+          `Found ${repoEvents.data.length} events for ${selectedRepo.repoName}`
+        );
+        events.push(...repoEvents.data);
+      } catch (repoError: any) {
+        console.error(
+          `Error fetching events for ${selectedRepo.repoName}:`,
+          repoError.message
+        );
+        // Continue with other repositories even if one fails
+      }
     }
 
-    // Filter events to only include selected repositories
+    console.log(`Total events fetched from repositories: ${events.length}`);
+
+    // If no repository events found, try user events as fallback
+    if (events.length === 0) {
+      try {
+        console.log('No repository events found, trying user events...');
+        const response =
+          await octokit.rest.activity.listEventsForAuthenticatedUser({
+            per_page: 50,
+          });
+        events = response.data;
+        console.log(`Fetched ${events.length} user events as fallback`);
+      } catch (apiError: any) {
+        console.error('User events also failed:', apiError.message);
+        // Try public events as last resort
+        const publicResponse =
+          await octokit.rest.activity.listPublicEventsForUser({
+            username: user.login,
+            per_page: 50,
+          });
+        events = publicResponse.data;
+        console.log(`Fetched ${events.length} public events as last resort`);
+      }
+    }
+
+    // Events are already filtered by repository, but let's double-check
     const filteredEvents = events.filter(event =>
       selectedRepoIds.has(event.repo.id)
     );
