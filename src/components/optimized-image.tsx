@@ -167,6 +167,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     <Image
       ref={imgRef}
       {...imageProps}
+      alt={alt || ''}
       loading={lazy && !priority ? 'lazy' : 'eager'}
     />
   );

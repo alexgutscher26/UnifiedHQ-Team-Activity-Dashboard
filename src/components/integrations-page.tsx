@@ -291,7 +291,7 @@ export function IntegrationsPage() {
                 </h1>
                 <p className='text-muted-foreground text-lg'>
                   Connect your favorite tools to get a unified view of your
-                  team's activity
+                  team&apos;s activity
                 </p>
               </div>
 

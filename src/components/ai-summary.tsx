@@ -73,7 +73,7 @@ export function AISummary() {
           <Badge variant='secondary'>Today</Badge>
         </div>
         <CardDescription>
-          Intelligent insights from your team's activity
+          Intelligent insights from your team&apos;s activity
         </CardDescription>
       </CardHeader>
       <CardContent className='space-y-4'>
