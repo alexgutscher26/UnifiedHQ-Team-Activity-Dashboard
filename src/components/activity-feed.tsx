@@ -109,6 +109,15 @@ const formatTimestamp = (timestamp: Date | string) => {
   }
 };
 
+/**
+ * Renders the activity feed component that displays recent activities from connected integrations.
+ *
+ * This component manages the state of activities, loading status, and live updates through EventSource.
+ * It fetches activities from the server, handles live updates, and provides a refresh mechanism.
+ * The component also manages UI states for loading, refreshing, and scroll indicators.
+ *
+ * @returns {JSX.Element} The rendered activity feed component.
+ */
 export function ActivityFeed() {
   const { toast } = useToast();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -193,6 +202,14 @@ export function ActivityFeed() {
     }
   };
 
+  /**
+   * Fetches activities from the API and updates the state.
+   *
+   * This asynchronous function attempts to retrieve activities from the '/api/activities' endpoint.
+   * If the response is successful, it parses the JSON data and updates the activities state with the
+   * retrieved activities. In case of an error during the fetch operation, it logs the error to the console.
+   * Finally, it ensures that the loading state is set to false regardless of the outcome.
+   */
   const fetchActivities = async () => {
     try {
       const response = await fetch('/api/activities');
