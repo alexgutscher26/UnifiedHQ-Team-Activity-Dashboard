@@ -35,8 +35,22 @@ interface Activity {
   metadata?: any;
 }
 
-const getActivityIcon = (type: string) => {
-  switch (type) {
+const getActivityIcon = (activity: Activity) => {
+  if (activity.source === 'github') {
+    const eventType = activity.metadata?.eventType;
+    switch (eventType) {
+      case 'commit':
+        return IconGitCommit;
+      case 'pull_request':
+        return IconTag;
+      case 'issue':
+        return IconBug;
+      default:
+        return IconBrandGithub;
+    }
+  }
+
+  switch (activity.source) {
     case 'notion':
       return IconBrandNotion;
     case 'slack':
@@ -48,8 +62,22 @@ const getActivityIcon = (type: string) => {
   }
 };
 
-const getActivityColor = (type: string) => {
-  switch (type) {
+const getActivityColor = (activity: Activity) => {
+  if (activity.source === 'github') {
+    const eventType = activity.metadata?.eventType;
+    switch (eventType) {
+      case 'commit':
+        return 'text-green-600';
+      case 'pull_request':
+        return 'text-blue-600';
+      case 'issue':
+        return 'text-orange-600';
+      default:
+        return 'text-gray-900';
+    }
+  }
+
+  switch (activity.source) {
     case 'notion':
       return 'text-black';
     case 'slack':
@@ -108,8 +136,8 @@ export function ActivityFeed() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      // Trigger GitHub sync
-      const syncResponse = await fetch('/api/github/sync', {
+      // Trigger GitHub sync using the new endpoint
+      const syncResponse = await fetch('/api/integrations/github/sync', {
         method: 'POST',
       });
 
@@ -234,9 +262,23 @@ export function ActivityFeed() {
         ) : (
           <div className='space-y-4'>
             {activities.map(activity => {
-              const Icon = getActivityIcon(activity.source);
-              const colorClass = getActivityColor(activity.source);
+              const Icon = getActivityIcon(activity);
+              const colorClass = getActivityColor(activity);
               const actor = activity.metadata?.actor;
+              const payload = activity.metadata?.payload;
+
+              // Get the GitHub URL for the activity
+              const getGitHubUrl = () => {
+                if (activity.source === 'github' && payload) {
+                  if (payload.commit?.url) return payload.commit.url;
+                  if (payload.pull_request?.url)
+                    return payload.pull_request.url;
+                  if (payload.issue?.url) return payload.issue.url;
+                }
+                return null;
+              };
+
+              const githubUrl = getGitHubUrl();
 
               return (
                 <div
@@ -248,7 +290,20 @@ export function ActivityFeed() {
                   </div>
                   <div className='flex-1 min-w-0'>
                     <div className='flex items-center gap-2 mb-1'>
-                      <h4 className='font-medium text-sm'>{activity.title}</h4>
+                      <h4 className='font-medium text-sm'>
+                        {githubUrl ? (
+                          <a
+                            href={githubUrl}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='hover:underline text-blue-600 hover:text-blue-800'
+                          >
+                            {activity.title}
+                          </a>
+                        ) : (
+                          activity.title
+                        )}
+                      </h4>
                       <Badge variant='secondary' className='text-xs'>
                         {activity.source}
                       </Badge>

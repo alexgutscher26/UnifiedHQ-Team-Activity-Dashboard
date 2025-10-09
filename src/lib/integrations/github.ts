@@ -32,10 +32,13 @@ export interface GitHubEvent {
 /**
  * Fetch GitHub activity for a user using their stored access token
  * Only includes activity from selected repositories
+ * Enhanced to fetch commits, PRs, and issues directly from repositories
  */
 export async function fetchGithubActivity(
   userId: string
 ): Promise<GitHubActivity[]> {
+  console.log(`[GitHub Sync] Starting sync for user: ${userId}`);
+
   const connection = await prisma.connection.findFirst({
     where: {
       userId,
@@ -44,6 +47,7 @@ export async function fetchGithubActivity(
   });
 
   if (!connection) {
+    console.log(`[GitHub Sync] No GitHub connection found for user: ${userId}`);
     throw new Error('GitHub not connected');
   }
 
@@ -59,27 +63,142 @@ export async function fetchGithubActivity(
     return [];
   }
 
-  const selectedRepoIds = new Set(selectedRepos.map(repo => repo.repoId));
-
   const octokit = new Octokit({
     auth: connection.accessToken,
     userAgent: 'UnifiedHQ/1.0.0',
   });
 
   try {
-    // Fetch user events (public activity)
-    const { data: events } =
-      await octokit.rest.activity.listPublicEventsForUser({
-        username: (await octokit.rest.users.getAuthenticated()).data.login,
-        per_page: 50, // Increased to get more events for filtering
-      });
+    const allActivities: GitHubActivity[] = [];
 
-    // Filter events to only include selected repositories
-    const filteredEvents = events.filter(event =>
-      selectedRepoIds.has(event.repo.id)
+    // Fetch activity from each selected repository
+    for (const repo of selectedRepos) {
+      const [owner, repoName] = repo.repoName.split('/');
+
+      try {
+        // Fetch recent commits
+        const commits = await octokit.rest.repos.listCommits({
+          owner,
+          repo: repoName,
+          per_page: 10,
+        });
+
+        // Fetch recent pull requests
+        const pullRequests = await octokit.rest.pulls.list({
+          owner,
+          repo: repoName,
+          state: 'all',
+          per_page: 10,
+          sort: 'updated',
+        });
+
+        // Fetch recent issues
+        const issues = await octokit.rest.issues.listForRepo({
+          owner,
+          repo: repoName,
+          state: 'all',
+          per_page: 10,
+          sort: 'updated',
+        });
+
+        // Convert commits to activities
+        commits.data.forEach(commit => {
+          allActivities.push({
+            source: 'github',
+            title: `Committed to ${repo.repoName}`,
+            description: commit.commit.message.split('\n')[0], // First line of commit message
+            timestamp: new Date(
+              commit.commit.author?.date ||
+                commit.commit.committer?.date ||
+                new Date()
+            ),
+            externalId: commit.sha,
+            metadata: {
+              eventType: 'commit',
+              repo: { id: repo.repoId, name: repo.repoName },
+              actor: commit.author || commit.committer,
+              payload: {
+                commit: {
+                  sha: commit.sha,
+                  message: commit.commit.message,
+                  url: commit.html_url,
+                },
+              },
+            },
+          });
+        });
+
+        // Convert pull requests to activities
+        pullRequests.data.forEach(pr => {
+          allActivities.push({
+            source: 'github',
+            title: `${pr.state === 'open' ? 'Opened' : pr.state === 'closed' ? 'Closed' : 'Updated'} PR #${pr.number} in ${repo.repoName}`,
+            description: pr.title,
+            timestamp: new Date(pr.updated_at),
+            externalId: `pr-${pr.id}`,
+            metadata: {
+              eventType: 'pull_request',
+              repo: { id: repo.repoId, name: repo.repoName },
+              actor: pr.user,
+              payload: {
+                pull_request: {
+                  number: pr.number,
+                  title: pr.title,
+                  state: pr.state,
+                  url: pr.html_url,
+                },
+              },
+            },
+          });
+        });
+
+        // Convert issues to activities (filter out pull requests)
+        issues.data
+          .filter(issue => !issue.pull_request) // Exclude PRs since they're handled separately
+          .forEach(issue => {
+            allActivities.push({
+              source: 'github',
+              title: `${issue.state === 'open' ? 'Opened' : issue.state === 'closed' ? 'Closed' : 'Updated'} issue #${issue.number} in ${repo.repoName}`,
+              description: issue.title,
+              timestamp: new Date(issue.updated_at),
+              externalId: `issue-${issue.id}`,
+              metadata: {
+                eventType: 'issue',
+                repo: { id: repo.repoId, name: repo.repoName },
+                actor: issue.user,
+                payload: {
+                  issue: {
+                    number: issue.number,
+                    title: issue.title,
+                    state: issue.state,
+                    url: issue.html_url,
+                  },
+                },
+              },
+            });
+          });
+      } catch (repoError: any) {
+        console.warn(
+          `Failed to fetch activity for ${repo.repoName}:`,
+          repoError.message
+        );
+        // Continue with other repositories even if one fails
+      }
+    }
+
+    console.log(
+      `[GitHub Sync] Total activities fetched: ${allActivities.length}`
     );
 
-    return filteredEvents.map(mapGitHubEventToActivity);
+    // Sort by timestamp (most recent first) and limit to 50 activities
+    const sortedActivities = allActivities
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .slice(0, 50);
+
+    console.log(
+      `[GitHub Sync] Returning ${sortedActivities.length} activities`
+    );
+    return sortedActivities;
   } catch (error: any) {
     if (error.status === 401) {
       throw new Error(
