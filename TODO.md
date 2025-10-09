@@ -393,7 +393,7 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 
 ### Development Workflow
 - [ ] Git branching strategy (GitFlow/GitHub Flow)
-- [ ] Pull request templates and guidelines
+- [x] Pull request templates and guidelines
 - [ ] Code review process automation
 - [ ] Automated testing in CI/CD
 - [ ] Feature flag management
