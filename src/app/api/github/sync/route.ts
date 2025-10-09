@@ -76,6 +76,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * Handles the GET request to check the GitHub connection status for the authenticated user.
+ *
+ * The function retrieves the user session using the auth.api.getSession method. If the user is not authenticated, it returns a 401 Unauthorized response. If authenticated, it checks if the user's GitHub account is connected by calling isGithubConnected and returns the connection status along with an appropriate message. In case of an error, it logs the error and returns a 500 Internal server error response.
+ *
+ * @param request - The NextRequest object representing the incoming request.
+ * @returns A JSON response containing the connection status and a message.
+ * @throws Error If an error occurs during the session retrieval or GitHub connection check.
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
