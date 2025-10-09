@@ -24,6 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export function NavUser({
   user,
@@ -98,6 +99,8 @@ export function NavUser({
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <ThemeToggle />
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <IconLogout />

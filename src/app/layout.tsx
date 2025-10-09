@@ -6,6 +6,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { Suspense } from 'react';
 import { GlobalErrorBoundary } from '@/components/error-boundaries';
 import { MemoryMonitor } from '@/components/memory-monitor';
+import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -20,13 +21,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <GlobalErrorBoundary>
-          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-        </GlobalErrorBoundary>
-        <Analytics />
-        <MemoryMonitor />
+        <ThemeProvider
+          attribute='class'
+          defaultTheme='system'
+          enableSystem
+          disableTransitionOnChange
+        >
+          <GlobalErrorBoundary>
+            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+          </GlobalErrorBoundary>
+          <Analytics />
+          <MemoryMonitor />
+        </ThemeProvider>
       </body>
     </html>
   );
