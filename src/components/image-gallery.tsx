@@ -37,14 +37,23 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
     setCurrentIndex(prev => (prev + 1) % images.length);
   };
 
+  /**
+   * Decrements the current image index in a circular manner.
+   */
   const prevImage = () => {
     setCurrentIndex(prev => (prev - 1 + images.length) % images.length);
   };
 
+  /**
+   * Sets the current image index.
+   */
   const goToImage = (index: number) => {
     setCurrentIndex(index);
   };
 
+  /**
+   * Sets the application to fullscreen mode.
+   */
   const openFullscreen = () => {
     setIsFullscreen(true);
   };
@@ -63,6 +72,15 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
 
   // Keyboard navigation
   React.useEffect(() => {
+    /**
+     * Handles key down events for fullscreen navigation.
+     *
+     * This function listens for specific key presses when the application is in fullscreen mode.
+     * It checks the pressed key and performs actions such as closing fullscreen on 'Escape',
+     * navigating to the previous image on 'ArrowLeft', and moving to the next image on 'ArrowRight'.
+     *
+     * @param e - The KeyboardEvent object representing the key press event.
+     */
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isFullscreen) {
         switch (e.key) {
