@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@/generated/prisma';
+import {
+  fetchGithubActivity,
+  saveGithubActivities,
+} from '@/lib/integrations/github';
 
 const prisma = new PrismaClient();
 
@@ -84,6 +88,21 @@ export async function GET(request: NextRequest) {
           : null,
       },
     });
+
+    // Trigger initial GitHub activity sync
+    try {
+      console.log(
+        `[GitHub Callback] Starting initial sync for user: ${user.id}`
+      );
+      const activities = await fetchGithubActivity(user.id);
+      await saveGithubActivities(user.id, activities);
+      console.log(
+        `[GitHub Callback] Synced ${activities.length} activities for user: ${user.id}`
+      );
+    } catch (syncError) {
+      console.error('[GitHub Callback] Failed to sync activities:', syncError);
+      // Don't fail the callback if sync fails - user can manually sync later
+    }
 
     return NextResponse.redirect(
       `${process.env.BETTER_AUTH_URL || 'http://localhost:3000'}/integrations?success=github_connected`

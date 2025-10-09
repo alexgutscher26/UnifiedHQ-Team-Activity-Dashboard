@@ -32,13 +32,18 @@ export function SectionCards() {
 
   const loadStats = async () => {
     try {
-      // Simulate API call delay - reduced for faster loading
-      await new Promise(resolve => {
-        const timer = setTimeout(resolve, 50);
-        return timer;
-      });
+      // Fetch real GitHub statistics
+      const githubResponse = await fetch('/api/github/stats');
+      const githubStats = githubResponse.ok
+        ? await githubResponse.json()
+        : {
+            count: 0,
+            status: 'Inactive',
+            details: 'No activity',
+            lastUpdate: 'No recent activity',
+          };
 
-      // Mock stats data
+      // Mock stats data for other services (Notion, Slack, AI)
       setStats({
         notion: {
           count: 24,
@@ -53,10 +58,10 @@ export function SectionCards() {
           lastUpdate: '2 minutes ago',
         },
         github: {
-          count: 18,
-          status: 'Active',
-          details: '7 commits, 3 PRs, 2 reviews',
-          lastUpdate: '15 minutes ago',
+          count: githubStats.count,
+          status: githubStats.status,
+          details: githubStats.details,
+          lastUpdate: githubStats.lastUpdate,
         },
         ai: {
           count: 'Ready',
@@ -67,6 +72,33 @@ export function SectionCards() {
       });
     } catch (error) {
       console.error('Error loading stats:', error);
+      // Fallback to mock data on error
+      setStats({
+        notion: {
+          count: 24,
+          status: 'Active',
+          details: '12 pages edited, 8 comments',
+          lastUpdate: '5 minutes ago',
+        },
+        slack: {
+          count: 156,
+          status: 'Active',
+          details: '8 channels, 23 threads',
+          lastUpdate: '2 minutes ago',
+        },
+        github: {
+          count: 0,
+          status: 'Inactive',
+          details: 'No activity',
+          lastUpdate: 'No recent activity',
+        },
+        ai: {
+          count: 'Ready',
+          status: 'Generated',
+          details: 'Daily insights available',
+          lastUpdate: '10 minutes ago',
+        },
+      });
     } finally {
       setIsLoading(false);
     }
