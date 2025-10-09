@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 
+/**
+ * Establishes a Server-Sent Events (SSE) connection for live updates.
+ *
+ * The function retrieves the user session from the request headers and checks for user authentication.
+ * If authenticated, it creates a readable stream that sends a connection message and periodic heartbeat messages
+ * to keep the connection alive. It also handles cleanup when the connection is closed.
+ * In case of an error during the process, it logs the error and returns a failure response.
+ *
+ * @param request - The NextRequest object containing the request details.
+ * @returns A Response object containing the SSE stream.
+ * @throws Error If there is an issue establishing the connection.
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
@@ -73,6 +85,14 @@ export async function GET(request: NextRequest) {
 }
 
 // Helper function to broadcast updates to connected users
+/**
+ * Broadcasts an activity update message to a specific user.
+ *
+ * This function checks if the user identified by userId has an active connection. If so, it constructs a message containing the provided data and a timestamp, then enqueues it for transmission. In case of an error during message creation or transmission, it logs the error and removes the user's connection from the global userConnections map.
+ *
+ * @param {string} userId - The ID of the user to whom the message will be broadcasted.
+ * @param {any} data - The data to be included in the broadcast message.
+ */
 export function broadcastToUser(userId: string, data: any) {
   if (global.userConnections?.has(userId)) {
     const controller = global.userConnections.get(userId);
