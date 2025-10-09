@@ -107,6 +107,13 @@ const formatTimestamp = (timestamp: Date | string) => {
   }
 };
 
+/**
+ * Render the activity feed component displaying recent activities from connected integrations.
+ *
+ * This component fetches activities from an API, manages loading and refreshing states, and handles scroll events to show fade indicators. It also provides user feedback through toasts for various actions, such as refreshing activities and handling errors. The activities are displayed in a card format, with options to manage integrations if no activities are found.
+ *
+ * @returns {JSX.Element} The rendered activity feed component.
+ */
 export function ActivityFeed() {
   const { toast } = useToast();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -142,6 +149,9 @@ export function ActivityFeed() {
     }
   };
 
+  /**
+   * Handles the scroll event to show or hide fade indicators.
+   */
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     const isAtTop = scrollTop === 0;
@@ -151,6 +161,14 @@ export function ActivityFeed() {
     setShowBottomFade(!isAtBottom);
   };
 
+  /**
+   * Handles the refresh of activities by synchronizing with GitHub.
+   *
+   * This function sets the refreshing state to true, triggers a GitHub sync via a POST request,
+   * and processes the response. If the sync is successful, it fetches the updated activities
+   * and displays a success message. In case of an error, it checks for specific error codes
+   * and displays appropriate error messages. Finally, it resets the refreshing state.
+   */
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
@@ -290,6 +308,15 @@ export function ActivityFeed() {
                 const payload = activity.metadata?.payload;
 
                 // Get the GitHub URL for the activity
+                /**
+                 * Retrieve the GitHub URL from the activity payload.
+                 *
+                 * This function checks if the activity source is 'github' and if the payload is defined.
+                 * It then attempts to return the URL from the commit, pull request, or issue within the payload,
+                 * in that order of priority. If none are found, it returns null.
+                 *
+                 * @returns The GitHub URL from the payload or null if not found.
+                 */
                 const getGitHubUrl = () => {
                   if (activity.source === 'github' && payload) {
                     if (payload.commit?.url) return payload.commit.url;
