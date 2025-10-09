@@ -112,10 +112,19 @@ export function ActivityFeed() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showTopFade, setShowTopFade] = useState(false);
+  const [showBottomFade, setShowBottomFade] = useState(false);
 
   useEffect(() => {
     fetchActivities();
   }, []);
+
+  useEffect(() => {
+    // Initialize fade states when activities change
+    if (activities.length > 0) {
+      setShowBottomFade(true); // Show bottom fade initially if there are activities
+    }
+  }, [activities]);
 
   const fetchActivities = async () => {
     try {
@@ -131,6 +140,15 @@ export function ActivityFeed() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    const isAtTop = scrollTop === 0;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5;
+
+    setShowTopFade(!isAtTop);
+    setShowBottomFade(!isAtBottom);
   };
 
   const handleRefresh = async () => {
@@ -260,78 +278,90 @@ export function ActivityFeed() {
             </div>
           </div>
         ) : (
-          <div className='space-y-4'>
-            {activities.map(activity => {
-              const Icon = getActivityIcon(activity);
-              const colorClass = getActivityColor(activity);
-              const actor = activity.metadata?.actor;
-              const payload = activity.metadata?.payload;
+          <div className='relative'>
+            <div
+              className='max-h-96 overflow-y-auto space-y-4 pr-2'
+              onScroll={handleScroll}
+            >
+              {activities.map(activity => {
+                const Icon = getActivityIcon(activity);
+                const colorClass = getActivityColor(activity);
+                const actor = activity.metadata?.actor;
+                const payload = activity.metadata?.payload;
 
-              // Get the GitHub URL for the activity
-              const getGitHubUrl = () => {
-                if (activity.source === 'github' && payload) {
-                  if (payload.commit?.url) return payload.commit.url;
-                  if (payload.pull_request?.url)
-                    return payload.pull_request.url;
-                  if (payload.issue?.url) return payload.issue.url;
-                }
-                return null;
-              };
+                // Get the GitHub URL for the activity
+                const getGitHubUrl = () => {
+                  if (activity.source === 'github' && payload) {
+                    if (payload.commit?.url) return payload.commit.url;
+                    if (payload.pull_request?.url)
+                      return payload.pull_request.url;
+                    if (payload.issue?.url) return payload.issue.url;
+                  }
+                  return null;
+                };
 
-              const githubUrl = getGitHubUrl();
+                const githubUrl = getGitHubUrl();
 
-              return (
-                <div
-                  key={activity.id}
-                  className='flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors'
-                >
-                  <div className={`p-2 rounded-lg bg-muted ${colorClass}`}>
-                    <Icon className='size-4' />
-                  </div>
-                  <div className='flex-1 min-w-0'>
-                    <div className='flex items-center gap-2 mb-1'>
-                      <h4 className='font-medium text-sm'>
-                        {githubUrl ? (
-                          <a
-                            href={githubUrl}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='hover:underline text-blue-600 hover:text-blue-800'
-                          >
-                            {activity.title}
-                          </a>
-                        ) : (
-                          activity.title
-                        )}
-                      </h4>
-                      <Badge variant='secondary' className='text-xs'>
-                        {activity.source}
-                      </Badge>
+                return (
+                  <div
+                    key={activity.id}
+                    className='flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors'
+                  >
+                    <div className={`p-2 rounded-lg bg-muted ${colorClass}`}>
+                      <Icon className='size-4' />
                     </div>
-                    {activity.description && (
-                      <p className='text-sm text-muted-foreground mb-2'>
-                        {activity.description}
-                      </p>
-                    )}
-                    <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                      {actor && (
-                        <>
-                          <Avatar className='size-4'>
-                            <AvatarImage src={actor.avatar_url} />
-                            <AvatarFallback>
-                              {actor.login?.charAt(0) || '?'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span>{actor.display_login || actor.login}</span>
-                          <span>•</span>
-                        </>
+                    <div className='flex-1 min-w-0'>
+                      <div className='flex items-center gap-2 mb-1'>
+                        <h4 className='font-medium text-sm'>
+                          {githubUrl ? (
+                            <a
+                              href={githubUrl}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='hover:underline text-blue-600 hover:text-blue-800'
+                            >
+                              {activity.title}
+                            </a>
+                          ) : (
+                            activity.title
+                          )}
+                        </h4>
+                        <Badge variant='secondary' className='text-xs'>
+                          {activity.source}
+                        </Badge>
+                      </div>
+                      {activity.description && (
+                        <p className='text-sm text-muted-foreground mb-2'>
+                          {activity.description}
+                        </p>
                       )}
-                      <span>{formatTimestamp(activity.timestamp)}</span>
+                      <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+                        {actor && (
+                          <>
+                            <Avatar className='size-4'>
+                              <AvatarImage src={actor.avatar_url} />
+                              <AvatarFallback>
+                                {actor.login?.charAt(0) || '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{actor.display_login || actor.login}</span>
+                            <span>•</span>
+                          </>
+                        )}
+                        <span>{formatTimestamp(activity.timestamp)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            {/* Gradient fade indicators */}
+            {showTopFade && (
+              <div className='absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-background to-transparent pointer-events-none' />
+            )}
+            {showBottomFade && (
+              <div className='absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-background to-transparent pointer-events-none' />
+            )}
           </div>
         )}
 
