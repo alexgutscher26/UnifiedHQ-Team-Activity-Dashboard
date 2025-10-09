@@ -83,60 +83,33 @@ export async function fetchGithubActivity(
 
     console.log('Authenticated user:', user.login);
 
-    // Fetch events from each selected repository individually
+    // Try to fetch user events - use a simpler approach first
     let events: any[] = [];
-
-    for (const selectedRepo of selectedRepos) {
-      try {
-        const [owner, repoName] = selectedRepo.repoName.split('/');
-        console.log(`Fetching events for ${selectedRepo.repoName}...`);
-
-        // Get repository events (both public and private)
-        const repoEvents = await octokit.rest.activity.listRepoEvents({
-          owner,
-          repo: repoName,
-          per_page: 30,
+    try {
+      const response =
+        await octokit.rest.activity.listEventsForAuthenticatedUser({
+          per_page: 50,
+          username: '',
         });
+      events = response.data;
+      console.log(`Fetched ${events.length} events from GitHub`);
+    } catch (apiError: any) {
+      console.error('GitHub API Error:', apiError);
+      console.error('API Error Status:', apiError.status);
+      console.error('API Error Message:', apiError.message);
 
-        console.log(
-          `Found ${repoEvents.data.length} events for ${selectedRepo.repoName}`
-        );
-        events.push(...repoEvents.data);
-      } catch (repoError: any) {
-        console.error(
-          `Error fetching events for ${selectedRepo.repoName}:`,
-          repoError.message
-        );
-        // Continue with other repositories even if one fails
-      }
+      // If the authenticated user events fail, try public events as fallback
+      console.log('Trying fallback to public events...');
+      const publicResponse =
+        await octokit.rest.activity.listPublicEventsForUser({
+          username: user.login,
+          per_page: 50,
+        });
+      events = publicResponse.data;
+      console.log(`Fetched ${events.length} public events as fallback`);
     }
 
-    console.log(`Total events fetched from repositories: ${events.length}`);
-
-    // If no repository events found, try user events as fallback
-    if (events.length === 0) {
-      try {
-        console.log('No repository events found, trying user events...');
-        const response =
-          await octokit.rest.activity.listEventsForAuthenticatedUser({
-            per_page: 50,
-          });
-        events = response.data;
-        console.log(`Fetched ${events.length} user events as fallback`);
-      } catch (apiError: any) {
-        console.error('User events also failed:', apiError.message);
-        // Try public events as last resort
-        const publicResponse =
-          await octokit.rest.activity.listPublicEventsForUser({
-            username: user.login,
-            per_page: 50,
-          });
-        events = publicResponse.data;
-        console.log(`Fetched ${events.length} public events as last resort`);
-      }
-    }
-
-    // Events are already filtered by repository, but let's double-check
+    // Filter events to only include selected repositories
     const filteredEvents = events.filter(event =>
       selectedRepoIds.has(event.repo.id)
     );
@@ -303,11 +276,26 @@ export async function saveGithubActivities(
 
 /**
  * Get stored GitHub activities for a user
+ * Only returns activities from selected repositories
  */
 export async function getGithubActivities(
   userId: string,
   limit: number = 10
 ): Promise<GitHubActivity[]> {
+  // Get selected repositories
+  const selectedRepos = await prisma.selectedRepository.findMany({
+    where: {
+      userId,
+    },
+  });
+
+  if (selectedRepos.length === 0) {
+    // If no repositories are selected, return empty array
+    return [];
+  }
+
+  const selectedRepoIds = new Set(selectedRepos.map(repo => repo.repoId));
+
   const activities = await prisma.activity.findMany({
     where: {
       userId,
@@ -316,10 +304,24 @@ export async function getGithubActivities(
     orderBy: {
       timestamp: 'desc',
     },
-    take: limit,
+    take: limit * 2, // Get more activities to filter
   });
 
-  return activities.map(activity => ({
+  // Filter activities to only include those from selected repositories
+  const filteredActivities = activities.filter(activity => {
+    const metadata = activity.metadata as any;
+    const repoId = metadata?.repo?.id;
+    return repoId && selectedRepoIds.has(repoId);
+  });
+
+  console.log(`getGithubActivities Debug:
+    - Selected repositories: ${selectedRepoIds.size}
+    - Total stored activities: ${activities.length}
+    - Filtered activities: ${filteredActivities.length}
+    - Selected repo IDs: ${Array.from(selectedRepoIds).join(', ')}
+  `);
+
+  return filteredActivities.slice(0, limit).map(activity => ({
     source: activity.source as 'github',
     title: activity.title,
     description: activity.description || undefined,

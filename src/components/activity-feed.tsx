@@ -24,7 +24,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { useRealTime } from '@/hooks/use-realtime';
 
 interface Activity {
   id: string;
@@ -85,141 +84,27 @@ export function ActivityFeed() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
-  const [realTimeEnabled, setRealTimeEnabled] = useState(true);
-  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    console.log('ActivityFeed mounted, syncing and fetching activities...');
-    syncAndFetchActivities();
+    fetchActivities();
   }, []);
 
-  // Set up real-time updates
-  const { isActive } = useRealTime({
-    interval: 60000, // 60 seconds - sync with GitHub every minute
-    enabled: realTimeEnabled,
-    onUpdate: () => syncAndFetchActivities(true), // Silent sync and refresh
-  });
-
-  /**
-   * Fetch activities from the API and update the state accordingly.
-   *
-   * This function retrieves activities from the '/api/activities' endpoint. If new activities are detected and the silent flag is not set, a toast notification is displayed. The function also updates the activities state and the last synchronization time. In case of an error during the fetch operation, it logs the error to the console. Finally, it ensures that the loading state is updated based on the silent flag.
-   *
-   * @param silent - A boolean flag indicating whether to suppress notifications and loading state updates.
-   */
-  const fetchActivities = async (silent = false) => {
+  const fetchActivities = async () => {
     try {
-      console.log('Fetching activities...', { silent });
       const response = await fetch('/api/activities');
       if (response.ok) {
         const data = await response.json();
-        const newActivities = data.activities || [];
-        console.log('Activities fetched:', {
-          count: newActivities.length,
-          activities: newActivities,
-        });
-
-        // If no activities found and not silent, try to sync with GitHub
-        if (newActivities.length === 0 && !silent) {
-          console.log('No activities found, attempting to sync with GitHub...');
-          try {
-            const syncResponse = await fetch('/api/github/sync', {
-              method: 'POST',
-            });
-            if (syncResponse.ok) {
-              // Fetch activities again after sync
-              const retryResponse = await fetch('/api/activities');
-              if (retryResponse.ok) {
-                const retryData = await retryResponse.json();
-                setActivities(retryData.activities || []);
-                setLastSyncTime(new Date());
-                return;
-              }
-            }
-          } catch (syncError) {
-            console.error('Sync failed:', syncError);
-          }
-        }
-
-        // Check if there are new activities
-        if (!silent && activities.length > 0) {
-          const hasNewActivities = newActivities.some(
-            (newActivity: Activity) =>
-              !activities.some(
-                (existingActivity: Activity) =>
-                  existingActivity.id === newActivity.id
-              )
-          );
-
-          if (hasNewActivities) {
-            toast({
-              title: 'New Activity',
-              description: 'New activities have been detected!',
-              duration: 3000,
-            });
-          }
-        }
-
-        setActivities(newActivities);
-        setLastSyncTime(new Date());
+        setActivities(data.activities || []);
       } else {
         console.error('Failed to fetch activities');
       }
     } catch (error) {
       console.error('Error fetching activities:', error);
     } finally {
-      if (!silent) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
     }
   };
 
-  /**
-   * Sync with GitHub and then fetch activities
-   */
-  const syncAndFetchActivities = async (silent = false) => {
-    try {
-      console.log('Syncing with GitHub and fetching activities...', { silent });
-
-      if (!silent) {
-        setIsSyncing(true);
-      }
-
-      // First sync with GitHub
-      const syncResponse = await fetch('/api/github/sync', {
-        method: 'POST',
-      });
-
-      if (syncResponse.ok) {
-        console.log('GitHub sync successful');
-        // Then fetch activities
-        await fetchActivities(silent);
-      } else {
-        console.error('GitHub sync failed:', syncResponse.status);
-        // Still try to fetch activities even if sync fails
-        await fetchActivities(silent);
-      }
-    } catch (error) {
-      console.error('Error in syncAndFetchActivities:', error);
-      // Still try to fetch activities even if sync fails
-      await fetchActivities(silent);
-    } finally {
-      if (!silent) {
-        setIsSyncing(false);
-      }
-    }
-  };
-
-  /**
-   * Handles the refresh of activities by synchronizing with GitHub.
-   *
-   * This function sets the refreshing state to true, triggers a GitHub sync via a POST request,
-   * and processes the response. If the sync is successful, it fetches the latest activities,
-   * updates the last sync time, and displays a success message. In case of an error, it checks
-   * for specific error codes and displays appropriate error messages. Finally, it resets the
-   * refreshing state to false.
-   */
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
@@ -231,7 +116,6 @@ export function ActivityFeed() {
       if (syncResponse.ok) {
         // Refresh activities after sync
         await fetchActivities();
-        setLastSyncTime(new Date());
         toast({
           title: 'Success',
           description: 'Activities refreshed successfully',
@@ -305,59 +189,24 @@ export function ActivityFeed() {
             <CardTitle className='flex items-center gap-2'>
               <IconGitCommit className='size-5' />
               Recent Activity
-              <div className='flex items-center gap-1 ml-2'>
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    isSyncing
-                      ? 'bg-blue-500 animate-pulse'
-                      : isActive
-                        ? 'bg-green-500 animate-pulse'
-                        : 'bg-gray-400'
-                  }`}
-                  title={
-                    isSyncing
-                      ? 'Syncing with GitHub...'
-                      : isActive
-                        ? 'Real-time updates active'
-                        : 'Real-time updates paused'
-                  }
-                />
-                <span className='text-xs text-muted-foreground'>
-                  {isSyncing ? 'Syncing...' : isActive ? 'Live' : 'Paused'}
-                </span>
-              </div>
             </CardTitle>
             <CardDescription>
               Latest updates from your connected integrations
-              {lastSyncTime && (
-                <span className='block text-xs mt-1'>
-                  Last updated: {formatTimestamp(lastSyncTime)}
-                </span>
-              )}
             </CardDescription>
           </div>
-          <div className='flex gap-2'>
-            <Button
-              variant={realTimeEnabled ? 'default' : 'outline'}
-              size='sm'
-              onClick={() => setRealTimeEnabled(!realTimeEnabled)}
-            >
-              {realTimeEnabled ? 'Live' : 'Paused'}
-            </Button>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-            >
-              {isRefreshing ? (
-                <IconLoader2 className='size-4 mr-2 animate-spin' />
-              ) : (
-                <IconRefresh className='size-4 mr-2' />
-              )}
-              Refresh
-            </Button>
-          </div>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? (
+              <IconLoader2 className='size-4 mr-2 animate-spin' />
+            ) : (
+              <IconRefresh className='size-4 mr-2' />
+            )}
+            Refresh
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -389,8 +238,8 @@ export function ActivityFeed() {
             </div>
           </div>
         ) : (
-          <div className='space-y-4 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100'>
-            {activities.slice(0, 5).map(activity => {
+          <div className='space-y-4'>
+            {activities.map(activity => {
               const Icon = getActivityIcon(activity.source);
               const colorClass = getActivityColor(activity.source);
               const actor = activity.metadata?.actor;
@@ -434,11 +283,6 @@ export function ActivityFeed() {
                 </div>
               );
             })}
-            {activities.length > 5 && (
-              <div className='text-center text-xs text-muted-foreground pt-2 border-t'>
-                Showing 5 of {activities.length} activities
-              </div>
-            )}
           </div>
         )}
 
