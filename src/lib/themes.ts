@@ -233,10 +233,16 @@ export const themes: Record<string, ThemeConfig> = {
   },
 };
 
+/**
+ * Retrieves the theme configuration by name.
+ */
 export function getTheme(name: string): ThemeConfig | undefined {
   return themes[name];
 }
 
+/**
+ * Retrieves all theme configurations.
+ */
 export function getAllThemes(): ThemeConfig[] {
   return Object.values(themes);
 }
