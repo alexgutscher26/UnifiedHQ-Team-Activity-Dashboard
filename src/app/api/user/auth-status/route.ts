@@ -9,6 +9,19 @@ import {
 
 const prisma = new PrismaClient();
 
+/**
+ * Retrieve the authentication status of a user based on the request.
+ *
+ * This function first obtains the session from Better Auth using the request headers.
+ * If the session is valid, it fetches the user and their associated accounts from the database.
+ * It then checks for the presence of a GitHub account and determines the user's signup method.
+ * Finally, it checks if the GitHub account is connected and has an access token before returning the authentication status.
+ *
+ * @param request - The NextRequest object containing the request headers.
+ * @returns An object containing the user's authentication status, including signup method and GitHub connection status.
+ * @throws ApiErrors.authentication If authentication is required and no session is found.
+ * @throws ApiErrors.notFound If the user is not found in the database.
+ */
 async function getUserAuthStatus(request: NextRequest) {
   // Get the session from Better Auth
   const session = await auth.api.getSession({
