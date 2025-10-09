@@ -77,6 +77,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   };
 
   // Get quality value
+  /**
+   * Retrieves the quality value based on the input quality type.
+   */
   const getQualityValue = () => {
     if (typeof quality === 'number') return quality;
 
