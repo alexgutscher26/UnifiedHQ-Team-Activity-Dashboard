@@ -4,6 +4,15 @@ import { PrismaClient } from '@/generated/prisma';
 
 const prisma = new PrismaClient();
 
+/**
+ * Fetch GitHub activity statistics for the authenticated user.
+ *
+ * This function retrieves the user's GitHub activities from the last 24 hours, calculates the number of commits, pull requests, and reviews, and formats the last commit time. It returns a JSON response containing the total activity count, status, details of the activities, and a breakdown of each activity type. If the user is not authenticated, it returns an unauthorized error.
+ *
+ * @param request - The NextRequest object containing the request details.
+ * @returns A JSON response with the activity statistics or an error message.
+ * @throws Error If there is an issue fetching GitHub statistics.
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
