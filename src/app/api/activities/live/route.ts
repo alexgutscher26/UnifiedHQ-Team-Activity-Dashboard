@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 
+/**
+ * Establish a Server-Sent Events (SSE) connection for live updates.
+ *
+ * The function first attempts to retrieve the user session from the request headers. If the session is not valid, it returns an SSE error message. Upon successful authentication, it creates a readable stream that sends connection confirmation and periodic heartbeat messages to the client. It also handles disconnection events to clean up resources.
+ *
+ * @param request - The NextRequest object containing the request details.
+ * @returns A Response object containing the SSE stream for live updates.
+ * @throws Error If there is an issue establishing the connection or during the stream processing.
+ */
 export async function GET(request: NextRequest) {
   try {
     // Try to get session from cookies first
