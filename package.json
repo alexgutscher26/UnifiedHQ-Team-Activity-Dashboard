@@ -9,7 +9,11 @@
     "start": "next start",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "format:staged": "prettier --write --list-different"
+    "format:staged": "prettier --write --list-different",
+    "review:analyze": "node scripts/review-tools.js",
+    "review:monitor": "node scripts/review-monitor.js",
+    "review:automate": "node scripts/review-automation.js",
+    "review:check": "npm run lint && npm run format:check && npm run build"
   },
   "dependencies": {
     "@dnd-kit/core": "latest",
