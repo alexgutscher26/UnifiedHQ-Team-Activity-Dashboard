@@ -26,6 +26,15 @@ import {
 } from '@/components/ui/sidebar';
 import { ThemeToggle } from '@/components/theme-toggle';
 
+/**
+ * Renders a user navigation component with a dropdown menu.
+ * @param {Object} params - The component parameters.
+ * @param {Object} params.user - The user object.
+ * @param {string} params.user.id - The user's ID.
+ * @param {string} params.user.name - The user's name.
+ * @param {string} params.user.email - The user's email.
+ * @param {string|null} [params.user.image] - The user's image URL (optional).
+ */
 export function NavUser({
   user,
 }: {
