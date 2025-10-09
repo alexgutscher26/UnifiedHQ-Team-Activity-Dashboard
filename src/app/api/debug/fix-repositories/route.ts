@@ -5,6 +5,19 @@ import { Octokit } from '@octokit/rest';
 
 const prisma = new PrismaClient();
 
+/**
+ * Handles the POST request to check and fix repository IDs for a user.
+ *
+ * This function retrieves the user's session and checks for a connected GitHub account.
+ * It then fetches the selected repositories from the database and verifies their IDs against
+ * the actual data from GitHub. If discrepancies are found, it updates the repository IDs
+ * in the database and collects the results of the fixes. In case of errors, it logs the
+ * error and returns an appropriate response.
+ *
+ * @param request - The incoming NextRequest object containing the request data.
+ * @returns A JSON response indicating the status of the repository ID checks and fixes.
+ * @throws Error If there is an issue with the session retrieval or repository updates.
+ */
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
