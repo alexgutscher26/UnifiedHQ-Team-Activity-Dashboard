@@ -5,6 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
+/**
+ * Renders the Debug Page for GitHub Sync debugging.
+ *
+ * This component manages the state for loading debug information and handles the fetching of debug data from the API.
+ * It provides buttons to retrieve debug info and test synchronization, displaying relevant debug information,
+ * connection status, selected repositories, stored activities, and test results.
+ * The component utilizes toast notifications to inform the user of the success or failure of operations.
+ *
+ * @returns JSX.Element representing the Debug Page.
+ */
 export default function DebugPage() {
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +50,15 @@ export default function DebugPage() {
     }
   };
 
+  /**
+   * Initiates a synchronization process with the GitHub integration.
+   *
+   * This function sets a loading state, makes a POST request to the GitHub sync API, and handles the response.
+   * If the sync is successful, it displays a success message and refreshes debug information by calling runDebug().
+   * In case of failure, it shows an error message based on the response or a generic failure message.
+   * Any errors during the fetch operation are caught and handled by displaying an error toast.
+   * Finally, it resets the loading state.
+   */
   const testSync = async () => {
     setIsLoading(true);
     try {
