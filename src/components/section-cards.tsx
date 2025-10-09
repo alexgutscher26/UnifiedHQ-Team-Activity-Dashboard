@@ -23,6 +23,13 @@ import {
   useSafeTimer,
 } from '@/lib/memory-leak-prevention';
 
+/**
+ * Renders the SectionCards component displaying various service statistics.
+ *
+ * This component fetches real-time statistics from GitHub and mock data for Notion, Slack, and AI services. It establishes a connection to live updates for GitHub activity and sets up a periodic refresh every 2 minutes. The component also handles loading states and memory leak prevention.
+ *
+ * @returns {JSX.Element} The rendered SectionCards component.
+ */
 export function SectionCards() {
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
