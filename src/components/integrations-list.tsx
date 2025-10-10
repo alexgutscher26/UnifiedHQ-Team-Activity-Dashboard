@@ -34,7 +34,7 @@ export function IntegrationsList() {
       title: 'Slack',
       icon: IconBrandSlack,
       connected: false,
-      status: 'coming-soon',
+      status: 'disconnected',
     },
     {
       id: 'github',
@@ -45,7 +45,7 @@ export function IntegrationsList() {
     },
   ]);
 
-  // Fetch GitHub connection status
+  // Fetch integration connection status
   useEffect(() => {
     const fetchGitHubStatus = async () => {
       try {
@@ -69,19 +69,54 @@ export function IntegrationsList() {
       }
     };
 
-    fetchGitHubStatus();
+    const fetchSlackStatus = async () => {
+      try {
+        const response = await fetch('/api/integrations/slack/sync');
+        if (response.ok) {
+          const data = await response.json();
+          setIntegrations(prev =>
+            prev.map(integration =>
+              integration.id === 'slack'
+                ? {
+                    ...integration,
+                    connected: data.connected,
+                    status: data.connected ? 'connected' : 'disconnected',
+                  }
+                : integration
+            )
+          );
+        }
+      } catch (error) {
+        console.error('Failed to fetch Slack status:', error);
+      }
+    };
+
+    const fetchAllStatuses = async () => {
+      await Promise.all([fetchGitHubStatus(), fetchSlackStatus()]);
+    };
+
+    fetchAllStatuses();
 
     // Refresh status when the page becomes visible (user returns from integrations page)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        fetchGitHubStatus();
+        fetchAllStatuses();
+      }
+    };
+
+    // Listen for storage changes (when user connects/disconnects in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'integration-status-changed') {
+        fetchAllStatuses();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('storage', handleStorageChange);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 

@@ -297,6 +297,14 @@ export function IntegrationsPage() {
           title: 'Success',
           description: data.message,
         });
+        // Trigger storage event to update sidebar
+        localStorage.setItem(
+          'integration-status-changed',
+          Date.now().toString()
+        );
+        setTimeout(() => {
+          localStorage.removeItem('integration-status-changed');
+        }, 100);
       } else {
         toast({
           title: 'Error',
