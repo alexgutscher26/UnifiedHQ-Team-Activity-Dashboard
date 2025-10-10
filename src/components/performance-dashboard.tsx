@@ -131,7 +131,7 @@ export function PerformanceDashboard({
     <div className='space-y-4'>
       {/* Performance Grade */}
       <Card>
-        <CardHeader className='pb-3'>
+        <CardHeader>
           <div className='flex items-center justify-between'>
             <CardTitle className='text-lg'>Performance Grade</CardTitle>
             {onRefresh && (
@@ -142,7 +142,7 @@ export function PerformanceDashboard({
             )}
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className='p-4'>
           <div className={`${performanceGrade.bg} rounded-lg p-4 text-center`}>
             <div
               className={`text-4xl font-bold ${performanceGrade.color} mb-2`}

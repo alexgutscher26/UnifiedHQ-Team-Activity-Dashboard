@@ -168,19 +168,19 @@ export function ScrollOptimizationDemo() {
               <h4 className='font-medium text-green-800'>Performance Optimizations</h4>
               <ul className='space-y-2 text-sm'>
                 <li className='flex items-center gap-2'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='w-2 h-2 bg-green-600 rounded-full'></div>
                   <span>Scroll throttling (16ms = 60fps)</span>
                 </li>
                 <li className='flex items-center gap-2'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='w-2 h-2 bg-green-600 rounded-full'></div>
                   <span>RequestAnimationFrame optimization</span>
                 </li>
                 <li className='flex items-center gap-2'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='w-2 h-2 bg-green-600 rounded-full'></div>
                   <span>Passive event listeners</span>
                 </li>
                 <li className='flex items-center gap-2'>
-                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+                  <div className='w-2 h-2 bg-green-600 rounded-full'></div>
                   <span>Debounced scroll handling</span>
                 </li>
               </ul>
@@ -190,19 +190,19 @@ export function ScrollOptimizationDemo() {
               <h4 className='font-medium text-blue-800'>Monitoring Features</h4>
               <ul className='space-y-2 text-sm'>
                 <li className='flex items-center gap-2'>
-                  <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
+                  <div className='w-2 h-2 bg-blue-600 rounded-full'></div>
                   <span>Real-time scroll performance metrics</span>
                 </li>
                 <li className='flex items-center gap-2'>
-                  <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
+                  <div className='w-2 h-2 bg-blue-600 rounded-full'></div>
                   <span>Scroll jank detection</span>
                 </li>
                 <li className='flex items-center gap-2'>
-                  <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
+                  <div className='w-2 h-2 bg-blue-600 rounded-full'></div>
                   <span>Performance grade scoring</span>
                 </li>
                 <li className='flex items-center gap-2'>
-                  <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
+                  <div className='w-2 h-2 bg-blue-600 rounded-full'></div>
                   <span>Automatic performance alerts</span>
                 </li>
               </ul>

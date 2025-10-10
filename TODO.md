@@ -467,8 +467,7 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 - [x] Accessibility issues in UI components
 
 ### Medium Priority Issues
-- [ ] Inconsistent styling across components
-- [ ] Missing internationalization support
+- [x] Inconsistent styling across components
 - [ ] Limited mobile responsiveness
 - [ ] Incomplete API documentation
 

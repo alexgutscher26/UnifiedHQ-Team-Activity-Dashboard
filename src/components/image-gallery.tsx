@@ -96,8 +96,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
 
   if (!images.length) {
     return (
-      <div className='flex items-center justify-center h-64 bg-gray-100 rounded-lg'>
-        <p className='text-gray-500'>No images to display</p>
+      <div className='flex items-center justify-center h-64 bg-muted rounded-lg'>
+        <p className='text-muted-foreground'>No images to display</p>
       </div>
     );
   }
@@ -193,7 +193,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
 
         {/* Caption */}
         {currentImage.caption && (
-          <p className='mt-2 text-sm text-gray-600 text-center'>
+          <p className='mt-2 text-sm text-muted-foreground text-center'>
             {currentImage.caption}
           </p>
         )}

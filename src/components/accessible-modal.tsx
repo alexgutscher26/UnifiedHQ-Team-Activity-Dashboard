@@ -293,7 +293,7 @@ export const AccessibleTooltip: React.FC<AccessibleTooltipProps> = ({
         <div
           role='tooltip'
           className={cn(
-            'absolute z-50 px-3 py-2 text-sm text-white bg-gray-900 rounded-md shadow-lg',
+            'absolute z-50 px-3 py-2 text-sm text-primary-foreground bg-primary rounded-md shadow-lg',
             'animate-in fade-in-0 zoom-in-95',
             side === 'top' &&
               'bottom-full left-1/2 transform -translate-x-1/2 mb-2',
@@ -308,7 +308,7 @@ export const AccessibleTooltip: React.FC<AccessibleTooltipProps> = ({
           {content}
           <div
             className={cn(
-              'absolute w-2 h-2 bg-gray-900 transform rotate-45',
+              'absolute w-2 h-2 bg-primary transform rotate-45',
               side === 'top' &&
                 'top-full left-1/2 transform -translate-x-1/2 -mt-1',
               side === 'bottom' &&
@@ -392,7 +392,7 @@ export const AccessiblePopover: React.FC<AccessiblePopoverProps> = ({
           role='dialog'
           aria-modal='false'
           className={cn(
-            'absolute z-50 p-4 bg-white border rounded-md shadow-lg',
+            'absolute z-50 p-4 bg-popover border rounded-md shadow-lg',
             'animate-in fade-in-0 zoom-in-95',
             side === 'top' && 'bottom-full mb-2',
             side === 'bottom' && 'top-full mt-2',

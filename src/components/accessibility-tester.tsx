@@ -23,7 +23,7 @@ import {
   IconKeyboard,
   IconVolume,
   IconAlertTriangle,
-  IconCheckCircle,
+  IconCircle,
 } from '@tabler/icons-react';
 
 interface AccessibilityTestResult {
@@ -136,7 +136,7 @@ export const AccessibilityTester: React.FC = () => {
             Test and monitor accessibility compliance across your application
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className='p-4'>
           <div className='space-y-4'>
             {/* Overall Score */}
             <div className='text-center space-y-2'>
@@ -243,7 +243,7 @@ export const AccessibilityTester: React.FC = () => {
                         </div>
                       ) : (
                         <div className='flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-md'>
-                          <IconCheckCircle className='size-4 text-green-600' />
+                          <IconCircle className='size-4 text-green-600' />
                           <span className='text-sm text-green-800'>
                             No accessibility issues found
                           </span>
@@ -272,7 +272,7 @@ export const AccessibilityTester: React.FC = () => {
                                   key={index}
                                   className='flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-md'
                                 >
-                                  <IconCheckCircle className='size-4 text-blue-600 mt-0.5 flex-shrink-0' />
+                                  <IconCircle className='size-4 text-blue-600 mt-0.5 flex-shrink-0' />
                                   <span className='text-sm text-blue-800'>
                                     {recommendation}
                                   </span>
@@ -309,23 +309,23 @@ export const AccessibilityTester: React.FC = () => {
               <h4 className='font-medium text-green-800'>✅ Best Practices</h4>
               <ul className='space-y-2 text-sm'>
                 <li className='flex items-start gap-2'>
-                  <IconCheckCircle className='size-4 text-green-600 mt-0.5 flex-shrink-0' />
+                  <IconCircle className='size-4 text-green-600 mt-0.5 flex-shrink-0' />
                   <span>Provide descriptive alt text for all images</span>
                 </li>
                 <li className='flex items-start gap-2'>
-                  <IconCheckCircle className='size-4 text-green-600 mt-0.5 flex-shrink-0' />
+                  <IconCircle className='size-4 text-green-600 mt-0.5 flex-shrink-0' />
                   <span>Use proper heading hierarchy (h1, h2, h3)</span>
                 </li>
                 <li className='flex items-start gap-2'>
-                  <IconCheckCircle className='size-4 text-green-600 mt-0.5 flex-shrink-0' />
+                  <IconCircle className='size-4 text-green-600 mt-0.5 flex-shrink-0' />
                   <span>Ensure sufficient color contrast (4.5:1 minimum)</span>
                 </li>
                 <li className='flex items-start gap-2'>
-                  <IconCheckCircle className='size-4 text-green-600 mt-0.5 flex-shrink-0' />
+                  <IconCircle className='size-4 text-green-600 mt-0.5 flex-shrink-0' />
                   <span>Make all interactive elements keyboard accessible</span>
                 </li>
                 <li className='flex items-start gap-2'>
-                  <IconCheckCircle className='size-4 text-green-600 mt-0.5 flex-shrink-0' />
+                  <IconCircle className='size-4 text-green-600 mt-0.5 flex-shrink-0' />
                   <span>Provide clear focus indicators</span>
                 </li>
               </ul>
