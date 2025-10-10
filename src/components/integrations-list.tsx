@@ -3,12 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SidebarMenuButton } from '@/components/ui/sidebar';
-import {
-  IconBrandGithub,
-  IconBrandNotion,
-  IconBrandSlack,
-  IconPlus,
-} from '@tabler/icons-react';
+import { IconBrandGithub, IconBrandSlack, IconPlus } from '@tabler/icons-react';
 
 interface Integration {
   id: string;
@@ -22,13 +17,6 @@ interface Integration {
 export function IntegrationsList() {
   const router = useRouter();
   const [integrations, setIntegrations] = useState<Integration[]>([
-    {
-      id: 'notion',
-      title: 'Notion',
-      icon: IconBrandNotion,
-      connected: false,
-      status: 'coming-soon',
-    },
     {
       id: 'slack',
       title: 'Slack',

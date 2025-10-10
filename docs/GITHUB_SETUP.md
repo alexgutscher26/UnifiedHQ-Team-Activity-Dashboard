@@ -71,4 +71,4 @@ BETTER_AUTH_URL=https://yourdomain.com
 
 - Implement real-time updates with webhooks
 - Add filtering and search capabilities
-- Integrate with Slack and Notion APIs
+- Integrate with Slack apis

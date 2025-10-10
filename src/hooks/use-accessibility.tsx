@@ -8,14 +8,17 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 export const useAriaLiveAnnouncer = () => {
   const [announcements, setAnnouncements] = useState<string[]>([]);
 
-  const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
-    setAnnouncements(prev => [...prev, `${priority}:${message}`]);
-    
-    // Clear announcement after a delay
-    setTimeout(() => {
-      setAnnouncements(prev => prev.slice(1));
-    }, 1000);
-  }, []);
+  const announce = useCallback(
+    (message: string, priority: 'polite' | 'assertive' = 'polite') => {
+      setAnnouncements(prev => [...prev, `${priority}:${message}`]);
+
+      // Clear announcement after a delay
+      setTimeout(() => {
+        setAnnouncements(prev => prev.slice(1));
+      }, 1000);
+    },
+    []
+  );
 
   return { announce, announcements };
 };
@@ -79,29 +82,32 @@ export const useKeyboardNavigation = (
   onArrowLeft?: () => void,
   onArrowRight?: () => void
 ) => {
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    switch (e.key) {
-      case 'Escape':
-        onEscape?.();
-        break;
-      case 'Enter':
-      case ' ':
-        onEnter?.();
-        break;
-      case 'ArrowUp':
-        onArrowUp?.();
-        break;
-      case 'ArrowDown':
-        onArrowDown?.();
-        break;
-      case 'ArrowLeft':
-        onArrowLeft?.();
-        break;
-      case 'ArrowRight':
-        onArrowRight?.();
-        break;
-    }
-  }, [onEscape, onEnter, onArrowUp, onArrowDown, onArrowLeft, onArrowRight]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'Escape':
+          onEscape?.();
+          break;
+        case 'Enter':
+        case ' ':
+          onEnter?.();
+          break;
+        case 'ArrowUp':
+          onArrowUp?.();
+          break;
+        case 'ArrowDown':
+          onArrowDown?.();
+          break;
+        case 'ArrowLeft':
+          onArrowLeft?.();
+          break;
+        case 'ArrowRight':
+          onArrowRight?.();
+          break;
+      }
+    },
+    [onEscape, onEnter, onArrowUp, onArrowDown, onArrowLeft, onArrowRight]
+  );
 
   return { handleKeyDown };
 };
@@ -113,25 +119,28 @@ export const useScreenReaderSupport = () => {
   useEffect(() => {
     // Detect screen reader usage
     const detectScreenReader = () => {
-      const hasScreenReader = 
+      const hasScreenReader =
         window.speechSynthesis ||
         navigator.userAgent.includes('NVDA') ||
         navigator.userAgent.includes('JAWS') ||
         navigator.userAgent.includes('VoiceOver');
-      
+
       setIsScreenReaderActive(!!hasScreenReader);
     };
 
     detectScreenReader();
   }, []);
 
-  const announceToScreenReader = useCallback((message: string) => {
-    if (isScreenReaderActive && window.speechSynthesis) {
-      const utterance = new SpeechSynthesisUtterance(message);
-      utterance.volume = 0.5;
-      window.speechSynthesis.speak(utterance);
-    }
-  }, [isScreenReaderActive]);
+  const announceToScreenReader = useCallback(
+    (message: string) => {
+      if (isScreenReaderActive && window.speechSynthesis) {
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.volume = 0.5;
+        window.speechSynthesis.speak(utterance);
+      }
+    },
+    [isScreenReaderActive]
+  );
 
   return { isScreenReaderActive, announceToScreenReader };
 };
@@ -144,10 +153,13 @@ export const useColorContrast = () => {
     return 4.5; // Placeholder - should be calculated properly
   }, []);
 
-  const isAccessibleContrast = useCallback((foreground: string, background: string) => {
-    const ratio = getContrastRatio(foreground, background);
-    return ratio >= 4.5; // WCAG AA standard
-  }, [getContrastRatio]);
+  const isAccessibleContrast = useCallback(
+    (foreground: string, background: string) => {
+      const ratio = getContrastRatio(foreground, background);
+      return ratio >= 4.5; // WCAG AA standard
+    },
+    [getContrastRatio]
+  );
 
   return { getContrastRatio, isAccessibleContrast };
 };
@@ -221,7 +233,7 @@ export const useAccessibilityAudit = () => {
       const label = element.querySelector(`label[for="${id}"]`);
       const ariaLabel = input.getAttribute('aria-label');
       const ariaLabelledBy = input.getAttribute('aria-labelledby');
-      
+
       if (!label && !ariaLabel && !ariaLabelledBy) {
         issues.push('Form input missing label or aria-label');
       }
@@ -233,7 +245,7 @@ export const useAccessibilityAudit = () => {
       const ariaLabel = button.getAttribute('aria-label');
       const ariaLabelledBy = button.getAttribute('aria-labelledby');
       const textContent = button.textContent?.trim();
-      
+
       if (!ariaLabel && !ariaLabelledBy && !textContent) {
         issues.push('Button missing accessible name');
       }
@@ -257,13 +269,15 @@ export const useAccessibilityAudit = () => {
 };
 
 // ARIA live region component
-export const AriaLiveRegion: React.FC<{ announcements: string[] }> = ({ announcements }) => {
+export const AriaLiveRegion: React.FC<{ announcements: string[] }> = ({
+  announcements,
+}) => {
   return (
     <div
-      aria-live="polite"
-      aria-atomic="true"
-      className="sr-only"
-      role="status"
+      aria-live='polite'
+      aria-atomic='true'
+      className='sr-only'
+      role='status'
     >
       {announcements.map((announcement, index) => (
         <div key={index}>{announcement}</div>
@@ -277,12 +291,12 @@ export const SkipLinks: React.FC = () => {
   const { skipLinks } = useSkipLinks();
 
   return (
-    <div className="sr-only focus-within:not-sr-only">
+    <div className='sr-only focus-within:not-sr-only'>
       {skipLinks.map(link => (
         <a
           key={link.id}
           href={`#${link.id}`}
-          className="absolute top-0 left-0 z-50 bg-primary text-primary-foreground px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+          className='absolute top-0 left-0 z-50 bg-primary text-primary-foreground px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring'
         >
           {link.label}
         </a>
@@ -394,8 +408,4 @@ export const ARIA_PROPERTIES = {
   REQUIRED: 'aria-required',
   SELECTED: 'aria-selected',
   SORT: 'aria-sort',
-  VALUEMIN: 'aria-valuemin',
-  VALUEMAX: 'aria-valuemax',
-  VALUENOW: 'aria-valuenow',
-  VALUETEXT: 'aria-valuetext',
 } as const;

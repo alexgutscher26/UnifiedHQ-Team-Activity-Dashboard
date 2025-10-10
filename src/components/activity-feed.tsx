@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Activity, ActivityMetadata } from '@/types/components';
+import { Activity } from '@/types/components';
 import {
-  IconBrandNotion,
   IconBrandSlack,
   IconBrandGithub,
   IconBug,
@@ -50,8 +49,6 @@ const getActivityIcon = (activity: Activity) => {
   }
 
   switch (activity.source) {
-    case 'notion':
-      return IconBrandNotion;
     case 'slack':
       return IconBrandSlack;
     case 'github':
@@ -81,8 +78,6 @@ const getActivityColor = (activity: Activity) => {
   }
 
   switch (activity.source) {
-    case 'notion':
-      return 'text-black';
     case 'slack':
       return 'text-purple-600';
     case 'github':

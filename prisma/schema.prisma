@@ -161,7 +161,6 @@ model UserPreferences {
   githubRepoId Int?
   
   // Other integration preferences can be added here
-  // notionWorkspaceId String?
   // slackTeamId String?
   
   createdAt   DateTime @default(now())
@@ -191,7 +190,7 @@ model Connection {
   id          String   @id @default(cuid())
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type        String   // 'github' | 'notion' | 'slack'
+  type        String   // 'github' | 'slack'
   accessToken String
   refreshToken String?
   expiresAt   DateTime?
@@ -209,7 +208,7 @@ model Activity {
   id          String   @id @default(cuid())
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  source      String   // 'github' | 'notion' | 'slack'
+  source      String   // 'github' | 'slack'
   title       String
   description String?
   timestamp   DateTime @default(now())

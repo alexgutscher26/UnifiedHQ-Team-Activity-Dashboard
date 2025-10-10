@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { StatsData, ConnectionState } from '@/types/components';
 import {
   IconBrandGithub,
-  IconBrandNotion,
   IconBrandSlack,
   IconSparkles,
   IconWifi,
@@ -59,61 +58,30 @@ export function SectionCards() {
             lastUpdate: 'No recent activity',
           };
 
-      // Mock stats data for other services (Notion, AI)
+      // Set stats data
       setStats({
-        notion: {
-          count: 24,
-          status: 'Active',
-          details: '12 pages edited, 8 comments',
-          lastUpdate: '5 minutes ago',
+        integrations: {
+          github: {
+            repositories: githubStats.count || 0,
+            pullRequests: 0,
+            commits: 0,
+            issues: 0,
+            lastActivity: githubStats.lastUpdate || 'No recent activity',
+          },
+          slack: {
+            channels: 0,
+            messages: slackStats.count || 0,
+            mentions: 0,
+            lastActivity: slackStats.lastUpdate || 'No recent activity',
+          },
         },
-        slack: {
-          count: slackStats.count,
-          status: slackStats.status,
-          details: slackStats.details,
-          lastUpdate: slackStats.lastUpdate,
+        summary: {
+          totalActivities: (githubStats.count || 0) + (slackStats.count || 0),
+          activeRepositories: githubStats.count || 0,
+          pendingReviews: 0,
+          urgentItems: 0,
         },
-        github: {
-          count: githubStats.count,
-          status: githubStats.status,
-          details: githubStats.details,
-          lastUpdate: githubStats.lastUpdate,
-        },
-        ai: {
-          count: 'Ready',
-          status: 'Generated',
-          details: 'Daily insights available',
-          lastUpdate: '10 minutes ago',
-        },
-      });
-    } catch (error) {
-      console.error('Error loading stats:', error);
-      // Fallback to mock data on error
-      setStats({
-        notion: {
-          count: 24,
-          status: 'Active',
-          details: '12 pages edited, 8 comments',
-          lastUpdate: '5 minutes ago',
-        },
-        slack: {
-          count: 156,
-          status: 'Active',
-          details: '8 channels, 23 threads',
-          lastUpdate: '2 minutes ago',
-        },
-        github: {
-          count: 0,
-          status: 'Inactive',
-          details: 'No activity',
-          lastUpdate: 'No recent activity',
-        },
-        ai: {
-          count: 'Ready',
-          status: 'Generated',
-          details: 'Daily insights available',
-          lastUpdate: '10 minutes ago',
-        },
+        lastUpdated: new Date().toISOString(),
       });
     } finally {
       setIsLoading(false);
@@ -257,30 +225,6 @@ export function SectionCards() {
             <Card className='@container/card'>
               <CardHeader>
                 <CardDescription className='flex items-center gap-2'>
-                  <IconBrandNotion className='size-4' />
-                  Notion Updates
-                </CardDescription>
-                <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                  {stats.notion.count}
-                </CardTitle>
-                <CardAction>
-                  <Badge variant='outline' className='bg-background'>
-                    {stats.notion.status}
-                  </Badge>
-                </CardAction>
-              </CardHeader>
-              <CardFooter className='flex-col items-start gap-1.5 text-sm'>
-                <div className='line-clamp-1 font-medium'>
-                  {stats.notion.details}
-                </div>
-                <div className='text-muted-foreground'>
-                  Last update {stats.notion.lastUpdate}
-                </div>
-              </CardFooter>
-            </Card>
-            <Card className='@container/card'>
-              <CardHeader>
-                <CardDescription className='flex items-center gap-2'>
                   <IconBrandSlack className='size-4' />
                   Slack Messages
                   {connectionState === 'connected' && (
@@ -303,20 +247,20 @@ export function SectionCards() {
                   )}
                 </CardDescription>
                 <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                  {stats.slack.count}
+                  {stats.integrations.slack.messages}
                 </CardTitle>
                 <CardAction>
                   <Badge variant='outline' className='bg-background'>
-                    {stats.slack.status}
+                    Active
                   </Badge>
                 </CardAction>
               </CardHeader>
               <CardFooter className='flex-col items-start gap-1.5 text-sm'>
                 <div className='line-clamp-1 font-medium'>
-                  {stats.slack.details}
+                  {stats.integrations.slack.channels} channels
                 </div>
                 <div className='text-muted-foreground'>
-                  Last message {stats.slack.lastUpdate}
+                  Last message {stats.integrations.slack.lastActivity}
                 </div>
               </CardFooter>
             </Card>
@@ -345,20 +289,20 @@ export function SectionCards() {
                   )}
                 </CardDescription>
                 <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                  {stats.github.count}
+                  {stats.integrations.github.repositories}
                 </CardTitle>
                 <CardAction>
                   <Badge variant='outline' className='bg-background'>
-                    {stats.github.status}
+                    Active
                   </Badge>
                 </CardAction>
               </CardHeader>
               <CardFooter className='flex-col items-start gap-1.5 text-sm'>
                 <div className='line-clamp-1 font-medium'>
-                  {stats.github.details}
+                  {stats.integrations.github.commits} commits
                 </div>
                 <div className='text-muted-foreground'>
-                  Last commit {stats.github.lastUpdate}
+                  Last commit {stats.integrations.github.lastActivity}
                 </div>
               </CardFooter>
             </Card>
@@ -369,20 +313,20 @@ export function SectionCards() {
                   AI Summary
                 </CardDescription>
                 <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                  {stats.ai.count}
+                  {stats.summary.totalActivities}
                 </CardTitle>
                 <CardAction>
                   <Badge variant='outline' className='bg-background'>
-                    {stats.ai.status}
+                    Total
                   </Badge>
                 </CardAction>
               </CardHeader>
               <CardFooter className='flex-col items-start gap-1.5 text-sm'>
                 <div className='line-clamp-1 font-medium'>
-                  {stats.ai.details}
+                  {stats.summary.activeRepositories} active repos
                 </div>
                 <div className='text-muted-foreground'>
-                  Updated {stats.ai.lastUpdate}
+                  Updated {new Date(stats.lastUpdated).toLocaleTimeString()}
                 </div>
               </CardFooter>
             </Card>

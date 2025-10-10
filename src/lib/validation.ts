@@ -283,11 +283,6 @@ export const validationSchemas = {
       'Repository name must be 1-100 characters'
     )
     .addRule(
-      'notionApiKey',
-      { required: false, minLength: 20 },
-      'Notion API key must be at least 20 characters'
-    )
-    .addRule(
       'slackToken',
       { required: false, minLength: 20 },
       'Slack token must be at least 20 characters'

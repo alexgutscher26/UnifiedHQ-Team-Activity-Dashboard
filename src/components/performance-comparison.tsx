@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ActivityFeed } from './activity-feed';
 import { OptimizedActivityFeed } from './optimized-activity-feed';
-import { IconActivity, IconZap, IconChartBar } from '@tabler/icons-react';
+import { IconActivity, IconBolt, IconChartBar } from '@tabler/icons-react';
 
 interface PerformanceComparisonProps {
   activities: any[];
@@ -31,7 +31,7 @@ export function PerformanceComparison({
   const generateMockActivities = (count: number) => {
     return Array.from({ length: count }, (_, i) => ({
       id: `activity-${i}`,
-      source: ['github', 'notion', 'slack'][i % 3],
+      source: ['github', 'slack'][i % 3],
       title: `Activity ${i + 1}`,
       description: `This is a description for activity ${i + 1}`,
       timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
@@ -119,7 +119,7 @@ export function PerformanceComparison({
 
             <div className='space-y-2'>
               <h4 className='font-medium flex items-center gap-2'>
-                <IconZap className='size-4' />
+                <IconBolt className='size-4' />
                 Optimized Feed
               </h4>
               <div className='space-y-1 text-sm'>

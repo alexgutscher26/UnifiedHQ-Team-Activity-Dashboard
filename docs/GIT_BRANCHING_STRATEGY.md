@@ -26,7 +26,6 @@ This document outlines the Git branching strategy for the UnifiedHQ project, imp
 - **Pattern**: `feature/description` or `feat/description`
 - **Examples**: 
   - `feature/github-integration`
-  - `feat/notion-api`
   - `feature/user-preferences`
 - **Lifecycle**: Created from `develop`, merged back to `develop`
 - **Protection**: No protection (developer branches)

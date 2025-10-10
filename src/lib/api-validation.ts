@@ -53,7 +53,6 @@ export const commonSchemas = {
     githubRepoId: z.string().optional(),
     githubOwner: z.string().min(1).max(100).optional(),
     githubRepo: z.string().min(1).max(100).optional(),
-    notionApiKey: z.string().min(20).optional(),
     slackToken: z.string().min(20).optional(),
   }),
 };
@@ -147,12 +146,6 @@ export const integrationSchemas = {
   githubConnection: z.object({
     code: z.string().min(1, 'Authorization code is required'),
     state: z.string().optional(),
-  }),
-
-  // Notion integration
-  notionIntegration: z.object({
-    apiKey: z.string().min(20, 'Notion API key must be at least 20 characters'),
-    databaseId: z.string().min(1, 'Database ID is required'),
   }),
 
   // Slack integration

@@ -18,20 +18,22 @@ import { RepositorySelector } from '@/components/repository-selector';
 import { ChannelSelector } from '@/components/channel-selector';
 import { SlackInstallationGuide } from '@/components/slack-installation-guide';
 import {
-  IconBrandNotion,
   IconBrandSlack,
   IconBrandGithub,
+  IconBrandWindows,
+  IconBrandGoogle,
+  IconBrandTrello,
+  IconChecklist,
+  IconBrandDiscord,
+  IconChartLine,
+  IconListCheck,
   IconCheck,
   IconLoader2,
   IconRefresh,
-  IconSettings,
-  IconExternalLink,
-  IconAlertCircle,
   IconInfoCircle,
   IconTrendingUp,
   IconClock,
   IconDatabase,
-  IconShield,
   IconSparkles,
   IconRocket,
 } from '@tabler/icons-react';
@@ -443,19 +445,6 @@ export function IntegrationsPage() {
       ),
     },
     {
-      id: 'notion',
-      name: 'Notion',
-      description: 'Sync your Notion pages, databases, and team updates',
-      icon: IconBrandNotion,
-      connected: false,
-      color: 'bg-black',
-      gradient: 'from-gray-900 to-black',
-      status: 'Coming Soon',
-      statusColor: 'bg-yellow-500',
-      features: ['Pages', 'Databases', 'Team Updates', 'Comments'],
-      comingSoon: true,
-    },
-    {
       id: 'slack',
       name: 'Slack',
       description: 'Track team messages, channels, and collaboration activity',
@@ -531,6 +520,151 @@ export function IntegrationsPage() {
           </Button>
           <SlackInstallationGuide clientId={slackClientId} />
         </div>
+      ),
+    },
+    // Coming Soon Integrations
+    {
+      id: 'microsoft-teams',
+      name: 'Microsoft Teams',
+      description:
+        'Track meetings, calls, and team collaboration in Microsoft Teams',
+      icon: IconBrandWindows,
+      connected: false,
+      color: 'bg-blue-600',
+      gradient: 'from-blue-600 to-blue-700',
+      status: 'Coming Soon',
+      statusColor: 'bg-yellow-500',
+      features: ['Meetings', 'Calls', 'Chat', 'Files'],
+      stats: null,
+      comingSoon: true,
+      action: (
+        <Button size='sm' disabled className='w-full opacity-50'>
+          <IconRocket className='size-4 mr-2' />
+          Coming Soon
+        </Button>
+      ),
+    },
+    {
+      id: 'google-workspace',
+      name: 'Google Workspace',
+      description: 'Track Gmail, Google Drive, Calendar, and Docs activity',
+      icon: IconBrandGoogle,
+      connected: false,
+      color: 'bg-green-600',
+      gradient: 'from-green-600 to-green-700',
+      status: 'Coming Soon',
+      statusColor: 'bg-yellow-500',
+      features: ['Gmail', 'Drive', 'Calendar', 'Docs'],
+      stats: null,
+      comingSoon: true,
+      action: (
+        <Button size='sm' disabled className='w-full opacity-50'>
+          <IconRocket className='size-4 mr-2' />
+          Coming Soon
+        </Button>
+      ),
+    },
+    {
+      id: 'jira',
+      name: 'Jira',
+      description: 'Track project management, issues, and sprint activities',
+      icon: IconChecklist,
+      connected: false,
+      color: 'bg-blue-500',
+      gradient: 'from-blue-500 to-blue-600',
+      status: 'Coming Soon',
+      statusColor: 'bg-yellow-500',
+      features: ['Issues', 'Sprints', 'Projects', 'Reports'],
+      stats: null,
+      comingSoon: true,
+      action: (
+        <Button size='sm' disabled className='w-full opacity-50'>
+          <IconRocket className='size-4 mr-2' />
+          Coming Soon
+        </Button>
+      ),
+    },
+    {
+      id: 'trello',
+      name: 'Trello',
+      description: 'Track board activities, card movements, and team workflows',
+      icon: IconBrandTrello,
+      connected: false,
+      color: 'bg-blue-400',
+      gradient: 'from-blue-400 to-blue-500',
+      status: 'Coming Soon',
+      statusColor: 'bg-yellow-500',
+      features: ['Boards', 'Cards', 'Lists', 'Comments'],
+      stats: null,
+      comingSoon: true,
+      action: (
+        <Button size='sm' disabled className='w-full opacity-50'>
+          <IconRocket className='size-4 mr-2' />
+          Coming Soon
+        </Button>
+      ),
+    },
+    {
+      id: 'discord',
+      name: 'Discord',
+      description:
+        'Track server messages, voice channels, and community activity',
+      icon: IconBrandDiscord,
+      connected: false,
+      color: 'bg-indigo-600',
+      gradient: 'from-indigo-600 to-indigo-700',
+      status: 'Coming Soon',
+      statusColor: 'bg-yellow-500',
+      features: ['Messages', 'Voice', 'Channels', 'Servers'],
+      stats: null,
+      comingSoon: true,
+      action: (
+        <Button size='sm' disabled className='w-full opacity-50'>
+          <IconRocket className='size-4 mr-2' />
+          Coming Soon
+        </Button>
+      ),
+    },
+    {
+      id: 'linear',
+      name: 'Linear',
+      description:
+        'Track issue management, project updates, and team productivity',
+      icon: IconChartLine,
+      connected: false,
+      color: 'bg-purple-600',
+      gradient: 'from-purple-600 to-purple-700',
+      status: 'Coming Soon',
+      statusColor: 'bg-yellow-500',
+      features: ['Issues', 'Projects', 'Cycles', 'Updates'],
+      stats: null,
+      comingSoon: true,
+      action: (
+        <Button size='sm' disabled className='w-full opacity-50'>
+          <IconRocket className='size-4 mr-2' />
+          Coming Soon
+        </Button>
+      ),
+    },
+    {
+      id: 'asana',
+      name: 'Asana',
+      description:
+        'Track task management, project progress, and team coordination',
+      icon: IconListCheck,
+      connected: false,
+      color: 'bg-red-500',
+      gradient: 'from-red-500 to-red-600',
+      status: 'Coming Soon',
+      statusColor: 'bg-yellow-500',
+      features: ['Tasks', 'Projects', 'Teams', 'Timeline'],
+      stats: null,
+      comingSoon: true,
+      action: (
+        <Button size='sm' disabled className='w-full opacity-50'>
+          <IconRocket className='size-4 mr-2' />
+          Coming Soon
+        </Button>
       ),
     },
   ];
@@ -648,7 +782,7 @@ export function IntegrationsPage() {
                     integration.connected
                       ? 'ring-2 ring-green-200 dark:ring-green-800 bg-green-50/30 dark:bg-green-950/20'
                       : ''
-                  } ${integration.comingSoon ? 'opacity-75' : ''}`}
+                  }`}
                 >
                   {/* Gradient Background */}
                   <div
@@ -749,9 +883,6 @@ export function IntegrationsPage() {
                       </div>
                     )}
 
-                    {/* Action Buttons */}
-                    <div className='pt-2'>{integration.action}</div>
-
                     {/* Coming Soon Notice */}
                     {integration.comingSoon && (
                       <Alert>
@@ -762,6 +893,9 @@ export function IntegrationsPage() {
                         </AlertDescription>
                       </Alert>
                     )}
+
+                    {/* Action Buttons */}
+                    <div className='pt-2'>{integration.action}</div>
                   </CardContent>
                 </Card>
               ))}

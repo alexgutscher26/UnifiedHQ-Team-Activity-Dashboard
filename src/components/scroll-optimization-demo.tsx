@@ -215,13 +215,13 @@ export function ScrollOptimizationDemo() {
               <div>
                 <span className='font-medium'>Scroll Time:</span>
                 <div className='text-blue-700'>
-                  ≤8ms (Excellent) | ≤16ms (Good) | >16ms (Needs Improvement)
+                  ≤8ms (Excellent) | ≤16ms (Good) | &gt;16ms (Needs Improvement)
                 </div>
               </div>
               <div>
                 <span className='font-medium'>Jank Rate:</span>
                 <div className='text-blue-700'>
-                  ≤5% (Excellent) | ≤10% (Good) | >10% (Needs Improvement)
+                  ≤5% (Excellent) | ≤10% (Good) | &gt;10% (Needs Improvement)
                 </div>
               </div>
               <div>

@@ -136,11 +136,6 @@ export interface IntegrationStats {
     issues: number;
     lastActivity: string;
   };
-  notion: {
-    pages: number;
-    databases: number;
-    lastActivity: string;
-  };
   slack: {
     channels: number;
     messages: number;

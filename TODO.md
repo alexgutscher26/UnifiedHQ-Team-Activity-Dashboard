@@ -1,20 +1,20 @@
 # TODO - Team Dashboard Project
 
 ## Project Overview
-A unified team dashboard that connects Notion, Slack, and GitHub to provide a centralized view of team activity with AI-powered summaries. Built with Next.js 15, TypeScript, Prisma, and modern web technologies.
+A unified team dashboard that connects Slack, and GitHub to provide a centralized view of team activity with AI-powered summaries. Built with Next.js 15, TypeScript, Prisma, and modern web technologies.
 
 ## 🎯 Project Goals
-- **Primary**: Create a single dashboard for teams to track all activity across GitHub, Notion, and Slack
+- **Primary**: Create a single dashboard for teams to track all activity across GitHub, and Slack
 - **Secondary**: Provide AI-powered insights and summaries of team productivity
 - **Tertiary**: Enable real-time collaboration and team awareness
 
 ## 📊 Current Status
-- **Overall Progress**: ~60% complete
+- **Overall Progress**: ~65% complete
 - **GitHub Integration**: 95% complete
-- **Notion Integration**: 25% complete (UI components and mock data)
 - **Slack Integration**: 100% complete (fully implemented with OAuth, API integration, and activity tracking)
+- **Coming Soon Integrations**: 7 integrations planned (Microsoft Teams, Google Workspace, Jira, Trello, Discord, Linear, Asana)
 - **AI Features**: 10% complete
-- **UI/UX**: 85% complete
+- **UI/UX**: 90% complete
 
 ## ✅ IMPLEMENTED FEATURES
 
@@ -46,9 +46,7 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 - [x] Integration cards for different services
 - [x] Loading states and error handling
 - [x] Refresh functionality for data updates
-- [x] Notion integration UI components
 - [x] Slack integration UI components
-- [x] Mock data for Notion and Slack activities
 - [x] Activity type icons and styling
 - [x] Integration status indicators
 
@@ -113,16 +111,6 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 
 ## 🚧 IN PROGRESS / PARTIALLY IMPLEMENTED
 
-### Notion Integration
-- [x] Notion UI components and integration cards
-- [x] Mock Notion activity data in activity feed
-- [x] Notion icon and styling implementation
-- [x] Integration status display ("Coming Soon")
-- [ ] Notion OAuth setup and authentication
-- [ ] Notion API integration for pages and databases
-- [ ] Real Notion activity tracking
-- [ ] Notion data transformation for activity feed
-
 ### Slack Integration
 - [x] Slack UI components and integration cards
 - [x] Mock Slack activity data in activity feed
@@ -139,6 +127,22 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 - [x] Slack installation guide with step-by-step instructions
 - [x] Slack app distribution support with bot tokens
 - [x] Professional UI with dark mode support
+
+### Coming Soon Integrations
+- [x] Microsoft Teams integration UI and planning
+- [x] Google Workspace integration UI and planning
+- [x] Jira integration UI and planning
+- [x] Trello integration UI and planning
+- [x] Discord integration UI and planning
+- [x] Linear integration UI and planning
+- [x] Asana integration UI and planning
+- [x] Coming Soon status indicators and badges
+- [x] Professional integration cards with proper branding
+- [x] Feature lists and descriptions for each integration
+- [x] Disabled state styling for coming soon integrations
+- [x] Alert notices for development status
+- [x] Proper icon integration with Tabler Icons
+- [x] Responsive design for all coming soon integrations
 
 ### AI Summary Feature
 - [ ] AI-powered daily summary generation
@@ -164,21 +168,6 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 
 ## ❌ MISSING FEATURES
 
-### Notion Integration (Backend/API)
-- [ ] Notion OAuth setup and authentication
-- [ ] Notion API integration for pages and databases
-- [ ] Notion workspace selection
-- [ ] Real Notion activity tracking (page updates, comments, etc.)
-- [ ] Notion data transformation for activity feed
-- [ ] Notion preferences storage
-- [ ] Notion page content parsing and indexing
-- [ ] Notion database querying and filtering
-- [ ] Notion user mapping and permissions
-- [ ] Notion webhook integration for real-time updates
-- [ ] Notion block-level change tracking
-- [ ] Notion comment and mention tracking
-- [ ] Notion template and property management
-
 ### Slack Integration (Backend/API)
 - [x] Slack OAuth setup and authentication
 - [x] Slack API integration for messages and channels
@@ -195,10 +184,31 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 - [x] Slack integration with external tools
 - [x] Slack notification preferences
 
+### Coming Soon Integrations (Backend/API)
+- [ ] Microsoft Teams OAuth setup and authentication
+- [ ] Microsoft Teams API integration for meetings and calls
+- [ ] Google Workspace OAuth setup and authentication
+- [ ] Google Workspace API integration (Gmail, Drive, Calendar, Docs)
+- [ ] Jira OAuth setup and authentication
+- [ ] Jira API integration for issues and projects
+- [ ] Trello OAuth setup and authentication
+- [ ] Trello API integration for boards and cards
+- [ ] Discord OAuth setup and authentication
+- [ ] Discord API integration for messages and servers
+- [ ] Linear OAuth setup and authentication
+- [ ] Linear API integration for issues and projects
+- [ ] Asana OAuth setup and authentication
+- [ ] Asana API integration for tasks and projects
+- [ ] Activity tracking for all coming soon integrations
+- [ ] Data transformation for activity feed
+- [ ] Preferences storage for all integrations
+- [ ] Caching system for all integrations
+- [ ] Installation guides for all integrations
+
 ### Enhanced Dashboard Features
 - [ ] Real-time updates with WebSockets or Server-Sent Events
 - [ ] Advanced filtering and search capabilities
-- [ ] Activity filtering by service (GitHub, Notion, Slack)
+- [ ] Activity filtering by service (GitHub, Slack)
 - [ ] Time range filtering (today, this week, this month)
 - [ ] User-specific activity filtering
 - [ ] Activity export functionality
@@ -492,7 +502,7 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 - [ ] Deployment guide
 - [ ] Architecture decision records (ADRs)
 - [ ] Database schema documentation
-- [ ] Integration setup guides (Notion, Slack)
+- [ ] Integration setup guides (Slack)
 - [ ] Troubleshooting guide
 - [ ] Performance optimization guide
 - [ ] Security best practices guide
@@ -540,7 +550,7 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 - [ ] Mobile performance metrics
 
 ### Business Metrics
-- [ ] Integration adoption rates (GitHub, Notion, Slack)
+- [ ] Integration adoption rates (GitHub, Slack)
 - [ ] Team collaboration metrics
 - [ ] Activity volume and patterns
 - [ ] User onboarding completion rates
@@ -578,10 +588,13 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 - [ ] Enterprise support and SLA
 
 ### Platform Integrations
-- [ ] Microsoft Teams integration
-- [ ] Google Workspace integration
-- [ ] Jira and Confluence integration
-- [ ] Trello and Asana integration
+- [x] Microsoft Teams integration (UI completed, backend planned)
+- [x] Google Workspace integration (UI completed, backend planned)
+- [x] Jira integration (UI completed, backend planned)
+- [x] Trello integration (UI completed, backend planned)
+- [x] Discord integration (UI completed, backend planned)
+- [x] Linear integration (UI completed, backend planned)
+- [x] Asana integration (UI completed, backend planned)
 - [ ] Calendar integrations (Google, Outlook)
 - [ ] Email integrations
 - [ ] CRM integrations (Salesforce, HubSpot)
@@ -615,9 +628,8 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 - [ ] **Monitoring**: Vercel Analytics, Sentry, DataDog
 
 ### Third-Party Services
-- [ ] **GitHub**: OAuth, REST API, Webhooks
-- [ ] **Notion**: OAuth, REST API, Webhooks
-- [ ] **Slack**: OAuth, Web API, Events API
+- [x] **GitHub**: OAuth, REST API, Webhooks
+- [x] **Slack**: OAuth, Web API, Events API
 - [ ] **OpenAI**: GPT API for AI features
 - [x] **Database**: PostgreSQL (Supabase/Neon)
 - [ ] **Hosting**: Vercel (recommended)
@@ -627,7 +639,7 @@ A unified team dashboard that connects Notion, Slack, and GitHub to provide a ce
 ## 🎯 SUCCESS CRITERIA
 
 ### MVP Success Criteria
-- [ ] All three integrations (GitHub, Notion, Slack) working
+- [ ] All three integrations (GitHub, Slack) working
 - [ ] Real-time activity feed with filtering
 - [ ] AI summary feature functional
 - [ ] Mobile responsive design

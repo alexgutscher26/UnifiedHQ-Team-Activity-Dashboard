@@ -1,15 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
-import { FixedSizeList as List } from 'react-window';
-import { Activity, ActivityMetadata } from '@/types/components';
+import * as ReactWindow from 'react-window';
+import { Activity } from '@/types/components';
 import {
-  IconBrandNotion,
   IconBrandSlack,
   IconBrandGithub,
   IconBug,
   IconTag,
-  IconStar,
   IconGitCommit,
   IconLoader2,
   IconRefresh,
@@ -61,8 +59,6 @@ const ActivityIcon = memo(({ activity }: { activity: Activity }) => {
   }
 
   switch (activity.source) {
-    case 'notion':
-      return <IconBrandNotion className='size-4' />;
     case 'slack':
       return <IconBrandSlack className='size-4' />;
     case 'github':
@@ -91,8 +87,6 @@ const ActivityColor = memo(({ activity }: { activity: Activity }) => {
   }
 
   switch (activity.source) {
-    case 'notion':
-      return 'text-black';
     case 'slack':
       return 'text-purple-600';
     case 'github':
@@ -635,7 +629,7 @@ export function OptimizedActivityFeed() {
               <SelectContent>
                 <SelectItem value='all'>All Types</SelectItem>
                 {uniqueEventTypes.map(eventType => (
-                  <SelectItem key={eventType} value={eventType}>
+                  <SelectItem key={eventType} value={eventType!}>
                     {eventType}
                   </SelectItem>
                 ))}
@@ -699,16 +693,16 @@ export function OptimizedActivityFeed() {
             {/* Virtualized List for Large Datasets */}
             {paginatedActivities.length > 20 ? (
               <div className='border rounded-lg'>
-                <List
-                  height={400}
-                  itemCount={paginatedActivities.length}
-                  itemSize={120}
-                  itemData={paginatedActivities}
-                  overscanCount={5}
-                  onScroll={handleScroll}
-                >
-                  {VirtualizedActivityItem}
-                </List>
+                {(ReactWindow.List as any)({
+                  height: 400,
+                  itemCount: paginatedActivities.length,
+                  itemSize: 120,
+                  itemData: paginatedActivities,
+                  overscanCount: 5,
+                  onScroll: (e: React.UIEvent<HTMLDivElement>) =>
+                    handleScroll(e.nativeEvent),
+                  children: VirtualizedActivityItem,
+                })}
               </div>
             ) : (
               /* Regular List for Small Datasets */
