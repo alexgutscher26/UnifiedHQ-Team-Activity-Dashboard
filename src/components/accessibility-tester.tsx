@@ -33,6 +33,13 @@ interface AccessibilityTestResult {
   recommendations: string[];
 }
 
+/**
+ * AccessibilityTester component for auditing accessibility compliance in a React application.
+ *
+ * This component manages the state for test results, overall score, and running status. It utilizes hooks to perform accessibility audits on various components, generates recommendations based on identified issues, and displays the results in a user-friendly interface. The component also provides visual feedback on the overall accessibility score and the status of screen reader detection.
+ *
+ * @returns A JSX element representing the accessibility testing dashboard.
+ */
 export const AccessibilityTester: React.FC = () => {
   const [testResults, setTestResults] = useState<AccessibilityTestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
