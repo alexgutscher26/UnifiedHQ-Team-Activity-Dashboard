@@ -5,6 +5,15 @@ import { Activity } from '@/types/components';
 
 const prisma = new PrismaClient();
 
+/**
+ * Handles the POST request for generating AI summaries in the background.
+ *
+ * This function verifies the authorization token, checks the connection to the AI service, and retrieves users with recent activity who lack recent summaries. It processes each user to generate and save AI summaries, while handling potential errors and logging the results. The function also includes a delay to prevent rate limiting during summary generation.
+ *
+ * @param request - The NextRequest object containing the request data.
+ * @returns A JSON response indicating the success of the operation and the results of the summary generation.
+ * @throws Error If there is an issue with the AI service connection or during summary generation.
+ */
 export async function POST(request: NextRequest) {
   try {
     // Verify this is a background job request
@@ -178,6 +187,17 @@ export async function POST(request: NextRequest) {
 }
 
 // Health check endpoint
+/**
+ * Handles the GET request to check the health status of the AI service.
+ *
+ * This function validates the connection to the AI service using the
+ * AISummaryService. It returns a JSON response indicating whether the
+ * service is connected or disconnected, along with a timestamp. In case
+ * of an error during the connection validation, it returns an unhealthy
+ * status with the error message.
+ *
+ * @param request - The NextRequest object representing the incoming request.
+ */
 export async function GET(request: NextRequest) {
   try {
     const isConnected = await AISummaryService.validateConnection();
