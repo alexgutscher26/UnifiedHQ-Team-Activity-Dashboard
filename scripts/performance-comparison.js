@@ -21,7 +21,7 @@ class PerformanceComparison {
   }
 
   /**
-   * Load performance reports
+   * Load performance reports from the reports directory.
    */
   loadReports() {
     if (!fs.existsSync(this.reportsDir)) {
@@ -93,7 +93,15 @@ class PerformanceComparison {
   }
 
   /**
-   * Compare individual metrics
+   * Compare individual metrics to determine the change and direction of performance.
+   *
+   * The function evaluates the baseline and comparison values to calculate the change and percentage difference.
+   * It also determines the direction of change based on the specified betterDirection, categorizing it as 'improved', 'regressed', or 'stable'.
+   *
+   * @param baselineValue - The baseline metric value for comparison.
+   * @param comparisonValue - The metric value to compare against the baseline.
+   * @param betterDirection - Indicates whether a lower or higher value is considered better.
+   * @returns An object containing the change, percentage, direction, baseline, and comparison values.
    */
   compareMetric(baselineValue, comparisonValue, betterDirection) {
     if (baselineValue === 0 && comparisonValue === 0) {
@@ -153,7 +161,13 @@ class PerformanceComparison {
   }
 
   /**
-   * Calculate overall performance score
+   * Calculate overall performance score.
+   *
+   * This function computes a performance score based on various metrics provided in the comparison object.
+   * It assigns weights to each metric and adjusts the score according to whether the performance has improved,
+   * remained stable, or regressed. The final score is rounded to the nearest integer before being returned.
+   *
+   * @param {Object} comparison - An object containing performance metrics and their respective data.
    */
   calculateOverallScore(comparison) {
     let score = 0;
@@ -183,7 +197,9 @@ class PerformanceComparison {
   }
 
   /**
-   * Generate recommendations based on comparison
+   * Generate recommendations based on comparison.
+   * @param {Object} comparison - The comparison data containing metrics and their performance.
+   * @returns {Array} An array of recommendations based on the comparison.
    */
   generateRecommendations(comparison) {
     const recommendations = [];
@@ -316,7 +332,7 @@ class PerformanceComparison {
   }
 
   /**
-   * Save comparison report
+   * Saves a comparison report to a JSON file.
    */
   saveComparisonReport(
     baselineReport,
@@ -354,7 +370,11 @@ class PerformanceComparison {
   }
 
   /**
-   * Run comparison between latest two reports
+   * Run comparison between latest two reports.
+   *
+   * This function initiates a performance comparison by loading the reports and checking if there are at least two available.
+   * It then selects the last two reports for comparison, generates a summary and recommendations based on the comparison,
+   * and prints the results. If any errors occur during the process, they are logged, and the process exits with an error code.
    */
   async runComparison() {
     console.log('🔍 Starting performance comparison...\n');
@@ -400,7 +420,15 @@ class PerformanceComparison {
   }
 
   /**
-   * Compare specific reports by filename
+   * Compare specific reports by filename.
+   *
+   * This function initiates a performance comparison between two report files specified by their filenames.
+   * It checks for the existence of both files, reads their contents, and parses them as JSON.
+   * The reports are then compared using the compareReports method, and a summary and recommendations are generated.
+   * Finally, the results are printed and saved, with appropriate logging for success or errors.
+   *
+   * @param {string} baselineFile - The filename of the baseline report.
+   * @param {string} comparisonFile - The filename of the comparison report.
    */
   async compareSpecificReports(baselineFile, comparisonFile) {
     console.log('🔍 Starting specific performance comparison...\n');
