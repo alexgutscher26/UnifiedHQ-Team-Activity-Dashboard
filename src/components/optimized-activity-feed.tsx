@@ -223,6 +223,9 @@ const VirtualizedActivityItem = memo(
 VirtualizedActivityItem.displayName = 'VirtualizedActivityItem';
 
 // Debounce hook for search
+/**
+ * Debounces a value for a specified delay.
+ */
 const useDebounce = (value: string, delay: number) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -240,6 +243,9 @@ const useDebounce = (value: string, delay: number) => {
 };
 
 // Performance monitoring hook
+/**
+ * Custom hook to monitor performance metrics.
+ */
 const usePerformanceMonitor = () => {
   const [metrics, setMetrics] = useState({
     renderTime: 0,
@@ -258,6 +264,15 @@ const usePerformanceMonitor = () => {
   return { metrics, measureRender };
 };
 
+/**
+ * Optimized component for displaying and managing activity feeds.
+ *
+ * This component handles fetching activities from an API, applying filters and search queries,
+ * managing pagination, and connecting to live updates via Server-Sent Events (SSE).
+ * It also includes performance monitoring and debounced search functionality to enhance user experience.
+ *
+ * @returns {JSX.Element} The rendered activity feed component.
+ */
 export function OptimizedActivityFeed() {
   const { toast } = useToast();
   const [activities, setActivities] = useState<Activity[]>([]);
