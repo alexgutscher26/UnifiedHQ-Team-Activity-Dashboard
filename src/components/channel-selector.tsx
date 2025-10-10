@@ -42,6 +42,15 @@ interface ChannelSelectorProps {
   isConnected: boolean;
 }
 
+/**
+ * Renders a channel selection dialog for managing Slack channels.
+ *
+ * This component fetches channels from the Slack API when opened and allows users to select channels for monitoring. It handles loading states, error notifications, and saves the selected channels back to the API. The component also provides filtering capabilities based on user input and displays relevant channel information, including accessibility and type.
+ *
+ * @param {ChannelSelectorProps} props - The properties for the ChannelSelector component.
+ * @param {boolean} props.isConnected - Indicates if the user is connected to Slack.
+ * @returns {JSX.Element | null} The rendered component or null if not connected.
+ */
 export function ChannelSelector({ isConnected }: ChannelSelectorProps) {
   const { toast } = useToast();
   const [channels, setChannels] = useState<Channel[]>([]);
