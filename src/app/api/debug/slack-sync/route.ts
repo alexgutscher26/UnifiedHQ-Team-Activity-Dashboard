@@ -8,6 +8,17 @@ import {
 
 const prisma = new PrismaClient();
 
+/**
+ * Handles the GET request to retrieve Slack connection status and related information.
+ *
+ * This function first checks the user's session for authentication. If the user is authenticated, it verifies if Slack is connected.
+ * If connected, it retrieves the count of selected channels and stored Slack activities, along with connection details.
+ * In case of any errors during the process, it logs the error and returns a 500 status response.
+ *
+ * @param request - The incoming NextRequest object containing request headers.
+ * @returns A JSON response containing the connection status, selected channel count, stored activities, and connection details.
+ * @throws Error If an internal server error occurs during the execution.
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
