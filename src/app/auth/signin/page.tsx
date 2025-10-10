@@ -23,7 +23,7 @@ import { validationSchemas } from '@/lib/validation';
 /**
  * Renders the Sign In page with options for email/password and social sign-in.
  *
- * This component manages the sign-in process, including form validation and handling both email/password and social sign-in methods. It utilizes hooks to manage loading states and errors, and retrieves the last used login method for user convenience. The form submission is handled asynchronously, with appropriate error handling for both sign-in methods.
+ * This component manages the sign-in process, including form validation and handling both email/password and social sign-in methods. It retrieves the last used login method for user convenience and manages loading and error states during the sign-in process. The form submission is handled asynchronously, with appropriate error handling for both sign-in methods.
  *
  * @returns {JSX.Element} The rendered Sign In page component.
  */
