@@ -578,26 +578,26 @@ ${description}
 
     try {
       // Get hotfix branches
-      const hotfixBranches = execSync('git branch -r | grep hotfix/', {
+      const allRemoteBranches = execSync('git branch -r', {
         encoding: 'utf8',
       })
         .trim()
         .split('\n')
-        .filter(b => b)
-        .map(b => b.trim().replace('origin/', ''));
+        .map(b => b.trim().replace('origin/', ''))
+        .filter(b => b && b.startsWith('hotfix/'));
 
-      if (hotfixBranches.length === 0) {
+      if (allRemoteBranches.length === 0) {
         console.log('✅ No active hotfix branches');
         return [];
       }
 
-      hotfixBranches.forEach(branch => {
+      allRemoteBranches.forEach(branch => {
         const info = this.getHotfixInfo(branch);
         const icon = this.getSeverityIcon(info.severity);
         console.log(`  ${icon} ${branch} (${info.severity}) - ${info.age}`);
       });
 
-      return hotfixBranches;
+      return allRemoteBranches;
     } catch (error) {
       console.error(`❌ Error listing hotfixes: ${error.message}`);
       return [];
