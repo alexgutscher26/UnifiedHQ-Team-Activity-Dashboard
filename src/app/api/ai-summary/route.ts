@@ -6,6 +6,15 @@ import { Activity } from '@/types/components';
 
 const prisma = new PrismaClient();
 
+/**
+ * Handles the GET request to fetch AI summaries for a user.
+ *
+ * This function retrieves the user's session, checks for authorization, and processes the request parameters to determine the time range and limit for the summaries. It checks if a summary needs to be auto-generated based on the time since the last summary and generates a new summary if necessary. Finally, it returns the fetched or newly generated summaries in a JSON response.
+ *
+ * @param request - The NextRequest object containing the request details.
+ * @returns A JSON response containing the summaries and additional metadata.
+ * @throws Error If there is an issue fetching AI summaries or if the user is unauthorized.
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
