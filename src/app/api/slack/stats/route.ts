@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 /**
  * Fetch Slack activity statistics for the authenticated user.
  *
- * This function retrieves the user's Slack activities from the last 24 hours, calculates the number of messages, threads, and reactions, and formats the last message time. It also compiles a summary of the user's activity status and channel information.
+ * This function retrieves the user's Slack activities from the last 24 hours, checks if Slack is connected, and calculates the number of messages, threads, and reactions. It formats the last message time and compiles a summary of the user's activity status and channel information. If the user is not authenticated or Slack is not connected, appropriate responses are returned.
  *
  * @param request - The NextRequest object containing the request headers.
  * @returns A JSON response containing the activity count, status, details, last update time, breakdown of activities, and channel statistics.
