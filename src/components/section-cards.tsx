@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { StatsData, ConnectionState } from '@/types/components';
 import {
   IconBrandGithub,
   IconBrandNotion,
@@ -24,12 +25,11 @@ import {
 } from '@/lib/memory-leak-prevention';
 
 export function SectionCards() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<StatsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
-  const [connectionState, setConnectionState] = useState<
-    'connecting' | 'connected' | 'disconnected' | 'error'
-  >('connecting');
+  const [connectionState, setConnectionState] =
+    useState<ConnectionState>('connecting');
 
   // Memory leak prevention
   useMemoryLeakPrevention('SectionCards');

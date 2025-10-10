@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Activity, ActivityMetadata } from '@/types/components';
 import {
   IconBrandNotion,
   IconBrandSlack,
@@ -27,15 +28,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 
-interface Activity {
-  id: string;
-  source: string;
-  title: string;
-  description?: string;
-  timestamp: Date | string;
-  externalId?: string;
-  metadata?: any;
-}
+// Activity interface is now imported from types/components.ts
 
 const getActivityIcon = (activity: Activity) => {
   if (activity.source === 'github') {

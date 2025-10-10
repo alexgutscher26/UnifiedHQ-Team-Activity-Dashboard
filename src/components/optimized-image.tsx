@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import { ImageQuality } from '@/types/components';
 import {
   getOptimizedImageProps,
   supportsWebP,
@@ -14,7 +15,7 @@ interface OptimizedImageProps {
   alt: string;
   width?: number;
   height?: number;
-  quality?: 'hero' | 'card' | 'thumbnail' | 'avatar' | number;
+  quality?: ImageQuality;
   priority?: boolean;
   className?: string;
   sizes?: string;
@@ -103,21 +104,19 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       className
     ),
     sizes,
-  });
+  }) as React.ComponentProps<typeof Image>;
 
-  // Add fill prop if specified
+  // Add additional props
   if (fill) {
-    (imageProps as any).fill = true;
+    imageProps.fill = true;
   }
 
-  // Add style prop if specified
   if (style) {
-    (imageProps as any).style = style;
+    imageProps.style = style;
   }
 
-  // Add event handlers
-  (imageProps as any).onLoad = handleLoad;
-  (imageProps as any).onError = handleError;
+  imageProps.onLoad = handleLoad;
+  imageProps.onError = handleError;
 
   // Show loading placeholder
   if (isLoading && blur) {

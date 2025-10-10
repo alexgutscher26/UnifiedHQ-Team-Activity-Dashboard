@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { MemorySnapshot } from '@/types/components';
 import {
   Card,
   CardContent,
@@ -147,7 +148,7 @@ export function MemoryMonitor({ show = false, className }: MemoryMonitorProps) {
                 <div className='text-xs font-medium'>Memory Usage</div>
                 {report.memorySnapshots
                   .slice(-3)
-                  .map((snapshot: any, index: number) => (
+                  .map((snapshot: MemorySnapshot, index: number) => (
                     <div key={index} className='text-xs space-y-1'>
                       <div className='flex justify-between'>
                         <span>Used:</span>

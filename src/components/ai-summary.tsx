@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { AISummaryData } from '@/types/components';
 import { IconSparkles } from '@tabler/icons-react';
 import {
   Card,
@@ -17,7 +18,7 @@ import {
 } from '@/lib/memory-leak-prevention';
 
 export function AISummary() {
-  const [summary, setSummary] = useState<any>(null);
+  const [summary, setSummary] = useState<AISummaryData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Memory leak prevention
