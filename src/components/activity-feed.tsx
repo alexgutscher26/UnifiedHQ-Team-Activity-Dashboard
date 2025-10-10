@@ -45,6 +45,10 @@ const getActivityIcon = (activity: Activity) => {
     }
   }
 
+  if (activity.source === 'slack') {
+    return IconBrandSlack;
+  }
+
   switch (activity.source) {
     case 'notion':
       return IconBrandNotion;
@@ -70,6 +74,10 @@ const getActivityColor = (activity: Activity) => {
       default:
         return 'text-gray-900';
     }
+  }
+
+  if (activity.source === 'slack') {
+    return 'text-purple-600';
   }
 
   switch (activity.source) {
@@ -243,34 +251,61 @@ export function ActivityFeed() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      // Trigger GitHub sync using the new endpoint
-      const syncResponse = await fetch('/api/integrations/github/sync', {
-        method: 'POST',
-      });
+      // Trigger both GitHub and Slack sync
+      const [githubResponse, slackResponse] = await Promise.allSettled([
+        fetch('/api/integrations/github/sync', { method: 'POST' }),
+        fetch('/api/integrations/slack/sync', { method: 'POST' }),
+      ]);
 
-      if (syncResponse.ok) {
-        // Refresh activities after sync
-        await fetchActivities();
+      let hasError = false;
+      let errorMessage = '';
+
+      // Check GitHub sync result
+      if (githubResponse.status === 'fulfilled') {
+        if (!githubResponse.value.ok) {
+          const errorData = await githubResponse.value.json();
+          if (errorData.code === 'TOKEN_EXPIRED') {
+            errorMessage += 'GitHub token expired. ';
+          } else {
+            errorMessage += `GitHub sync failed: ${errorData.error || 'Unknown error'}. `;
+          }
+          hasError = true;
+        }
+      } else {
+        errorMessage += 'GitHub sync failed. ';
+        hasError = true;
+      }
+
+      // Check Slack sync result
+      if (slackResponse.status === 'fulfilled') {
+        if (!slackResponse.value.ok) {
+          const errorData = await slackResponse.value.json();
+          if (errorData.code === 'TOKEN_EXPIRED') {
+            errorMessage += 'Slack token expired. ';
+          } else {
+            errorMessage += `Slack sync failed: ${errorData.error || 'Unknown error'}. `;
+          }
+          hasError = true;
+        }
+      } else {
+        errorMessage += 'Slack sync failed. ';
+        hasError = true;
+      }
+
+      // Refresh activities after sync
+      await fetchActivities();
+
+      if (hasError) {
+        toast({
+          title: 'Sync Issues',
+          description: errorMessage.trim() + ' Please check your integrations.',
+          variant: 'destructive',
+        });
+      } else {
         toast({
           title: 'Success',
           description: 'Activities refreshed successfully',
         });
-      } else {
-        const errorData = await syncResponse.json();
-        if (errorData.code === 'TOKEN_EXPIRED') {
-          toast({
-            title: 'GitHub Token Expired',
-            description:
-              'Please reconnect your GitHub account in Settings > Integrations',
-            variant: 'destructive',
-          });
-        } else {
-          toast({
-            title: 'Error',
-            description: errorData.error || 'Failed to refresh activities',
-            variant: 'destructive',
-          });
-        }
       }
     } catch (error) {
       toast({
@@ -394,18 +429,25 @@ export function ActivityFeed() {
                 const actor = activity.metadata?.actor;
                 const payload = activity.metadata?.payload;
 
-                // Get the GitHub URL for the activity
-                const getGitHubUrl = () => {
+                // Get the external URL for the activity
+                const getExternalUrl = () => {
                   if (activity.source === 'github' && payload) {
                     if (payload.commit?.url) return payload.commit.url;
                     if (payload.pull_request?.url)
                       return payload.pull_request.url;
                     if (payload.issue?.url) return payload.issue.url;
                   }
+                  if (activity.source === 'slack' && payload) {
+                    // Construct Slack message URL
+                    const channel = activity.metadata?.channel;
+                    if (channel?.id && payload.message?.ts) {
+                      return `https://app.slack.com/client/${channel.id}/${channel.id}/p${payload.message.ts.replace('.', '')}`;
+                    }
+                  }
                   return null;
                 };
 
-                const githubUrl = getGitHubUrl();
+                const externalUrl = getExternalUrl();
 
                 return (
                   <div
@@ -418,9 +460,9 @@ export function ActivityFeed() {
                     <div className='flex-1 min-w-0'>
                       <div className='flex items-center gap-2 mb-1'>
                         <h4 className='font-medium text-sm'>
-                          {githubUrl ? (
+                          {externalUrl ? (
                             <a
-                              href={githubUrl}
+                              href={externalUrl}
                               target='_blank'
                               rel='noopener noreferrer'
                               className='hover:underline text-blue-600 hover:text-blue-800'
@@ -446,10 +488,14 @@ export function ActivityFeed() {
                             <Avatar className='size-4'>
                               <AvatarImage src={actor.avatar_url} />
                               <AvatarFallback>
-                                {actor.login?.charAt(0) || '?'}
+                                {actor.login?.charAt(0) ||
+                                  actor.name?.charAt(0) ||
+                                  '?'}
                               </AvatarFallback>
                             </Avatar>
-                            <span>{actor.display_login || actor.login}</span>
+                            <span>
+                              {actor.display_login || actor.login || actor.name}
+                            </span>
                             <span>•</span>
                           </>
                         )}

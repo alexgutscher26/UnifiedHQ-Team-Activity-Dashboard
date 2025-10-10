@@ -11,13 +11,20 @@ export interface ActivityMetadata {
     | 'release'
     | 'push'
     | 'create'
-    | 'delete';
+    | 'delete'
+    | 'message';
   url?: string;
   actor?: {
-    login: string;
+    login?: string;
     display_login?: string;
+    name?: string;
     avatar_url: string;
-    html_url: string;
+    html_url?: string;
+  };
+  channel?: {
+    id: string;
+    name: string;
+    type: string;
   };
   payload?: {
     action?: string;
@@ -55,6 +62,17 @@ export interface ActivityMetadata {
       state: string;
       url?: string;
       html_url: string;
+    };
+    message?: {
+      text: string;
+      ts: string;
+      thread_ts?: string;
+      reply_count?: number;
+      reactions?: Array<{
+        name: string;
+        count: number;
+        users: string[];
+      }>;
     };
   };
   author?: {

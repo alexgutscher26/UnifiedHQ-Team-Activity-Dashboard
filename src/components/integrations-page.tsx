@@ -15,6 +15,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { RepositorySelector } from '@/components/repository-selector';
+import { ChannelSelector } from '@/components/channel-selector';
+import { SlackInstallationGuide } from '@/components/slack-installation-guide';
 import {
   IconBrandNotion,
   IconBrandSlack,
@@ -37,22 +39,27 @@ import {
 export function IntegrationsPage() {
   const { toast } = useToast();
   const [githubConnected, setGithubConnected] = useState(false);
+  const [slackConnected, setSlackConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [selectedRepos, setSelectedRepos] = useState(0);
+  const [selectedChannels, setSelectedChannels] = useState(0);
   const [totalActivities, setTotalActivities] = useState(0);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [syncProgress, setSyncProgress] = useState(0);
+  const [slackClientId, setSlackClientId] = useState<string | undefined>();
 
-  // Check GitHub connection status on mount
+  // Check connection status on mount
   useEffect(() => {
     checkGithubStatus();
+    checkSlackStatus();
     fetchStats();
+    fetchSlackClientId();
   }, []);
 
   const checkGithubStatus = async () => {
     try {
-      const response = await fetch('/api/github/sync');
+      const response = await fetch('/api/integrations/github/sync');
       const data = await response.json();
       setGithubConnected(data.connected);
     } catch (error) {
@@ -60,14 +67,49 @@ export function IntegrationsPage() {
     }
   };
 
+  const checkSlackStatus = async () => {
+    try {
+      const response = await fetch('/api/integrations/slack/sync');
+      const data = await response.json();
+      setSlackConnected(data.connected);
+    } catch (error) {
+      console.error('Failed to check Slack status:', error);
+    }
+  };
+
+  const fetchSlackClientId = async () => {
+    try {
+      const response = await fetch('/api/integrations/slack/client-id');
+      if (response.ok) {
+        const data = await response.json();
+        setSlackClientId(data.clientId);
+      }
+    } catch (error) {
+      console.error('Failed to fetch Slack client ID:', error);
+    }
+  };
+
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/debug/github-sync');
-      const data = await response.json();
-      if (response.ok) {
-        setSelectedRepos(data.selectedRepositories || 0);
-        setTotalActivities(data.storedActivities || 0);
+      let totalActivities = 0;
+
+      // Fetch GitHub stats
+      const githubResponse = await fetch('/api/debug/github-sync');
+      const githubData = await githubResponse.json();
+      if (githubResponse.ok) {
+        setSelectedRepos(githubData.selectedRepositories || 0);
+        totalActivities += githubData.storedActivities || 0;
       }
+
+      // Fetch Slack stats
+      const slackResponse = await fetch('/api/debug/slack-sync');
+      const slackData = await slackResponse.json();
+      if (slackResponse.ok) {
+        setSelectedChannels(slackData.selectedChannels || 0);
+        totalActivities += slackData.storedActivities || 0;
+      }
+
+      setTotalActivities(totalActivities);
     } catch (error) {
       console.error('Failed to fetch stats:', error);
     }
@@ -173,6 +215,106 @@ export function IntegrationsPage() {
     }
   };
 
+  const handleSlackConnect = async () => {
+    setIsLoading(true);
+    try {
+      window.location.href = '/api/integrations/slack/connect';
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to connect to Slack. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSlackSync = async () => {
+    setIsSyncing(true);
+    setSyncProgress(0);
+
+    try {
+      // Simulate progress for better UX
+      const progressInterval = setInterval(() => {
+        setSyncProgress(prev => Math.min(prev + 10, 90));
+      }, 200);
+
+      const response = await fetch('/api/integrations/slack/sync', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      clearInterval(progressInterval);
+      setSyncProgress(100);
+
+      if (response.ok) {
+        setLastSyncTime(new Date());
+        await fetchStats(); // Refresh stats after sync
+        toast({
+          title: 'Sync Successful',
+          description: data.message,
+        });
+      } else {
+        if (data.code === 'TOKEN_EXPIRED') {
+          setSlackConnected(false);
+          toast({
+            title: 'Slack Token Expired',
+            description: 'Please reconnect your Slack account.',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Sync Failed',
+            description: data.error || 'Failed to sync Slack activity',
+            variant: 'destructive',
+          });
+        }
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to sync Slack activity. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSyncing(false);
+      setTimeout(() => setSyncProgress(0), 1000);
+    }
+  };
+
+  const handleSlackDisconnect = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/integrations/slack/disconnect', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setSlackConnected(false);
+        toast({
+          title: 'Success',
+          description: data.message,
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to disconnect Slack',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to disconnect Slack. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const integrations = [
     {
       id: 'github',
@@ -267,13 +409,78 @@ export function IntegrationsPage() {
       name: 'Slack',
       description: 'Track team messages, channels, and collaboration activity',
       icon: IconBrandSlack,
-      connected: false,
+      connected: slackConnected,
       color: 'bg-purple-600',
       gradient: 'from-purple-600 to-purple-700',
-      status: 'Coming Soon',
-      statusColor: 'bg-yellow-500',
+      status: slackConnected ? 'Connected' : 'Available',
+      statusColor: slackConnected ? 'bg-green-500' : 'bg-blue-500',
       features: ['Messages', 'Channels', 'Files', 'Reactions'],
-      comingSoon: true,
+      stats: slackConnected
+        ? {
+            channels: selectedChannels,
+            activities: 0, // Will be calculated separately
+            lastSync: lastSyncTime,
+          }
+        : null,
+      action: slackConnected ? (
+        <div className='flex flex-col gap-2'>
+          <div className='flex gap-2'>
+            <ChannelSelector isConnected={slackConnected} />
+            <Button
+              size='sm'
+              variant='outline'
+              onClick={handleSlackSync}
+              disabled={isSyncing}
+              className='flex-1'
+            >
+              {isSyncing ? (
+                <IconLoader2 className='size-4 mr-2 animate-spin' />
+              ) : (
+                <IconRefresh className='size-4 mr-2' />
+              )}
+              Sync Now
+            </Button>
+          </div>
+          {isSyncing && (
+            <div className='space-y-2'>
+              <Progress value={syncProgress} className='h-2' />
+              <p className='text-xs text-muted-foreground text-center'>
+                Syncing activities...
+              </p>
+            </div>
+          )}
+          <Button
+            size='sm'
+            variant='destructive'
+            onClick={handleSlackDisconnect}
+            disabled={isLoading}
+            className='w-full'
+          >
+            {isLoading ? (
+              <IconLoader2 className='size-4 mr-2 animate-spin' />
+            ) : null}
+            Disconnect
+          </Button>
+          <SlackInstallationGuide clientId={slackClientId} />
+        </div>
+      ) : (
+        <div className='flex flex-col gap-2'>
+          <Button
+            size='sm'
+            onClick={handleSlackConnect}
+            disabled={isLoading}
+            className='w-full'
+          >
+            {isLoading ? (
+              <IconLoader2 className='size-4 mr-2 animate-spin' />
+            ) : (
+              <IconRocket className='size-4 mr-2' />
+            )}
+            Connect Slack
+          </Button>
+          <SlackInstallationGuide clientId={slackClientId} />
+        </div>
+      ),
     },
   ];
 
@@ -296,25 +503,47 @@ export function IntegrationsPage() {
               </div>
 
               {/* Quick Stats */}
-              {githubConnected && (
-                <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                  <Card className='bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'>
-                    <CardContent className='p-4'>
-                      <div className='flex items-center gap-3'>
-                        <div className='p-2 bg-green-100 rounded-lg'>
-                          <IconDatabase className='size-5 text-green-600' />
+              {(githubConnected || slackConnected) && (
+                <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+                  {githubConnected && (
+                    <Card className='bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'>
+                      <CardContent className='p-4'>
+                        <div className='flex items-center gap-3'>
+                          <div className='p-2 bg-green-100 rounded-lg'>
+                            <IconBrandGithub className='size-5 text-green-600' />
+                          </div>
+                          <div>
+                            <p className='text-sm text-muted-foreground'>
+                              Repositories
+                            </p>
+                            <p className='text-2xl font-bold text-green-700'>
+                              {selectedRepos}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className='text-sm text-muted-foreground'>
-                            Repositories
-                          </p>
-                          <p className='text-2xl font-bold text-green-700'>
-                            {selectedRepos}
-                          </p>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {slackConnected && (
+                    <Card className='bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200'>
+                      <CardContent className='p-4'>
+                        <div className='flex items-center gap-3'>
+                          <div className='p-2 bg-purple-100 rounded-lg'>
+                            <IconBrandSlack className='size-5 text-purple-600' />
+                          </div>
+                          <div>
+                            <p className='text-sm text-muted-foreground'>
+                              Channels
+                            </p>
+                            <p className='text-2xl font-bold text-purple-700'>
+                              {selectedChannels}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  )}
 
                   <Card className='bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200'>
                     <CardContent className='p-4'>
@@ -334,17 +563,17 @@ export function IntegrationsPage() {
                     </CardContent>
                   </Card>
 
-                  <Card className='bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200'>
+                  <Card className='bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200'>
                     <CardContent className='p-4'>
                       <div className='flex items-center gap-3'>
-                        <div className='p-2 bg-purple-100 rounded-lg'>
-                          <IconClock className='size-5 text-purple-600' />
+                        <div className='p-2 bg-orange-100 rounded-lg'>
+                          <IconClock className='size-5 text-orange-600' />
                         </div>
                         <div>
                           <p className='text-sm text-muted-foreground'>
                             Last Sync
                           </p>
-                          <p className='text-sm font-medium text-purple-700'>
+                          <p className='text-sm font-medium text-orange-700'>
                             {lastSyncTime
                               ? lastSyncTime.toLocaleTimeString()
                               : 'Never'}
@@ -446,10 +675,14 @@ export function IntegrationsPage() {
                           <div className='flex items-center gap-2'>
                             <IconDatabase className='size-4 text-muted-foreground' />
                             <span className='text-muted-foreground'>
-                              Repos:
+                              {integration.id === 'github'
+                                ? 'Repos:'
+                                : 'Channels:'}
                             </span>
                             <span className='font-medium'>
-                              {integration.stats.repositories}
+                              {integration.id === 'github'
+                                ? integration.stats.repositories
+                                : integration.stats.channels}
                             </span>
                           </div>
                           <div className='flex items-center gap-2'>

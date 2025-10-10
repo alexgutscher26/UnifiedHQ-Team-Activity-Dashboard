@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { getGithubActivities } from '@/lib/integrations/github';
+import { PrismaClient } from '@/generated/prisma';
+
+const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,11 +17,19 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     const limit = 20; // Limit to 20 most recent activities
 
-    // Get GitHub activities
-    const githubActivities = await getGithubActivities(userId, limit);
+    // Get all activities from database (both GitHub and Slack)
+    const allActivities = await prisma.activity.findMany({
+      where: {
+        userId,
+      },
+      orderBy: {
+        timestamp: 'desc',
+      },
+      take: limit,
+    });
 
     // Convert to the format expected by the frontend
-    const activities = githubActivities.map(activity => ({
+    const activities = allActivities.map(activity => ({
       id: activity.externalId || activity.timestamp.getTime().toString(),
       source: activity.source,
       title: activity.title,
@@ -29,14 +39,8 @@ export async function GET(request: NextRequest) {
       metadata: activity.metadata,
     }));
 
-    // Sort by timestamp (most recent first)
-    activities.sort(
-      (a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-
     return NextResponse.json({
-      activities: activities.slice(0, limit),
+      activities,
       count: activities.length,
     });
   } catch (error) {
