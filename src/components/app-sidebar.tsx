@@ -8,6 +8,7 @@ import {
   IconSettings,
   IconSparkles,
   IconUsers,
+  IconHistory,
 } from '@tabler/icons-react';
 
 import { NavMain } from '@/components/nav-main';
@@ -30,6 +31,11 @@ const data = {
       title: 'Dashboard',
       url: '/dashboard',
       icon: IconDashboard,
+    },
+    {
+      title: 'Summary History',
+      url: '/summary-history',
+      icon: IconHistory,
     },
     {
       title: 'Team Activity',

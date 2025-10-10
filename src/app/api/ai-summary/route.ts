@@ -36,49 +36,66 @@ export async function GET(request: NextRequest) {
         startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     }
 
-    // Get existing summaries
-    const summaries = await prisma.aISummary.findMany({
+    // First, check if we need to auto-generate a summary (regardless of time range filter)
+    const mostRecentSummary = await prisma.aISummary.findFirst({
       where: {
         userId,
-        timeRangeStart: {
-          gte: startDate,
-        },
       },
       orderBy: {
         generatedAt: 'desc',
       },
-      take: limit,
     });
 
-    // Check if user needs a daily summary (every 24 hours from account creation)
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { createdAt: true },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    // Get existing summaries for the requested time range (for display)
+    let summaries;
+    if (timeRange === '24h') {
+      // For "Today" view, always include the most recent daily summary (last 24 hours)
+      // Use a slightly wider range to account for timing differences
+      const dailyStartDate = new Date(now.getTime() - 25 * 60 * 60 * 1000); // 25 hours ago
+      summaries = await prisma.aISummary.findMany({
+        where: {
+          userId,
+          timeRangeStart: {
+            gte: dailyStartDate,
+          },
+        },
+        orderBy: {
+          generatedAt: 'desc',
+        },
+        take: limit,
+      });
+    } else {
+      // For other time ranges, use the original logic
+      summaries = await prisma.aISummary.findMany({
+        where: {
+          userId,
+          timeRangeStart: {
+            gte: startDate,
+          },
+        },
+        orderBy: {
+          generatedAt: 'desc',
+        },
+        take: limit,
+      });
     }
 
-    // Calculate if it's time for a new daily summary
-    const accountAge = now.getTime() - user.createdAt.getTime();
-    const daysSinceCreation = Math.floor(accountAge / (24 * 60 * 60 * 1000));
-    const shouldHaveSummary = daysSinceCreation >= 0; // Always generate summary for any account
-
-    // Check if it's been 24 hours since last summary or no summaries exist
-    const lastSummary = summaries[0];
-    const hoursSinceLastSummary = lastSummary
-      ? (now.getTime() - new Date(lastSummary.generatedAt).getTime()) /
+    // Check if it's been 24 hours since last summary
+    const hoursSinceLastSummary = mostRecentSummary
+      ? (now.getTime() - new Date(mostRecentSummary.generatedAt).getTime()) /
         (60 * 60 * 1000)
       : 24; // If no summaries, consider it as 24+ hours
 
     // Auto-generate summary if it's been 24+ hours since last summary
-    if (hoursSinceLastSummary >= 24 && shouldHaveSummary) {
+    if (hoursSinceLastSummary >= 24) {
+      // For auto-generation, always use the last 24 hours regardless of user's time range filter
+      const dailyStartDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      
       const activityCount = await prisma.activity.count({
         where: {
           userId,
           timestamp: {
-            gte: startDate,
+            gte: dailyStartDate,
             lte: now,
           },
         },
@@ -90,12 +107,12 @@ export async function GET(request: NextRequest) {
           // Validate OpenRouter connection
           const isConnected = await AISummaryService.validateConnection();
           if (isConnected) {
-            // Get activities for auto-generation
+            // Get activities for auto-generation (last 24 hours)
             const activities = await prisma.activity.findMany({
               where: {
                 userId,
                 timestamp: {
-                  gte: startDate,
+                  gte: dailyStartDate,
                   lte: now,
                 },
               },
@@ -117,7 +134,7 @@ export async function GET(request: NextRequest) {
               }),
             ]);
 
-            // Prepare data for AI summary
+            // Prepare data for AI summary (always use 24-hour range for daily summaries)
             const summaryData: AISummaryData = {
               activities: activities.map(activity => ({
                 id: activity.id,
@@ -129,7 +146,7 @@ export async function GET(request: NextRequest) {
                 metadata: activity.metadata,
               })) as Activity[],
               timeRange: {
-                start: startDate,
+                start: dailyStartDate,
                 end: now,
               },
               teamContext: {
