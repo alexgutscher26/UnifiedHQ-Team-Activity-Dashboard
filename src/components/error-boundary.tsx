@@ -142,6 +142,19 @@ interface ErrorFallbackProps {
   onGoHome: () => void;
 }
 
+/**
+ * Renders an error fallback UI when an unexpected error occurs.
+ *
+ * This component displays a user-friendly message indicating that something went wrong, along with options to retry the action, go to the dashboard, or reload the page. It also provides the ability to show technical details about the error, including the error message and component stack if available. The component manages its own state to toggle the visibility of the technical details.
+ *
+ * @param {Object} props - The properties for the ErrorFallback component.
+ * @param {Error} props.error - The error object containing error details.
+ * @param {Object} props.errorInfo - Additional information about the error context.
+ * @param {string} props.errorId - An identifier for the error, if available.
+ * @param {Function} props.onRetry - Callback function to retry the action that caused the error.
+ * @param {Function} props.onReload - Callback function to reload the current page.
+ * @param {Function} props.onGoHome - Callback function to navigate to the home/dashboard.
+ */
 function ErrorFallback({
   error,
   errorInfo,
