@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { IconCheck, IconX } from '@tabler/icons-react';
-import { useCustomTheme, type ThemeConfig } from '@/contexts/theme-context';
+import { useCustomTheme } from '@/contexts/theme-context';
+import { type ThemeConfig } from '@/lib/themes';
 import {
   Dialog,
   DialogContent,

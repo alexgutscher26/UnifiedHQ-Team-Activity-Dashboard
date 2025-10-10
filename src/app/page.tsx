@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Github, Slack, Mail, Lock } from 'lucide-react';
+import { Github, Mail, Lock } from 'lucide-react';
 
 export default function Home() {
   return (

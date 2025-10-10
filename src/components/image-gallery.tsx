@@ -96,15 +96,16 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
       <div className={cn('relative', className)}>
         {/* Main Image */}
         <div className='relative group'>
-          <OptimizedImage
-            src={currentImage.src}
-            alt={currentImage.alt}
-            width={currentImage.width || 800}
-            height={currentImage.height || 600}
-            quality='hero'
-            className='w-full h-auto rounded-lg cursor-pointer'
-            onClick={openFullscreen}
-          />
+          <div onClick={openFullscreen}>
+            <OptimizedImage
+              src={currentImage.src}
+              alt={currentImage.alt}
+              width={currentImage.width || 800}
+              height={currentImage.height || 600}
+              quality='hero'
+              className='w-full h-auto rounded-lg cursor-pointer'
+            />
+          </div>
 
           {/* Navigation Arrows */}
           {images.length > 1 && (

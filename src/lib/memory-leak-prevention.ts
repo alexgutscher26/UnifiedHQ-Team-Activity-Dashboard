@@ -126,13 +126,14 @@ export class MemoryLeakDetector {
 
   // Take memory snapshot
   takeMemorySnapshot() {
-    if (typeof performance !== 'undefined' && performance.memory) {
+    if (typeof performance !== 'undefined' && (performance as any).memory) {
+      const memory = (performance as any).memory;
       const snapshot = {
         timestamp: Date.now(),
         memory: {
-          usedJSHeapSize: performance.memory.usedJSHeapSize,
-          totalJSHeapSize: performance.memory.totalJSHeapSize,
-          jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+          usedJSHeapSize: memory.usedJSHeapSize,
+          totalJSHeapSize: memory.totalJSHeapSize,
+          jsHeapSizeLimit: memory.jsHeapSizeLimit,
         },
       };
       this.memorySnapshots.push(snapshot);

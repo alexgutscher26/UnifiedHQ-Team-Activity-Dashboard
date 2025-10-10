@@ -4,9 +4,9 @@ import { PrismaClient } from '@/generated/prisma';
 import {
   withErrorHandling,
   createApiSuccessResponse,
-  validateRequestBody,
   ApiErrors,
 } from '@/lib/api-error-handler';
+import { validateRequestBody } from '@/lib/api-validation';
 import { commonSchemas } from '@/lib/api-validation';
 
 const prisma = new PrismaClient();
@@ -52,6 +52,7 @@ async function saveUserPreferences(request: NextRequest) {
     await request.json()
   );
   const { githubOwner, githubRepo, githubRepoId } = body;
+  const repoId = githubRepoId ? parseInt(githubRepoId, 10) : null;
 
   // Upsert user preferences
   const preferences = await prisma.userPreferences.upsert({
@@ -61,14 +62,14 @@ async function saveUserPreferences(request: NextRequest) {
     update: {
       githubOwner,
       githubRepo,
-      githubRepoId,
+      githubRepoId: repoId,
       updatedAt: new Date(),
     },
     create: {
       userId: session.user.id,
       githubOwner,
       githubRepo,
-      githubRepoId,
+      githubRepoId: repoId,
     },
   });
 

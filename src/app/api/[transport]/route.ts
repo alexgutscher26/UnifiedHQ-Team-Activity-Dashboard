@@ -27,7 +27,7 @@ const handler = withMcpAuth(auth, (req, session) => {
             content: [
               {
                 type: 'text',
-                text: `User ID: ${session.userId}, Scopes: ${session.scopes?.join(', ') || 'none'}`,
+                text: `User ID: ${session.userId}, Scopes: ${Array.isArray(session.scopes) ? session.scopes.join(', ') : session.scopes || 'none'}`,
               },
             ],
           };

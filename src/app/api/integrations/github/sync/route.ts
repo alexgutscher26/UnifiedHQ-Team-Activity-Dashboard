@@ -9,8 +9,9 @@ import {
 
 // Helper function to broadcast updates to connected users
 function broadcastToUser(userId: string, data: any) {
-  if (global.userConnections?.has(userId)) {
-    const controller = global.userConnections.get(userId);
+  const userConnections = (global as any).userConnections;
+  if (userConnections?.has(userId)) {
+    const controller = userConnections.get(userId);
     try {
       const message = JSON.stringify({
         type: 'activity_update',
@@ -20,7 +21,7 @@ function broadcastToUser(userId: string, data: any) {
       controller.enqueue(`data: ${message}\n\n`);
     } catch (error) {
       console.error('Failed to broadcast to user:', error);
-      global.userConnections?.delete(userId);
+      userConnections?.delete(userId);
     }
   }
 }

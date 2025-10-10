@@ -10,8 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LoadingState, LoadingSkeleton } from '@/components/ui/loading';
-import { useLoading } from '@/hooks/use-loading';
+import { LoadingSkeleton } from '@/components/ui/loading';
 import {
   useMemoryLeakPrevention,
   useSafeTimer,
@@ -29,9 +28,8 @@ export function AISummary() {
   const generateSummary = async () => {
     try {
       // Simulate API call delay - reduced for faster loading
-      await new Promise(resolve => {
-        const timer = setTimeout(resolve, 50);
-        return timer;
+      await new Promise<void>(resolve => {
+        setTimeout(() => resolve(), 50);
       });
 
       // Mock summary data

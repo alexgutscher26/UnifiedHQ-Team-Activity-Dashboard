@@ -339,7 +339,7 @@ class DatabaseCache {
     };
 
     // Store in database cache table
-    await prisma.githubCache.upsert({
+    await prisma.gitHubCache.upsert({
       where: {
         userId_cacheKey: {
           userId,
@@ -347,14 +347,14 @@ class DatabaseCache {
         },
       },
       update: {
-        data: cacheEntry.data,
+        data: cacheEntry.data as any,
         timestamp: cacheEntry.timestamp,
         ttl: cacheEntry.ttl,
       },
       create: {
         userId,
         cacheKey,
-        data: cacheEntry.data,
+        data: cacheEntry.data as any,
         timestamp: cacheEntry.timestamp,
         ttl: cacheEntry.ttl,
       },
@@ -368,7 +368,7 @@ class DatabaseCache {
     userId: string,
     cacheKey: string
   ): Promise<GitHubActivity[] | null> {
-    const cacheEntry = await prisma.githubCache.findUnique({
+    const cacheEntry = await prisma.gitHubCache.findUnique({
       where: {
         userId_cacheKey: {
           userId,
@@ -384,7 +384,7 @@ class DatabaseCache {
 
     if (cacheAge > cacheEntry.ttl) {
       // Cache expired, delete it
-      await prisma.githubCache.delete({
+      await prisma.gitHubCache.delete({
         where: {
           userId_cacheKey: {
             userId,
@@ -395,7 +395,7 @@ class DatabaseCache {
       return null;
     }
 
-    return cacheEntry.data as GitHubActivity[];
+    return cacheEntry.data as unknown as GitHubActivity[];
   }
 
   /**
@@ -403,7 +403,7 @@ class DatabaseCache {
    */
   static async clearExpiredCache(): Promise<void> {
     const now = new Date();
-    await prisma.githubCache.deleteMany({
+    await prisma.gitHubCache.deleteMany({
       where: {
         timestamp: {
           lt: new Date(now.getTime() - 24 * 60 * 60 * 1000), // Delete entries older than 24 hours
@@ -416,7 +416,7 @@ class DatabaseCache {
    * Clear all cache for a user
    */
   static async clearUserCache(userId: string): Promise<void> {
-    await prisma.githubCache.deleteMany({
+    await prisma.gitHubCache.deleteMany({
       where: { userId },
     });
   }

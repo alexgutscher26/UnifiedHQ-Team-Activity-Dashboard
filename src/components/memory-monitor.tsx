@@ -192,9 +192,11 @@ export function MemoryMonitor({ show = false, className }: MemoryMonitorProps) {
                       >
                         <span className='truncate'>{component}</span>
                         <Badge
-                          variant={count > 1 ? 'destructive' : 'secondary'}
+                          variant={
+                            (count as number) > 1 ? 'destructive' : 'secondary'
+                          }
                         >
-                          {count}
+                          {count as number}
                         </Badge>
                       </div>
                     )

@@ -451,14 +451,14 @@ export function useFormValidation<T extends Record<string, any>>(
    * Returns the error message for a specified field if it has been touched.
    */
   const getFieldError = (field: keyof T) => {
-    return touched[field] ? errors[field] : '';
+    return touched[field as string] ? errors[field as string] : '';
   };
 
   /**
    * Checks if a form field is valid based on its touched and error status.
    */
   const isFieldValid = (field: keyof T) => {
-    return !touched[field] || !errors[field];
+    return !touched[field as string] || !errors[field as string];
   };
 
   /**

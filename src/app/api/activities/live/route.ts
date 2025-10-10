@@ -46,10 +46,10 @@ export async function GET(request: NextRequest) {
           controller.enqueue(`data: ${data}\n\n`);
 
           // Store the controller for this user's connection
-          if (!global.userConnections) {
-            global.userConnections = new Map();
+          if (!(global as any).userConnections) {
+            (global as any).userConnections = new Map();
           }
-          global.userConnections.set(userId, controller);
+          (global as any).userConnections.set(userId, controller);
 
           // Send periodic heartbeat to keep connection alive
           const heartbeatInterval = setInterval(() => {
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
             } catch (error) {
               console.error('Heartbeat error:', error);
               clearInterval(heartbeatInterval);
-              global.userConnections?.delete(userId);
+              (global as any).userConnections?.delete(userId);
             }
           }, 30000); // Send heartbeat every 30 seconds
 
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
           request.signal.addEventListener('abort', () => {
             console.log(`[SSE] User ${userId} disconnected`);
             clearInterval(heartbeatInterval);
-            global.userConnections?.delete(userId);
+            (global as any).userConnections?.delete(userId);
             try {
               controller.close();
             } catch (error) {
@@ -111,8 +111,9 @@ export async function GET(request: NextRequest) {
 
 // Helper function to broadcast updates to connected users
 export function broadcastToUser(userId: string, data: any) {
-  if (global.userConnections?.has(userId)) {
-    const controller = global.userConnections.get(userId);
+  const userConnections = (global as any).userConnections;
+  if (userConnections?.has(userId)) {
+    const controller = userConnections.get(userId);
     try {
       const message = JSON.stringify({
         type: 'activity_update',
@@ -122,15 +123,16 @@ export function broadcastToUser(userId: string, data: any) {
       controller.enqueue(`data: ${message}\n\n`);
     } catch (error) {
       console.error('Failed to broadcast to user:', error);
-      global.userConnections?.delete(userId);
+      userConnections?.delete(userId);
     }
   }
 }
 
 // Helper function to broadcast to all connected users
 export function broadcastToAll(data: any) {
-  if (global.userConnections) {
-    for (const [userId, controller] of global.userConnections) {
+  const userConnections = (global as any).userConnections;
+  if (userConnections) {
+    for (const [userId, controller] of userConnections) {
       try {
         const message = JSON.stringify({
           type: 'activity_update',
@@ -140,7 +142,7 @@ export function broadcastToAll(data: any) {
         controller.enqueue(`data: ${message}\n\n`);
       } catch (error) {
         console.error('Failed to broadcast to user:', userId, error);
-        global.userConnections.delete(userId);
+        userConnections.delete(userId);
       }
     }
   }

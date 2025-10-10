@@ -107,17 +107,17 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Add fill prop if specified
   if (fill) {
-    imageProps.fill = true;
+    (imageProps as any).fill = true;
   }
 
   // Add style prop if specified
   if (style) {
-    imageProps.style = style;
+    (imageProps as any).style = style;
   }
 
   // Add event handlers
-  imageProps.onLoad = handleLoad;
-  imageProps.onError = handleError;
+  (imageProps as any).onLoad = handleLoad;
+  (imageProps as any).onError = handleError;
 
   // Show loading placeholder
   if (isLoading && blur) {

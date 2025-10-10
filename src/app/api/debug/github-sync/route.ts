@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
         title: activity.title,
         timestamp: activity.timestamp,
         externalId: activity.externalId,
-        eventType: activity.metadata?.eventType,
+        eventType: (activity.metadata as any)?.eventType,
       })),
       githubTest,
       repoTest,

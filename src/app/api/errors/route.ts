@@ -3,9 +3,9 @@ import { auth } from '@/lib/auth';
 import {
   withErrorHandling,
   createApiSuccessResponse,
-  validateRequestBody,
   ApiErrors,
 } from '@/lib/api-error-handler';
+import { validateRequestBody } from '@/lib/api-validation';
 import { z } from 'zod';
 
 // Error report schema
@@ -37,7 +37,7 @@ async function reportError(request: NextRequest) {
     await request.json()
   );
 
-  // In production, you would:
+  // ToDo: In production, you would:
   // 1. Send to error tracking service (Sentry, LogRocket, etc.)
   // 2. Store in database for analysis
   // 3. Send alerts for critical errors
@@ -49,7 +49,7 @@ async function reportError(request: NextRequest) {
   });
 
   // For now, just log the error
-  // In production, integrate with your error tracking service
+  // ToDo: In production, integrate with your error tracking service
   if (process.env.NODE_ENV === 'production') {
     // Example: Send to Sentry, LogRocket, or your error tracking service
     // await sendToErrorTrackingService(errorData);

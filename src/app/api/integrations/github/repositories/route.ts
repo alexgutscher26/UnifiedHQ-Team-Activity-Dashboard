@@ -11,8 +11,9 @@ function broadcastRepositoryChange(
   action: 'added' | 'removed',
   repoName: string
 ) {
-  if (global.userConnections?.has(userId)) {
-    const controller = global.userConnections.get(userId);
+  const userConnections = (global as any).userConnections;
+  if (userConnections?.has(userId)) {
+    const controller = userConnections.get(userId);
     try {
       const message = JSON.stringify({
         type: 'repository_update',
@@ -26,7 +27,7 @@ function broadcastRepositoryChange(
       controller.enqueue(`data: ${message}\n\n`);
     } catch (error) {
       console.error('Failed to broadcast repository change:', error);
-      global.userConnections?.delete(userId);
+      userConnections?.delete(userId);
     }
   }
 }

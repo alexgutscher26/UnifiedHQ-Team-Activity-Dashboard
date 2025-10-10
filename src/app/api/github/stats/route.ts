@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     if (lastCommitTime) {
       const now = new Date();
       const diffInMinutes = Math.floor(
-        (now.getTime() - lastCommitTime.getTime()) / (1000 * 60)
+        (now.getTime() - (lastCommitTime as Date).getTime()) / (1000 * 60)
       );
 
       if (diffInMinutes < 1) {

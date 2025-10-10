@@ -350,7 +350,7 @@ export function checkRateLimit(
 export async function requireAuth(
   req: NextRequest
 ): Promise<{ userId: string; user: any }> {
-  // This should integrate with your auth system
+  // ToDo: This should integrate with your auth system
   // For now, we'll check for a simple header
   const authHeader = req.headers.get('authorization');
 
@@ -360,7 +360,7 @@ export async function requireAuth(
 
   const token = authHeader.substring(7);
 
-  // In a real implementation, verify the token
+  // ToDo: In a real implementation, verify the token
   // For now, we'll simulate a user
   if (token === 'invalid') {
     throw ApiErrors.authentication('Invalid token');
