@@ -42,6 +42,9 @@ export function OptimizedScrollContainer({
     const container = containerRef.current;
     if (!container) return;
 
+    /**
+     * Removes the scroll event listener from the container.
+     */
     const cleanup = () => {
       container.removeEventListener('scroll', optimizedScrollHandler, {
         passive: optimizationConfig.enablePassiveListeners,
@@ -83,6 +86,15 @@ interface ScrollPerformanceIndicatorProps {
   className?: string;
 }
 
+/**
+ * Renders a scroll performance indicator based on provided scroll metrics.
+ *
+ * This function calculates the performance grade based on the average scroll time and displays various metrics including average scroll time, maximum scroll time, jank percentage, and the number of scroll events. The performance grade is determined by the average scroll time, categorizing it into grades A, B, C, or D with corresponding colors. The jank percentage is calculated only if there are scroll events, otherwise it defaults to 0.
+ *
+ * @param {Object} props - The properties for the component.
+ * @param {ScrollPerformanceIndicatorProps} props.scrollMetrics - The metrics related to scroll performance.
+ * @param {string} [props.className=''] - Optional additional class names for styling.
+ */
 export function ScrollPerformanceIndicator({
   scrollMetrics,
   className = '',
