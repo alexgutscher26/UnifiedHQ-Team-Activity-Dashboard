@@ -44,7 +44,13 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Get cache statistics
+ * Retrieves cache statistics and returns them in JSON format.
+ *
+ * This function attempts to fetch cache statistics using GitHubCacheManager.getStats().
+ * If successful, it returns a JSON response containing the statistics and a timestamp.
+ * In case of an error, it logs the error and returns a JSON response with an error message and a 500 status code.
+ *
+ * @param request - The NextRequest object representing the incoming request.
  */
 export async function GET(request: NextRequest) {
   try {

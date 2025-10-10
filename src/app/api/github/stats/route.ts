@@ -5,6 +5,15 @@ import { GitHubCacheManager } from '@/lib/integrations/github-cached';
 
 const prisma = new PrismaClient();
 
+/**
+ * Fetch GitHub activity statistics for the authenticated user.
+ *
+ * This function retrieves the user's GitHub activities from the last 24 hours, calculates the number of commits, pull requests, and reviews, and formats the last commit time. It also compiles a summary of the user's activity status and cache statistics. If the user is not authenticated, it returns an unauthorized error response.
+ *
+ * @param request - The NextRequest object containing the request headers.
+ * @returns A JSON response containing the activity count, status, details, last update time, breakdown of activities, and cache statistics.
+ * @throws Error If there is an issue fetching GitHub statistics.
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
