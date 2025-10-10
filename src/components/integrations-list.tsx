@@ -14,6 +14,15 @@ interface Integration {
   description?: string;
 }
 
+/**
+ * Renders a list of integrations with their connection statuses.
+ *
+ * This function initializes the integrations state and fetches the connection status for GitHub and Slack integrations.
+ * It updates the state based on the fetched data and handles visibility changes and storage events to refresh the status.
+ * The function also provides click handlers for navigating to the integrations page and determining the status color and text.
+ *
+ * @returns {JSX.Element} The rendered integrations list component.
+ */
 export function IntegrationsList() {
   const router = useRouter();
   const [integrations, setIntegrations] = useState<Integration[]>([
