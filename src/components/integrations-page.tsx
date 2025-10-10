@@ -51,10 +51,29 @@ export function IntegrationsPage() {
 
   // Check connection status on mount
   useEffect(() => {
+    // Load lastSyncTime from localStorage
+    const savedSyncTime = localStorage.getItem('lastSyncTime');
+    if (savedSyncTime) {
+      setLastSyncTime(new Date(savedSyncTime));
+    }
+
     checkGithubStatus();
     checkSlackStatus();
     fetchStats();
     fetchSlackClientId();
+
+    // Listen for storage changes (cross-tab sync)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'lastSyncTime' && e.newValue) {
+        setLastSyncTime(new Date(e.newValue));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const checkGithubStatus = async () => {
@@ -102,11 +121,11 @@ export function IntegrationsPage() {
       }
 
       // Fetch Slack stats
-      const slackResponse = await fetch('/api/debug/slack-sync');
+      const slackResponse = await fetch('/api/slack/stats');
       const slackData = await slackResponse.json();
       if (slackResponse.ok) {
-        setSelectedChannels(slackData.selectedChannels || 0);
-        totalActivities += slackData.storedActivities || 0;
+        setSelectedChannels(slackData.channels?.selected || 0);
+        totalActivities += slackData.count || 0;
       }
 
       setTotalActivities(totalActivities);
@@ -145,11 +164,23 @@ export function IntegrationsPage() {
       });
       const data = await response.json();
 
+      console.log('GitHub sync response:', {
+        ok: response.ok,
+        status: response.status,
+        data,
+      });
+
       clearInterval(progressInterval);
       setSyncProgress(100);
 
       if (response.ok) {
-        setLastSyncTime(new Date());
+        console.log(
+          'GitHub sync successful, updating lastSyncTime to:',
+          new Date()
+        );
+        const syncTime = new Date();
+        setLastSyncTime(syncTime);
+        localStorage.setItem('lastSyncTime', syncTime.toISOString());
         await fetchStats(); // Refresh stats after sync
         toast({
           title: 'Sync Successful',
@@ -245,11 +276,23 @@ export function IntegrationsPage() {
       });
       const data = await response.json();
 
+      console.log('Slack sync response:', {
+        ok: response.ok,
+        status: response.status,
+        data,
+      });
+
       clearInterval(progressInterval);
       setSyncProgress(100);
 
       if (response.ok) {
-        setLastSyncTime(new Date());
+        console.log(
+          'Slack sync successful, updating lastSyncTime to:',
+          new Date()
+        );
+        const syncTime = new Date();
+        setLastSyncTime(syncTime);
+        localStorage.setItem('lastSyncTime', syncTime.toISOString());
         await fetchStats(); // Refresh stats after sync
         toast({
           title: 'Sync Successful',
@@ -514,17 +557,17 @@ export function IntegrationsPage() {
               {(githubConnected || slackConnected) && (
                 <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
                   {githubConnected && (
-                    <Card className='bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'>
+                    <Card className='bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 dark:from-green-950/30 dark:to-emerald-950/30 dark:border-green-800'>
                       <CardContent className='p-4'>
                         <div className='flex items-center gap-3'>
-                          <div className='p-2 bg-green-100 rounded-lg'>
-                            <IconBrandGithub className='size-5 text-green-600' />
+                          <div className='p-2 bg-green-100 dark:bg-green-900 rounded-lg'>
+                            <IconBrandGithub className='size-5 text-green-600 dark:text-green-400' />
                           </div>
                           <div>
                             <p className='text-sm text-muted-foreground'>
                               Repositories
                             </p>
-                            <p className='text-2xl font-bold text-green-700'>
+                            <p className='text-2xl font-bold text-green-700 dark:text-green-300'>
                               {selectedRepos}
                             </p>
                           </div>
@@ -534,17 +577,17 @@ export function IntegrationsPage() {
                   )}
 
                   {slackConnected && (
-                    <Card className='bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200'>
+                    <Card className='bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200 dark:from-purple-950/30 dark:to-violet-950/30 dark:border-purple-800'>
                       <CardContent className='p-4'>
                         <div className='flex items-center gap-3'>
-                          <div className='p-2 bg-purple-100 rounded-lg'>
-                            <IconBrandSlack className='size-5 text-purple-600' />
+                          <div className='p-2 bg-purple-100 dark:bg-purple-900 rounded-lg'>
+                            <IconBrandSlack className='size-5 text-purple-600 dark:text-purple-400' />
                           </div>
                           <div>
                             <p className='text-sm text-muted-foreground'>
                               Channels
                             </p>
-                            <p className='text-2xl font-bold text-purple-700'>
+                            <p className='text-2xl font-bold text-purple-700 dark:text-purple-300'>
                               {selectedChannels}
                             </p>
                           </div>
@@ -553,17 +596,17 @@ export function IntegrationsPage() {
                     </Card>
                   )}
 
-                  <Card className='bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200'>
+                  <Card className='bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 dark:from-blue-950/30 dark:to-cyan-950/30 dark:border-blue-800'>
                     <CardContent className='p-4'>
                       <div className='flex items-center gap-3'>
-                        <div className='p-2 bg-blue-100 rounded-lg'>
-                          <IconTrendingUp className='size-5 text-blue-600' />
+                        <div className='p-2 bg-blue-100 dark:bg-blue-900 rounded-lg'>
+                          <IconTrendingUp className='size-5 text-blue-600 dark:text-blue-400' />
                         </div>
                         <div>
                           <p className='text-sm text-muted-foreground'>
                             Activities
                           </p>
-                          <p className='text-2xl font-bold text-blue-700'>
+                          <p className='text-2xl font-bold text-blue-700 dark:text-blue-300'>
                             {totalActivities}
                           </p>
                         </div>
@@ -571,17 +614,17 @@ export function IntegrationsPage() {
                     </CardContent>
                   </Card>
 
-                  <Card className='bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200'>
+                  <Card className='bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 dark:from-orange-950/30 dark:to-amber-950/30 dark:border-orange-800'>
                     <CardContent className='p-4'>
                       <div className='flex items-center gap-3'>
-                        <div className='p-2 bg-orange-100 rounded-lg'>
-                          <IconClock className='size-5 text-orange-600' />
+                        <div className='p-2 bg-orange-100 dark:bg-orange-900 rounded-lg'>
+                          <IconClock className='size-5 text-orange-600 dark:text-orange-400' />
                         </div>
                         <div>
                           <p className='text-sm text-muted-foreground'>
                             Last Sync
                           </p>
-                          <p className='text-sm font-medium text-orange-700'>
+                          <p className='text-sm font-medium text-orange-700 dark:text-orange-300'>
                             {lastSyncTime
                               ? lastSyncTime.toLocaleTimeString()
                               : 'Never'}
@@ -603,7 +646,7 @@ export function IntegrationsPage() {
                   key={integration.id}
                   className={`relative overflow-hidden transition-all duration-200 hover:shadow-lg ${
                     integration.connected
-                      ? 'ring-2 ring-green-200 bg-green-50/30'
+                      ? 'ring-2 ring-green-200 dark:ring-green-800 bg-green-50/30 dark:bg-green-950/20'
                       : ''
                   } ${integration.comingSoon ? 'opacity-75' : ''}`}
                 >
@@ -643,7 +686,7 @@ export function IntegrationsPage() {
                       {integration.connected && (
                         <Badge
                           variant='secondary'
-                          className='bg-green-100 text-green-800'
+                          className='bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                         >
                           <IconCheck className='size-3 mr-1' />
                           Active
@@ -723,41 +766,6 @@ export function IntegrationsPage() {
                 </Card>
               ))}
             </div>
-          </div>
-
-          {/* Help Section */}
-          <div className='px-4 lg:px-6'>
-            <Card className='bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200'>
-              <CardContent className='p-6'>
-                <div className='flex items-start gap-4'>
-                  <div className='p-2 bg-blue-100 rounded-lg'>
-                    <IconShield className='size-6 text-blue-600' />
-                  </div>
-                  <div className='space-y-2'>
-                    <h3 className='text-lg font-semibold text-blue-900'>
-                      Need Help?
-                    </h3>
-                    <p className='text-blue-700'>
-                      Having trouble with integrations? Check out our debug page
-                      for detailed information about your connections and sync
-                      status.
-                    </p>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      asChild
-                      className='mt-2'
-                    >
-                      <a href='/debug' className='flex items-center gap-2'>
-                        <IconSettings className='size-4' />
-                        Debug Center
-                        <IconExternalLink className='size-4' />
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

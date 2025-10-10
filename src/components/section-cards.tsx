@@ -48,7 +48,18 @@ export function SectionCards() {
             lastUpdate: 'No recent activity',
           };
 
-      // Mock stats data for other services (Notion, Slack, AI)
+      // Fetch real Slack statistics
+      const slackResponse = await fetch('/api/slack/stats');
+      const slackStats = slackResponse.ok
+        ? await slackResponse.json()
+        : {
+            count: 0,
+            status: 'Inactive',
+            details: 'No activity',
+            lastUpdate: 'No recent activity',
+          };
+
+      // Mock stats data for other services (Notion, AI)
       setStats({
         notion: {
           count: 24,
@@ -57,10 +68,10 @@ export function SectionCards() {
           lastUpdate: '5 minutes ago',
         },
         slack: {
-          count: 156,
-          status: 'Active',
-          details: '8 channels, 23 threads',
-          lastUpdate: '2 minutes ago',
+          count: slackStats.count,
+          status: slackStats.status,
+          details: slackStats.details,
+          lastUpdate: slackStats.lastUpdate,
         },
         github: {
           count: githubStats.count,
@@ -139,8 +150,8 @@ export function SectionCards() {
             data.type === 'activity_update' &&
             data.data?.type === 'sync_completed'
           ) {
-            // Refresh GitHub stats when sync is completed
-            console.log('🔄 Refreshing GitHub stats after sync');
+            // Refresh stats when sync is completed (GitHub or Slack)
+            console.log('🔄 Refreshing stats after sync:', data.data);
             loadStats();
           } else if (data.type === 'error') {
             console.warn('⚠️ SSE error message:', data.message);
@@ -194,9 +205,9 @@ export function SectionCards() {
     loadStats();
     connectToLiveUpdates();
 
-    // Set up periodic refresh every 2 minutes for GitHub stats
+    // Set up periodic refresh every 2 minutes for all stats (GitHub and Slack)
     const interval = setTimeout(() => {
-      console.log('🔄 Periodic GitHub stats refresh');
+      console.log('🔄 Periodic stats refresh (GitHub and Slack)');
       loadStats();
     }, 120000); // 2 minutes
 
@@ -272,6 +283,24 @@ export function SectionCards() {
                 <CardDescription className='flex items-center gap-2'>
                   <IconBrandSlack className='size-4' />
                   Slack Messages
+                  {connectionState === 'connected' && (
+                    <IconWifi
+                      className='size-3 text-green-500'
+                      title='Live updates active'
+                    />
+                  )}
+                  {connectionState === 'connecting' && (
+                    <div
+                      className='size-3 animate-spin rounded-full border-2 border-blue-500 border-t-transparent'
+                      title='Connecting...'
+                    />
+                  )}
+                  {connectionState === 'error' && (
+                    <div
+                      className='size-3 rounded-full bg-red-500'
+                      title='Connection failed'
+                    />
+                  )}
                 </CardDescription>
                 <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
                   {stats.slack.count}

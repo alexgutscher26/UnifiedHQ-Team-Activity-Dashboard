@@ -77,9 +77,11 @@ export async function POST(request: NextRequest) {
     try {
       broadcastToUser(userId, {
         type: 'sync_completed',
+        source: 'slack',
         count: activities.length,
         selectedChannels: selectedChannelCount,
         message: `Synced ${activities.length} Slack activities from ${selectedChannelCount} selected channels`,
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
       console.error('Failed to broadcast sync update:', error);

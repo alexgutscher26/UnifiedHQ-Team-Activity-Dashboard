@@ -192,7 +192,7 @@ export function ActivityFeed() {
 
             case 'activity_update':
               if (data.data.type === 'sync_completed') {
-                // Refresh activities when sync is completed
+                // Refresh activities when sync is completed (GitHub or Slack)
                 fetchActivities();
                 toast({
                   title: 'Live Update',
