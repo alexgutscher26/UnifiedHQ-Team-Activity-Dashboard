@@ -19,7 +19,7 @@ import {
   IconTrendingDown,
   IconRefresh,
   IconAlertTriangle,
-  IconCheckCircle,
+  IconCircleCheck,
 } from '@tabler/icons-react';
 
 interface PerformanceMetrics {

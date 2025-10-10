@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ActivityFeed } from '@/components/activity-feed';
-import { AISummary } from '@/components/ai-summary';
+import { AISummaryCard } from '@/components/ai-summary-card';
 import { SectionCards } from '@/components/section-cards';
 import {
   ActivityFeedErrorBoundary,
@@ -30,7 +30,7 @@ export function DashboardContent() {
             </div>
             <div className='lg:col-span-1'>
               <GitHubErrorBoundary>
-                <AISummary />
+                <AISummaryCard />
               </GitHubErrorBoundary>
             </div>
           </div>

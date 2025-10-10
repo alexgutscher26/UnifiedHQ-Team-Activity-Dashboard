@@ -108,6 +108,9 @@ REDIS_URL="redis://localhost:6379"
 
 # Sentry (optional)
 SENTRY_DSN="your-sentry-dsn"
+
+# AI Summary (OpenRouter)
+OPENROUTER_API_KEY="your-openrouter-api-key"
 ```
 
 ### Available Scripts

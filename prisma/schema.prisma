@@ -37,6 +37,7 @@ model User {
   selectedChannels    SelectedChannel[]
   githubCache       GitHubCache[]
   slackCache        SlackCache[]
+  aiSummaries       AISummary[]
 
   @@unique([email])
   @@map("user")
@@ -261,4 +262,22 @@ model SlackCache {
 
   @@unique([userId, cacheKey])
   @@map("slack_cache")
+}
+
+model AISummary {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  keyHighlights Json     // Array of key highlights
+  actionItems   Json     // Array of action items
+  insights      Json     // Array of insights
+  generatedAt   DateTime @default(now())
+  timeRangeStart DateTime
+  timeRangeEnd   DateTime
+  metadata      Json     // Activity count, source breakdown, model info, etc.
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("ai_summary")
 }

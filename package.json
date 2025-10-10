@@ -42,7 +42,9 @@
     "hotfix:complete": "node scripts/hotfix-manager.js complete",
     "perf:monitor": "node scripts/performance-monitor.js",
     "perf:analyze": "node scripts/performance-analyzer.js",
-    "perf:compare": "node scripts/performance-comparison.js"
+    "perf:compare": "node scripts/performance-comparison.js",
+    "ai-summary:setup": "node scripts/setup-ai-summary.js",
+    "ai-summary:test": "node scripts/test-ai-summary.js"
   },
   "dependencies": {
     "@dnd-kit/core": "latest",
@@ -53,6 +55,7 @@
     "@hookform/resolvers": "^3.10.0",
     "@modelcontextprotocol/sdk": "^1.19.1",
     "@octokit/rest": "^22.0.0",
+    "@prisma/client": "^6.17.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
     "@radix-ui/react-aspect-ratio": "1.1.1",
@@ -103,6 +106,7 @@
     "next-themes": "^0.4.6",
     "node-cron": "^4.2.1",
     "openai": "^6.2.0",
+    "prisma": "^6.17.1",
     "react": "^19.2.0",
     "react-day-picker": "9.8.0",
     "react-dom": "^19.2.0",
