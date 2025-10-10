@@ -252,6 +252,13 @@ const usePerformanceMonitor = () => {
   return { metrics, measureRender };
 };
 
+/**
+ * Renders an optimized activity feed with search, filter, and live update capabilities.
+ *
+ * This function manages the state for activities, loading status, and filters. It connects to a live updates stream and fetches activities from an API, applying search and filter criteria. The component also handles pagination and performance monitoring, ensuring efficient rendering of activities. Cleanup is performed on unmount to close connections and clear intervals.
+ *
+ * @returns {JSX.Element} The rendered activity feed component.
+ */
 export function OptimizedActivityFeed() {
   const { toast } = useToast();
   const [activities, setActivities] = useState<Activity[]>([]);
