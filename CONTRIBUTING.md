@@ -78,7 +78,7 @@ We are committed to providing a welcoming and inclusive environment for all cont
 
 5. **Start the development server**
    ```bash
-   npm run dev
+   bun run dev
    # or
    yarn dev
    # or
@@ -114,14 +114,14 @@ SENTRY_DSN="your-sentry-dsn"
 
 ```bash
 # Development
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
+bun run dev          # Start development server
+bun run build        # Build for production
+bun run start        # Start production server
 
 # Code Quality
-npm run lint         # Run ESLint
-npm run format       # Format code with Prettier
-npm run format:check # Check code formatting
+bun run lint         # Run ESLint
+bun run format       # Format code with Prettier
+bun run format:check # Check code formatting
 
 # Database
 npx prisma generate  # Generate Prisma client
@@ -390,10 +390,10 @@ refactor(ui): simplify component structure
 npm test
 
 # Run tests in watch mode
-npm run test:watch
+bun run test:watch
 
 # Run tests with coverage
-npm run test:coverage
+bun run test:coverage
 
 # Run specific test file
 npm test -- --testPathPattern=Button.test.tsx

@@ -128,9 +128,9 @@
 ### Pre-submission
 - [ ] Branch is up to date with main
 - [ ] All tests pass locally
-- [ ] Linting passes (`npm run lint`)
-- [ ] Formatting is correct (`npm run format:check`)
-- [ ] Build succeeds (`npm run build`)
+- [ ] Linting passes (`bun run lint`)
+- [ ] Formatting is correct (`bun run format:check`)
+- [ ] Build succeeds (`bun run build`)
 - [ ] No merge conflicts
 
 ### Review Process

@@ -58,20 +58,20 @@ docs/
 
 ```bash
 # Run code analysis
-npm run review:analyze
+bun run review:analyze
 
 # Check PR readiness
-npm run review:check
+bun run review:check
 
 # Automate PR processes
-npm run review:automate <PR_NUMBER>
+bun run review:automate <PR_NUMBER>
 ```
 
 ### For Reviewers
 
 ```bash
 # Monitor review metrics
-npm run review:monitor
+bun run review:monitor
 
 # Generate review dashboard
 # (Automatically runs daily)
@@ -81,9 +81,9 @@ npm run review:monitor
 
 ```bash
 # All review tools
-npm run review:analyze
-npm run review:monitor
-npm run review:automate
+bun run review:analyze
+bun run review:monitor
+bun run review:automate
 ```
 
 ## 📊 Automation Workflows
@@ -248,13 +248,13 @@ auto_labels:
 ### 2. Test the System
 ```bash
 # Test code analysis
-npm run review:analyze
+bun run review:analyze
 
 # Test PR automation
-npm run review:automate 123
+bun run review:automate 123
 
 # Test monitoring
-npm run review:monitor
+bun run review:monitor
 ```
 
 ### 3. Customize for Your Team
@@ -286,13 +286,13 @@ npm run review:monitor
 
 ```bash
 # Debug review tools
-DEBUG=review-automation npm run review:analyze
+DEBUG=review-automation bun run review:analyze
 
 # Check workflow logs
 # Go to Actions tab in GitHub
 
 # Test locally
-npm run review:check
+bun run review:check
 ```
 
 ## 📚 Documentation
