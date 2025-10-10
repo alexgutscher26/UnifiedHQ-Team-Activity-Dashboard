@@ -28,6 +28,9 @@ export function PerformanceComparison({
     optimized: { renderTime: 0, memoryUsage: 0, itemCount: 0 },
   });
 
+  /**
+   * Generates an array of mock activity objects.
+   */
   const generateMockActivities = (count: number) => {
     return Array.from({ length: count }, (_, i) => ({
       id: `activity-${i}`,
