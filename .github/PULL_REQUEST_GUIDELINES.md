@@ -19,10 +19,10 @@ This document outlines the guidelines and best practices for creating, reviewing
 
 ### 2. Pre-submission Checklist
 - [ ] Code compiles without errors
-- [ ] All tests pass (`npm run test`)
-- [ ] Linting passes (`npm run lint`)
-- [ ] Formatting is correct (`npm run format:check`)
-- [ ] Build succeeds (`npm run build`)
+- [ ] All tests pass (`bun run test`)
+- [ ] Linting passes (`bun run lint`)
+- [ ] Formatting is correct (`bun run format:check`)
+- [ ] Build succeeds (`bun run build`)
 - [ ] No console.log statements left in code
 - [ ] No TODO comments left in code
 - [ ] Self-review completed

@@ -251,7 +251,7 @@ class ReviewAutomation {
     try {
       // Check build
       try {
-        execSync('npm run build', { stdio: 'pipe' });
+        execSync('bun run build', { stdio: 'pipe' });
         checks.build = true;
       } catch (error) {
         console.log('❌ Build failed');
@@ -259,7 +259,7 @@ class ReviewAutomation {
 
       // Check linting
       try {
-        execSync('npm run lint', { stdio: 'pipe' });
+        execSync('bun run lint', { stdio: 'pipe' });
         checks.lint = true;
       } catch (error) {
         console.log('❌ Linting failed');
@@ -267,7 +267,7 @@ class ReviewAutomation {
 
       // Check formatting
       try {
-        execSync('npm run format:check', { stdio: 'pipe' });
+        execSync('bun run format:check', { stdio: 'pipe' });
         checks.format = true;
       } catch (error) {
         console.log('❌ Formatting check failed');

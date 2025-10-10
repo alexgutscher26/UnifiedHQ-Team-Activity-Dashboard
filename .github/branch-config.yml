@@ -1,0 +1,224 @@
+# Branch Management Configuration
+
+# Branch protection rules
+branches:
+  main:
+    protected: true
+    required_reviews: 2
+    dismiss_stale_reviews: true
+    require_status_checks: true
+    required_status_checks:
+      - 'build'
+      - 'test'
+      - 'lint'
+    restrictions:
+      users: []
+      teams: ['maintainers']
+
+  develop:
+    protected: true
+    required_reviews: 1
+    dismiss_stale_reviews: true
+    require_status_checks: true
+    required_status_checks:
+      - 'build'
+      - 'test'
+      - 'lint'
+    restrictions:
+      users: []
+      teams: ['developers']
+
+  release:
+    protected: true
+    required_reviews: 2
+    dismiss_stale_reviews: true
+    require_status_checks: true
+    required_status_checks:
+      - 'build'
+      - 'test'
+      - 'lint'
+      - 'release-validation'
+    restrictions:
+      users: []
+      teams: ['release-managers']
+
+# Branch naming conventions
+naming:
+  feature: 'feature/'
+  bugfix: 'bugfix/'
+  hotfix: 'hotfix/'
+  release: 'release/'
+  docs: 'docs/'
+  refactor: 'refactor/'
+  chore: 'chore/'
+  test: 'test/'
+
+# Workflow settings
+workflows:
+  auto_cleanup: true
+  enforce_naming: true
+  require_approval: true
+  auto_merge: false
+  health_check_interval: 'daily'
+  cleanup_interval: 'daily'
+
+# Branch health monitoring
+health_monitoring:
+  max_branch_age_days: 14
+  max_pr_size_lines: 1000
+  warn_pr_size_lines: 500
+  check_conflicts: true
+  check_outdated: true
+  check_orphaned: true
+
+# Hotfix settings
+hotfix:
+  emergency_contacts:
+    - '@maintainers'
+    - '@devops-team'
+    - '@security-team'
+  auto_deploy: true
+  require_approval: false
+  max_age_minutes: 60
+  severity_levels:
+    - 'critical'
+    - 'high'
+    - 'medium'
+    - 'low'
+
+# Release settings
+release:
+  versioning: 'semantic'
+  changelog: 'CHANGELOG.md'
+  release_notes: 'RELEASE_NOTES.md'
+  auto_bump: true
+  create_tag: true
+  environments:
+    staging: 'develop'
+    production: 'main'
+
+# Notification settings
+notifications:
+  channels:
+    - 'slack'
+    - 'email'
+    - 'github'
+  events:
+    - 'hotfix_created'
+    - 'large_pr'
+    - 'branch_health_issues'
+    - 'release_created'
+    - 'deployment_failed'
+
+# Team assignments
+teams:
+  maintainers:
+    - '@admin1'
+    - '@admin2'
+  developers:
+    - '@dev1'
+    - '@dev2'
+    - '@dev3'
+  release_managers:
+    - '@release1'
+    - '@release2'
+  devops_team:
+    - '@devops1'
+    - '@devops2'
+  security_team:
+    - '@security1'
+    - '@security2'
+
+# File-based reviewer assignments
+file_reviewers:
+  'src/lib/integrations/':
+    - '@backend-team'
+    - '@integrations-team'
+  'src/components/':
+    - '@frontend-team'
+    - '@ui-team'
+  'src/app/api/':
+    - '@backend-team'
+    - '@api-team'
+  'prisma/':
+    - '@backend-team'
+    - '@database-team'
+  'docs/':
+    - '@documentation-team'
+  '.github/':
+    - '@devops-team'
+    - '@maintainers'
+
+# Auto-labeling rules
+auto_labels:
+  enabled: true
+  rules:
+    - pattern: 'feature/*'
+      labels: ['feature', 'enhancement']
+    - pattern: 'bugfix/*'
+      labels: ['bug', 'bugfix']
+    - pattern: 'hotfix/*'
+      labels: ['hotfix', 'urgent']
+    - pattern: 'release/*'
+      labels: ['release', 'version']
+    - pattern: 'docs/*'
+      labels: ['documentation', 'docs']
+    - pattern: 'refactor/*'
+      labels: ['refactor', 'improvement']
+    - pattern: 'chore/*'
+      labels: ['chore', 'maintenance']
+    - pattern: 'test/*'
+      labels: ['test', 'testing']
+
+# PR size limits
+pr_limits:
+  max_files: 50
+  max_lines: 1000
+  warn_files: 20
+  warn_lines: 500
+  large_pr_requires_approval: 2
+
+# Merge strategies
+merge_strategies:
+  feature: 'squash'
+  bugfix: 'squash'
+  hotfix: 'merge'
+  release: 'merge'
+  docs: 'squash'
+  refactor: 'squash'
+  chore: 'squash'
+  test: 'squash'
+
+# Cleanup settings
+cleanup:
+  auto_delete_merged: true
+  auto_delete_merged_delay_hours: 24
+  keep_branches:
+    - 'main'
+    - 'develop'
+  cleanup_schedule: '0 2 * * *' # Daily at 2 AM UTC
+
+# Security settings
+security:
+  require_signed_commits: false
+  require_linear_history: false
+  allow_force_pushes: false
+  allow_deletions: false
+  required_checks:
+    - 'security-audit'
+    - 'vulnerability-scan'
+
+# Integration settings
+integrations:
+  github_cli: true
+  slack: true
+  email: true
+  monitoring: true
+  metrics: true
+
+# Environment variables
+environment:
+  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+  SLACK_WEBHOOK: '${{ secrets.SLACK_WEBHOOK }}'
+  EMAIL_SMTP: '${{ secrets.EMAIL_SMTP }}'
+  MONITORING_API: '${{ secrets.MONITORING_API }}'
