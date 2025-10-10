@@ -6,6 +6,9 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { DashboardErrorBoundary } from '@/components/error-boundaries';
 import { getCurrentUser } from '@/lib/get-user';
 
+/**
+ * Renders the summary history page with user-specific data.
+ */
 export default async function SummaryHistoryPage() {
   const user = await getCurrentUser();
   
