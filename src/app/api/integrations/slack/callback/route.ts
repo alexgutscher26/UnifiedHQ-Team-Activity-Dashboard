@@ -7,6 +7,17 @@ import {
 
 const prisma = new PrismaClient();
 
+/**
+ * Handles the GET request for Slack OAuth callback.
+ *
+ * This function processes the incoming request, verifies the user, exchanges the authorization code for an access token,
+ * and stores the connection details in the database. It also auto-selects the first three public channels for the user
+ * and triggers an initial sync of Slack activities. If any errors occur during the process, appropriate redirects are made.
+ *
+ * @param request - The incoming NextRequest object containing the OAuth callback parameters.
+ * @returns A NextResponse redirecting to the appropriate URL based on the outcome of the operation.
+ * @throws Error If an internal error occurs during processing.
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
