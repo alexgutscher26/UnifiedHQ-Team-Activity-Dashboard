@@ -27,6 +27,29 @@ interface OptimizedImageProps {
   blur?: boolean;
 }
 
+/**
+ * Renders an optimized image component with various loading and error handling features.
+ *
+ * This component checks for WebP support, preloads critical images if marked as priority, and handles loading and error states.
+ * It generates optimized image properties based on the provided dimensions and quality settings, and displays a loading placeholder or error message as needed.
+ *
+ * @param src - The source URL of the image.
+ * @param alt - The alternative text for the image.
+ * @param width - The width of the image (default is 800).
+ * @param height - The height of the image (default is 600).
+ * @param quality - The quality setting for the image (default is 'card').
+ * @param priority - Indicates if the image should be prioritized for loading (default is false).
+ * @param className - Additional CSS classes to apply to the image.
+ * @param sizes - The sizes attribute for responsive images.
+ * @param fill - Indicates if the image should fill its container (default is false).
+ * @param style - Additional inline styles for the image.
+ * @param onLoad - Callback function to be called when the image loads successfully.
+ * @param onError - Callback function to be called when the image fails to load.
+ * @param fallback - The fallback image source to use in case of an error.
+ * @param lazy - Indicates if the image should be lazy-loaded (default is true).
+ * @param blur - Indicates if a blur effect should be shown while loading (default is true).
+ * @returns A React element representing the optimized image.
+ */
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
   alt,
