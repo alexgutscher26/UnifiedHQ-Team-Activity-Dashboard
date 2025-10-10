@@ -36,6 +36,15 @@ import {
   IconRocket,
 } from '@tabler/icons-react';
 
+/**
+ * Render the Integrations Page component.
+ *
+ * This component manages the connection status and synchronization of various integrations such as GitHub and Slack.
+ * It handles loading states, fetches integration statuses, and updates the UI based on user interactions.
+ * The component also listens for storage changes to synchronize the last sync time across tabs and provides actions for connecting, syncing, and disconnecting integrations.
+ *
+ * @returns {JSX.Element} The rendered Integrations Page component.
+ */
 export function IntegrationsPage() {
   const { toast } = useToast();
   const [githubConnected, setGithubConnected] = useState(false);
@@ -108,6 +117,16 @@ export function IntegrationsPage() {
     }
   };
 
+  /**
+   * Fetch and aggregate statistics from GitHub and Slack.
+   *
+   * The function retrieves data from two APIs: one for GitHub stats and another for Slack stats.
+   * It updates the selected repositories and channels based on the fetched data and calculates
+   * the total activities from both sources. Errors during the fetch process are logged to the console.
+   *
+   * @returns {Promise<void>} A promise that resolves when the stats have been fetched and processed.
+   * @throws {Error} If there is an issue with the fetch requests or data processing.
+   */
   const fetchStats = async () => {
     try {
       let totalActivities = 0;
@@ -149,6 +168,11 @@ export function IntegrationsPage() {
     }
   };
 
+  /**
+   * Handles the synchronization of GitHub data.
+   *
+   * This function initiates a sync process by setting the syncing state and progress. It makes a POST request to the GitHub sync API and updates the UI based on the response. If the sync is successful, it updates the last sync time and refreshes stats. In case of errors, it handles token expiration and other failures with appropriate notifications.
+   */
   const handleGithubSync = async () => {
     setIsSyncing(true);
     setSyncProgress(0);
@@ -261,6 +285,11 @@ export function IntegrationsPage() {
     }
   };
 
+  /**
+   * Handles the synchronization process with Slack.
+   *
+   * This function initiates the syncing process by setting the syncing state and progress. It makes a POST request to the Slack sync API and updates the UI based on the response. If the sync is successful, it updates the last sync time and refreshes statistics. In case of errors, it handles token expiration and other failures with appropriate user notifications.
+   */
   const handleSlackSync = async () => {
     setIsSyncing(true);
     setSyncProgress(0);
