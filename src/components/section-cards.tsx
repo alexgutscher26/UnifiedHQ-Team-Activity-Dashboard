@@ -63,22 +63,22 @@ export function SectionCards() {
         integrations: {
           github: {
             repositories: githubStats.count || 0,
-            pullRequests: 0,
-            commits: 0,
-            issues: 0,
+            pullRequests: githubStats.breakdown?.pullRequests || 0,
+            commits: githubStats.breakdown?.commits || 0,
+            issues: githubStats.breakdown?.reviews || 0, // Using reviews as issues for now
             lastActivity: githubStats.lastUpdate || 'No recent activity',
           },
           slack: {
-            channels: 0,
+            channels: slackStats.channels?.selected || slackStats.breakdown?.channels || 0,
             messages: slackStats.count || 0,
-            mentions: 0,
+            mentions: slackStats.breakdown?.reactions || 0, // Using reactions as mentions for now
             lastActivity: slackStats.lastUpdate || 'No recent activity',
           },
         },
         summary: {
           totalActivities: (githubStats.count || 0) + (slackStats.count || 0),
           activeRepositories: githubStats.count || 0,
-          pendingReviews: 0,
+          pendingReviews: githubStats.breakdown?.reviews || 0,
           urgentItems: 0,
         },
         lastUpdated: new Date().toISOString(),
