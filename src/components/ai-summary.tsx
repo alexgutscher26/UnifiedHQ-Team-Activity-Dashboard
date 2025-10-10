@@ -17,6 +17,11 @@ import {
   useSafeTimer,
 } from '@/lib/memory-leak-prevention';
 
+/**
+ * Renders an AI-generated daily summary component.
+ *
+ * The function initializes state for the summary and loading status, and employs memory leak prevention. It simulates an API call to generate a summary of team activities, which includes highlights and action items. The summary is displayed in a card format, with loading skeletons shown while the summary is being generated. The component updates every 30 minutes.
+ */
 export function AISummary() {
   const [summary, setSummary] = useState<AISummaryData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
