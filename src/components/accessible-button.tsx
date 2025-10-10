@@ -47,7 +47,6 @@ interface AccessibleButtonProps
   ariaValuemax?: number;
   ariaValuenow?: number;
   ariaValuetext?: string;
-  ariaControls?: string;
   ariaOwns?: string;
   ariaFlowto?: string;
   ariaActivedescendant?: string;

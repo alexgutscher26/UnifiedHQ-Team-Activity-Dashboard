@@ -271,10 +271,11 @@ export function SlackInstallationGuide({
             </CardHeader>
             <CardContent className='space-y-2 text-sm'>
               <div className='space-y-2'>
-                <p className='font-medium'>Can't install the app?</p>
+                <p className='font-medium'>Can&apos;t install the app?</p>
                 <ul className='list-disc list-inside space-y-1 text-muted-foreground ml-4'>
                   <li>
-                    Make sure you're an admin or have permission to install apps
+                    Make sure you&apos;re an admin or have permission to install
+                    apps
                   </li>
                   <li>
                     Check if your workspace allows third-party app installations

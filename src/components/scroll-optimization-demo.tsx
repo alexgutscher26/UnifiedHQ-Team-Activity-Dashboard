@@ -1,18 +1,37 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { OptimizedScrollContainer, ScrollPerformanceIndicator, ScrollOptimizationSettings } from '@/components/optimized-scroll-container';
-import { useScrollPerformanceMonitor, scrollOptimizationPresets } from '@/hooks/use-scroll-optimization';
-import { IconScroll, IconZap, IconChartBar, IconSettings } from '@tabler/icons-react';
+import {
+  OptimizedScrollContainer,
+  ScrollPerformanceIndicator,
+  ScrollOptimizationSettings,
+} from '@/components/optimized-scroll-container';
+import {
+  useScrollPerformanceMonitor,
+  scrollOptimizationPresets,
+} from '@/hooks/use-scroll-optimization';
+import {
+  IconScroll,
+  IconZap,
+  IconChartBar,
+  IconSettings,
+} from '@tabler/icons-react';
 
 export function ScrollOptimizationDemo() {
-  const [selectedPreset, setSelectedPreset] = useState<keyof typeof scrollOptimizationPresets>('smooth');
+  const [selectedPreset, setSelectedPreset] =
+    useState<keyof typeof scrollOptimizationPresets>('smooth');
   const [showPerformance, setShowPerformance] = useState(true);
-  
+
   // Scroll performance monitoring
   const { metrics: scrollMetrics, handleScroll } = useScrollPerformanceMonitor(
     scrollOptimizationPresets[selectedPreset]
@@ -59,7 +78,8 @@ export function ScrollOptimizationDemo() {
             Scroll Optimization Demo
           </CardTitle>
           <CardDescription>
-            Compare different scroll optimization strategies and monitor performance in real-time
+            Compare different scroll optimization strategies and monitor
+            performance in real-time
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -68,7 +88,7 @@ export function ScrollOptimizationDemo() {
               currentPreset={selectedPreset}
               onPresetChange={setSelectedPreset}
             />
-            
+
             <div className='space-y-2'>
               <label className='text-sm font-medium'>Display Options:</label>
               <div className='flex items-center space-x-2'>
@@ -76,7 +96,7 @@ export function ScrollOptimizationDemo() {
                   type='checkbox'
                   id='showPerformance'
                   checked={showPerformance}
-                  onChange={(e) => setShowPerformance(e.target.checked)}
+                  onChange={e => setShowPerformance(e.target.checked)}
                   className='rounded'
                 />
                 <label htmlFor='showPerformance' className='text-sm'>
@@ -165,7 +185,9 @@ export function ScrollOptimizationDemo() {
         <CardContent>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <div className='space-y-4'>
-              <h4 className='font-medium text-green-800'>Performance Optimizations</h4>
+              <h4 className='font-medium text-green-800'>
+                Performance Optimizations
+              </h4>
               <ul className='space-y-2 text-sm'>
                 <li className='flex items-center gap-2'>
                   <div className='w-2 h-2 bg-green-600 rounded-full'></div>
@@ -210,7 +232,9 @@ export function ScrollOptimizationDemo() {
           </div>
 
           <div className='mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg'>
-            <h5 className='font-medium text-blue-800 mb-2'>Performance Targets</h5>
+            <h5 className='font-medium text-blue-800 mb-2'>
+              Performance Targets
+            </h5>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4 text-sm'>
               <div>
                 <span className='font-medium'>Scroll Time:</span>
@@ -227,7 +251,8 @@ export function ScrollOptimizationDemo() {
               <div>
                 <span className='font-medium'>Frame Rate:</span>
                 <div className='text-blue-700'>
-                  ≥60fps (Excellent) | ≥30fps (Good) | <30fps (Needs Improvement)
+                  ≥60fps (Excellent) | ≥30fps (Good) | &lt;30fps (Needs
+                  Improvement)
                 </div>
               </div>
             </div>

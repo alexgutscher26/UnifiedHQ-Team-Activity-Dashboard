@@ -117,6 +117,8 @@ const formatTimestamp = memo((timestamp: Date | string) => {
   }
 });
 
+formatTimestamp.displayName = 'FormatTimestamp';
+
 // Individual activity item component
 const ActivityItem = memo(
   ({

@@ -155,21 +155,27 @@ export const useOptimizedScroll = (
   } = config;
 
   // Create optimized callback based on configuration
+  // Always call hooks unconditionally to follow rules of hooks
+  const rafCallback = useScrollRAF(callback);
+  const throttledCallback = useScrollThrottle(callback, {
+    throttleMs: 16, // 60fps
+    passive: enablePassiveListeners,
+  });
+  const debouncedCallback = useScrollDebounce(callback, debounceMs);
+
+  // Apply optimizations based on configuration
   let optimizedCallback = callback;
 
   if (enableRAF) {
-    optimizedCallback = useScrollRAF(optimizedCallback);
+    optimizedCallback = rafCallback;
   }
 
   if (enableThrottling) {
-    optimizedCallback = useScrollThrottle(optimizedCallback, {
-      throttleMs: 16, // 60fps
-      passive: enablePassiveListeners,
-    });
+    optimizedCallback = throttledCallback;
   }
 
   if (enableDebouncing) {
-    optimizedCallback = useScrollDebounce(optimizedCallback, debounceMs);
+    optimizedCallback = debouncedCallback;
   }
 
   return optimizedCallback;

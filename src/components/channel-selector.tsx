@@ -327,8 +327,8 @@ export function ChannelSelector({ isConnected }: ChannelSelectorProps) {
             {selectedCount} of {channels.length} channels selected
             <br />
             <span className='text-xs'>
-              💡 For channels showing "❌ Requires invitation", add the app to
-              the channel in Slack first
+              💡 For channels showing &quot;❌ Requires invitation&quot;, add
+              the app to the channel in Slack first
             </span>
           </div>
           <div className='flex gap-2'>
