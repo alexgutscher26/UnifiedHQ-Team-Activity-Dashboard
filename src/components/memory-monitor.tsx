@@ -23,6 +23,18 @@ interface MemoryMonitorProps {
   className?: string;
 }
 
+/**
+ * Monitors memory usage and detects potential memory leaks in a React application.
+ *
+ * The MemoryMonitor component initializes memory monitoring, updates the memory report at regular intervals,
+ * and provides a user interface to display memory statistics, including active subscriptions, timers,
+ * and event listeners. It also allows for manual cleanup of memory leaks and displays memory usage snapshots.
+ *
+ * @param {Object} props - The properties for the MemoryMonitor component.
+ * @param {boolean} [props.show=false] - Determines if the memory monitor is initially visible.
+ * @param {string} [props.className] - Additional class names for styling the component.
+ * @returns {JSX.Element|null} The rendered MemoryMonitor component or null if not in development mode.
+ */
 export function MemoryMonitor({ show = false, className }: MemoryMonitorProps) {
   const [report, setReport] = useState<any>(null);
   const [isVisible, setIsVisible] = useState(show);
