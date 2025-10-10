@@ -20,7 +20,7 @@ class PerformanceAnalyzer {
   }
 
   /**
-   * Load performance reports from files
+   * Load performance reports from JSON files in the reports directory.
    */
   loadReports() {
     if (!fs.existsSync(this.reportsDir)) {
@@ -44,7 +44,7 @@ class PerformanceAnalyzer {
   }
 
   /**
-   * Analyze performance trends
+   * Analyzes performance trends from the provided reports.
    */
   analyzeTrends(reports) {
     if (reports.length < 2) {
@@ -123,7 +123,12 @@ class PerformanceAnalyzer {
   }
 
   /**
-   * Calculate overall performance grade
+   * Calculate overall performance grade.
+   *
+   * This function evaluates the performance based on various metrics such as average render time, average memory usage, total errors, and average scroll time. Points are deducted from a base score of 100 based on the values of these metrics. The final score is then translated into a letter grade with an accompanying description.
+   *
+   * @param summary - An object containing performance metrics including averageRenderTime, averageMemoryUsage, totalErrors, and averageScrollTime.
+   * @returns An object with the performance grade and description based on the calculated score.
    */
   calculatePerformanceGrade(summary) {
     let score = 100;
@@ -150,7 +155,15 @@ class PerformanceAnalyzer {
   }
 
   /**
-   * Generate recommendations based on analysis
+   * Generate recommendations based on analysis of reports and trends.
+   *
+   * This function evaluates the latest report's summary to identify performance, memory, stability, and UX issues.
+   * It generates tailored recommendations based on specific thresholds for render time, memory usage, and error counts,
+   * as well as trends indicating degradation in performance or memory usage.
+   *
+   * @param reports - An array of report objects containing performance metrics.
+   * @param trends - An object containing trend data for render time and memory usage.
+   * @returns An array of recommendation objects based on the analysis.
    */
   generateRecommendations(reports, trends) {
     const recommendations = [];
@@ -283,7 +296,7 @@ class PerformanceAnalyzer {
   }
 
   /**
-   * Generate comprehensive analysis report
+   * Generate an analysis report from the provided reports.
    */
   generateAnalysisReport(reports) {
     const trends = this.analyzeTrends(reports);
@@ -308,7 +321,11 @@ class PerformanceAnalyzer {
   }
 
   /**
-   * Print analysis results to console
+   * Print analysis results to console.
+   *
+   * This function generates a detailed performance analysis report by logging various metrics, including a summary of performance grades, average render time, memory usage, total errors, and session duration. It also displays trends for each metric, alerts if any critical issues are present, and provides recommendations based on the analysis report. Finally, it calculates and displays the overall performance score using the `calculateOverallScore` method.
+   *
+   * @param {Object} analysisReport - The analysis report containing summary, trends, alerts, and recommendations.
    */
   printAnalysis(analysisReport) {
     console.log('\n📊 Performance Analysis Report');
@@ -389,7 +406,12 @@ class PerformanceAnalyzer {
   }
 
   /**
-   * Calculate overall performance score
+   * Calculate overall performance score.
+   *
+   * This function evaluates the performance score based on various metrics from the analysis report. It deducts points for high average render time, excessive memory usage, and the number of errors. Additionally, it considers trends and alerts, applying further deductions based on their severity. The final score is constrained to a minimum of 0.
+   *
+   * @param analysisReport - An object containing performance metrics, trends, and alerts.
+   * @returns The calculated overall performance score, which is a non-negative integer.
    */
   calculateOverallScore(analysisReport) {
     let score = 100;
@@ -419,7 +441,7 @@ class PerformanceAnalyzer {
   }
 
   /**
-   * Save analysis report to file
+   * Save analysis report to a JSON file in the reports directory.
    */
   saveAnalysisReport(analysisReport) {
     const filename = `performance-analysis-${Date.now()}.json`;
@@ -437,6 +459,10 @@ class PerformanceAnalyzer {
 
   /**
    * Run complete analysis
+   *
+   * This function initiates a performance analysis by loading reports, checking if any reports are available,
+   * generating an analysis report, printing it, and saving the report. If no reports are found, it prompts
+   * the user to run the performance monitoring command. Errors during the process are caught and logged.
    */
   async runAnalysis() {
     console.log('🔍 Starting performance analysis...\n');
