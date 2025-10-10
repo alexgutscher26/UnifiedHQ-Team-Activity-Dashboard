@@ -41,6 +41,17 @@ interface PerformanceDashboardProps {
   onRefresh?: () => void;
 }
 
+/**
+ * Renders a performance dashboard displaying various performance metrics and alerts.
+ *
+ * The component maintains historical data of performance metrics, updates alerts based on the current metrics,
+ * and calculates a performance grade. It also provides visual indicators for render time, memory usage, FPS,
+ * and scroll performance, along with trend icons for comparative analysis against previous metrics.
+ *
+ * @param metrics - An object containing performance metrics including renderTime, memoryUsage, fps, and scrollPerformance.
+ * @param onRefresh - A callback function to refresh the metrics.
+ * @returns A JSX element representing the performance dashboard.
+ */
 export function PerformanceDashboard({
   metrics,
   onRefresh,
