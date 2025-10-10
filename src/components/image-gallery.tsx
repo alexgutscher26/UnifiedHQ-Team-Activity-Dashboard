@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { OptimizedImage } from './optimized-image';
 import { cn } from '@/lib/utils';
-import { Button } from './ui/button';
+import { AccessibleButton } from './accessible-button';
+import { useAriaLiveAnnouncer } from '@/hooks/use-accessibility';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ImageGalleryProps {
@@ -30,27 +31,37 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { announce } = useAriaLiveAnnouncer();
 
   const currentImage = images[currentIndex];
 
   const nextImage = () => {
     setCurrentIndex(prev => (prev + 1) % images.length);
+    announce(
+      `Image ${currentIndex + 1} of ${images.length}: ${images[(currentIndex + 1) % images.length].alt}`
+    );
   };
 
   const prevImage = () => {
     setCurrentIndex(prev => (prev - 1 + images.length) % images.length);
+    announce(
+      `Image ${currentIndex} of ${images.length}: ${images[(currentIndex - 1 + images.length) % images.length].alt}`
+    );
   };
 
   const goToImage = (index: number) => {
     setCurrentIndex(index);
+    announce(`Image ${index + 1} of ${images.length}: ${images[index].alt}`);
   };
 
   const openFullscreen = () => {
     setIsFullscreen(true);
+    announce(`Opened fullscreen view for image: ${currentImage.alt}`);
   };
 
   const closeFullscreen = () => {
     setIsFullscreen(false);
+    announce('Closed fullscreen view');
   };
 
   // Auto-play functionality
@@ -110,28 +121,36 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
           {/* Navigation Arrows */}
           {images.length > 1 && (
             <>
-              <Button
+              <AccessibleButton
                 variant='ghost'
                 size='icon'
                 className='absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity'
                 onClick={prevImage}
+                aria-label={`Previous image: ${images[(currentIndex - 1 + images.length) % images.length].alt}`}
+                announceOnClick={false}
               >
                 <ChevronLeft className='w-6 h-6' />
-              </Button>
-              <Button
+              </AccessibleButton>
+              <AccessibleButton
                 variant='ghost'
                 size='icon'
                 className='absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity'
                 onClick={nextImage}
+                aria-label={`Next image: ${images[(currentIndex + 1) % images.length].alt}`}
+                announceOnClick={false}
               >
                 <ChevronRight className='w-6 h-6' />
-              </Button>
+              </AccessibleButton>
             </>
           )}
 
           {/* Image Counter */}
           {images.length > 1 && (
-            <div className='absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-sm'>
+            <div
+              className='absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-sm'
+              aria-label={`Image ${currentIndex + 1} of ${images.length}`}
+              role='status'
+            >
               {currentIndex + 1} / {images.length}
             </div>
           )}
@@ -139,27 +158,35 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
 
         {/* Thumbnails */}
         {showThumbnails && images.length > 1 && (
-          <div className='flex gap-2 mt-4 overflow-x-auto'>
+          <div
+            className='flex gap-2 mt-4 overflow-x-auto'
+            role='tablist'
+            aria-label='Image thumbnails'
+          >
             {images.map((image, index) => (
-              <button
+              <AccessibleButton
                 key={index}
                 onClick={() => goToImage(index)}
                 className={cn(
-                  'relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all',
+                  'relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all p-0',
                   index === currentIndex
                     ? 'border-blue-500 ring-2 ring-blue-200'
                     : 'border-gray-200 hover:border-gray-300'
                 )}
+                aria-label={`Go to image ${index + 1}: ${image.alt}`}
+                aria-selected={index === currentIndex}
+                role='tab'
+                announceOnClick={false}
               >
                 <OptimizedImage
                   src={image.src}
-                  alt={image.alt}
+                  alt=''
                   width={80}
                   height={80}
                   quality='thumbnail'
                   className='w-full h-full object-cover'
                 />
-              </button>
+              </AccessibleButton>
             ))}
           </div>
         )}
@@ -174,16 +201,24 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
 
       {/* Fullscreen Modal */}
       {isFullscreen && (
-        <div className='fixed inset-0 z-50 bg-black/90 flex items-center justify-center'>
+        <div
+          className='fixed inset-0 z-50 bg-black/90 flex items-center justify-center'
+          role='dialog'
+          aria-modal='true'
+          aria-labelledby='fullscreen-image-title'
+          aria-describedby='fullscreen-image-description'
+        >
           <div className='relative max-w-7xl max-h-full p-4'>
-            <Button
+            <AccessibleButton
               variant='ghost'
               size='icon'
               className='absolute top-4 right-4 text-white hover:bg-white/20'
               onClick={closeFullscreen}
+              aria-label='Close fullscreen view'
+              announceOnClick={false}
             >
               <X className='w-6 h-6' />
-            </Button>
+            </AccessibleButton>
 
             <OptimizedImage
               src={currentImage.src}
@@ -196,30 +231,46 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
 
             {images.length > 1 && (
               <>
-                <Button
+                <AccessibleButton
                   variant='ghost'
                   size='icon'
                   className='absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20'
                   onClick={prevImage}
+                  aria-label={`Previous image: ${images[(currentIndex - 1 + images.length) % images.length].alt}`}
+                  announceOnClick={false}
                 >
                   <ChevronLeft className='w-8 h-8' />
-                </Button>
-                <Button
+                </AccessibleButton>
+                <AccessibleButton
                   variant='ghost'
                   size='icon'
                   className='absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20'
                   onClick={nextImage}
+                  aria-label={`Next image: ${images[(currentIndex + 1) % images.length].alt}`}
+                  announceOnClick={false}
                 >
                   <ChevronRight className='w-8 h-8' />
-                </Button>
+                </AccessibleButton>
               </>
             )}
 
             {currentImage.caption && (
-              <div className='absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded'>
+              <div
+                className='absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded'
+                role='status'
+                aria-label={`Caption: ${currentImage.caption}`}
+              >
                 {currentImage.caption}
               </div>
             )}
+
+            {/* Hidden labels for screen readers */}
+            <div id='fullscreen-image-title' className='sr-only'>
+              {currentImage.alt}
+            </div>
+            <div id='fullscreen-image-description' className='sr-only'>
+              Fullscreen view of image {currentIndex + 1} of {images.length}
+            </div>
           </div>
         </div>
       )}
