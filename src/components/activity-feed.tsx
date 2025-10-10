@@ -152,6 +152,14 @@ export function ActivityFeed() {
     }
   }, [activities]);
 
+  /**
+   * Establish a connection to live updates via Server-Sent Events (SSE).
+   *
+   * This function creates an EventSource to listen for live updates from the server. It handles various message types, including connection confirmation, errors, heartbeats, and activity updates. On receiving an activity update, it triggers a fetch for activities if the sync is completed. Error handling is implemented to manage connection issues and notify the user accordingly.
+   *
+   * @returns void
+   * @throws Error If the connection to live updates fails.
+   */
   const connectToLiveUpdates = () => {
     try {
       // Create EventSource with credentials
