@@ -29,6 +29,16 @@ import { useToast } from '@/hooks/use-toast';
 
 // Activity interface is now imported from types/components.ts
 
+/**
+ * Retrieve the appropriate icon based on the activity source and type.
+ *
+ * The function checks the source of the activity, which can be 'github' or 'slack', and returns the corresponding icon.
+ * For 'github', it further inspects the event type to determine the specific icon to return.
+ * If the source is not recognized, a default icon is returned.
+ *
+ * @param activity - An object representing the activity, which includes the source and metadata.
+ * @returns The icon associated with the specified activity.
+ */
 const getActivityIcon = (activity: Activity) => {
   if (activity.source === 'github') {
     const eventType = activity.metadata?.eventType;
