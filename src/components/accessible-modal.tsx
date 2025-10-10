@@ -32,6 +32,25 @@ interface AccessibleModalProps {
   announceOnClose?: boolean;
 }
 
+/**
+ * A React functional component that renders an accessible modal dialog.
+ *
+ * The AccessibleModal component manages focus trapping, announces modal state changes, and handles keyboard and overlay interactions. It saves the previous focus when opened and restores it when closed. The modal can be customized with various props, including size, close behavior, and visibility of the close button.
+ *
+ * @param open - A boolean indicating whether the modal is open.
+ * @param onOpenChange - A function to handle changes to the modal's open state.
+ * @param title - The title of the modal.
+ * @param description - An optional description of the modal.
+ * @param children - The content to be displayed inside the modal.
+ * @param className - Additional CSS classes to apply to the modal.
+ * @param size - The size of the modal, defaults to 'md'.
+ * @param closeOnEscape - A boolean indicating if the modal should close on the Escape key press, defaults to true.
+ * @param closeOnOverlayClick - A boolean indicating if the modal should close when the overlay is clicked, defaults to true.
+ * @param showCloseButton - A boolean indicating if the close button should be shown, defaults to true.
+ * @param announceOnOpen - A boolean indicating if the modal opening should be announced, defaults to true.
+ * @param announceOnClose - A boolean indicating if the modal closing should be announced, defaults to true.
+ * @returns A JSX element representing the modal dialog.
+ */
 export const AccessibleModal: React.FC<AccessibleModalProps> = ({
   open,
   onOpenChange,
@@ -94,10 +113,16 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
     restoreFocus,
   ]);
 
+  /**
+   * Closes the open state by setting it to false.
+   */
   const handleClose = () => {
     onOpenChange(false);
   };
 
+  /**
+   * Handles click events on the overlay to close it if conditions are met.
+   */
   const handleOverlayClick = (event: React.MouseEvent) => {
     if (closeOnOverlayClick && event.target === event.currentTarget) {
       handleClose();
@@ -164,6 +189,22 @@ interface AccessibleAlertDialogProps {
   announceOnOpen?: boolean;
 }
 
+/**
+ * Renders an accessible alert dialog component.
+ *
+ * The AccessibleAlertDialog component manages the dialog's open state, announces the title and description when opened, and handles focus trapping. It provides action and cancel buttons, invoking the respective callbacks on user interaction. The dialog can be customized with different labels and variants, ensuring a user-friendly experience.
+ *
+ * @param {boolean} open - Indicates whether the dialog is open or closed.
+ * @param {function} onOpenChange - Callback function to handle changes in the dialog's open state.
+ * @param {string} title - The title of the alert dialog.
+ * @param {string} description - The description of the alert dialog.
+ * @param {string} actionLabel - The label for the action button.
+ * @param {string} [cancelLabel='Cancel'] - The label for the cancel button.
+ * @param {function} onAction - Callback function to be called when the action button is clicked.
+ * @param {function} onCancel - Callback function to be called when the cancel button is clicked.
+ * @param {string} [variant='default'] - The variant of the action button.
+ * @param {boolean} [announceOnOpen=true] - Indicates whether to announce the dialog content when opened.
+ */
 export const AccessibleAlertDialog: React.FC<AccessibleAlertDialogProps> = ({
   open,
   onOpenChange,
@@ -208,6 +249,9 @@ export const AccessibleAlertDialog: React.FC<AccessibleAlertDialogProps> = ({
     onOpenChange(false);
   };
 
+  /**
+   * Handles the cancel action by invoking onCancel and setting onOpenChange to false.
+   */
   const handleCancel = () => {
     onCancel?.();
     onOpenChange(false);
@@ -262,6 +306,9 @@ export const AccessibleTooltip: React.FC<AccessibleTooltipProps> = ({
   const [open, setOpen] = useState(false);
   const { announce } = useAriaLiveAnnouncer();
 
+  /**
+   * Handles mouse enter event by setting open state and announcing content.
+   */
   const handleMouseEnter = () => {
     setOpen(true);
     announce(content);
@@ -271,11 +318,15 @@ export const AccessibleTooltip: React.FC<AccessibleTooltipProps> = ({
     setOpen(false);
   };
 
+  /**
+   * Sets the open state to true and announces the content.
+   */
   const handleFocus = () => {
     setOpen(true);
     announce(content);
   };
 
+  /** Closes the open state when the blur event occurs. */
   const handleBlur = () => {
     setOpen(false);
   };
@@ -361,10 +412,16 @@ export const AccessiblePopover: React.FC<AccessiblePopoverProps> = ({
     }
   }, [isOpen, announceOnOpen, announce]);
 
+  /**
+   * Toggles the isOpen state.
+   */
   const handleTriggerClick = () => {
     setIsOpen(!isOpen);
   };
 
+  /**
+   * Closes the modal when the Escape key is pressed.
+   */
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
       setIsOpen(false);
