@@ -33,6 +33,13 @@ interface SlackInstallationGuideProps {
   clientId?: string;
 }
 
+/**
+ * Renders the Slack installation guide modal for users.
+ *
+ * This component manages the installation process of the Slack app, including displaying the installation URL, handling clipboard actions, and providing troubleshooting information. It utilizes state management for modal visibility and copied step tracking, and it ensures the body scroll is disabled when the modal is open. The installation URL is dynamically generated based on the provided clientId.
+ *
+ * @param clientId - The client ID used to generate the installation URL for the Slack app.
+ */
 export function SlackInstallationGuide({
   clientId,
 }: SlackInstallationGuideProps) {
