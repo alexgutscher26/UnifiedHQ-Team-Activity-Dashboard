@@ -26,6 +26,17 @@ function broadcastToUser(userId: string, data: any) {
   }
 }
 
+/**
+ * Handles the POST request to sync Slack activities for the authenticated user.
+ *
+ * This function retrieves the user's session, checks if Slack is connected, and counts the selected channels.
+ * If conditions are met, it fetches Slack activities, saves them to the database, and broadcasts an update to connected clients.
+ * It also handles errors related to session and token validity, returning appropriate responses.
+ *
+ * @param request - The NextRequest object containing the request details.
+ * @returns A JSON response indicating the success or failure of the sync operation.
+ * @throws Error If the Slack token is expired or invalid, or if any other error occurs during the sync process.
+ */
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
