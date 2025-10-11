@@ -5,6 +5,7 @@ import {
   createApiSuccessResponse,
 } from '@/lib/api-error-handler';
 import { validateRequestBody } from '@/lib/api-validation';
+import { captureClientError } from '@/lib/posthog-server';
 import { z } from 'zod';
 
 // Error report schema
@@ -36,23 +37,28 @@ async function reportError(request: NextRequest) {
     await request.json()
   );
 
-  // ToDo: In production, you would:
-  // 1. Send to error tracking service (Sentry, LogRocket, etc.)
-  // 2. Store in database for analysis
-  // 3. Send alerts for critical errors
+  // Create error object for PostHog
+  const error = new Error(errorData.error.message);
+  error.name = errorData.error.name || 'ClientError';
+  error.stack = errorData.error.stack;
+
+  // Capture error in PostHog with additional context
+  await captureClientError(error, session?.user?.id || 'anonymous', {
+    errorId: errorData.errorId,
+    url: errorData.url,
+    userAgent: errorData.userAgent,
+    componentStack: errorData.errorInfo?.componentStack,
+    timestamp: errorData.timestamp || new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    errorType: 'client_error',
+    userId: session?.user?.id || 'anonymous',
+  });
 
   console.error('Client Error Report:', {
     ...errorData,
     userId: session?.user?.id || 'anonymous',
     timestamp: new Date().toISOString(),
   });
-
-  // For now, just log the error
-  // ToDo: In production, integrate with your error tracking service
-  if (process.env.NODE_ENV === 'production') {
-    // Example: Send to Sentry, LogRocket, or your error tracking service
-    // await sendToErrorTrackingService(errorData);
-  }
 
   return createApiSuccessResponse(
     { received: true },

@@ -97,7 +97,6 @@ class ReviewTools {
         });
       }
     } catch (error) {
-      // No TODO comments found
     }
   }
 

@@ -40,3 +40,27 @@ export async function captureServerException(
     console.error('Failed to capture server exception:', err);
   }
 }
+
+export async function captureClientError(
+  error: Error,
+  distinctId?: string,
+  additionalProperties?: Record<string, any>
+): Promise<void> {
+  try {
+    const posthog = getPostHogServer();
+    if (posthog) {
+      await posthog.capture({
+        distinctId: distinctId || 'anonymous',
+        event: 'Client Error',
+        properties: {
+          error_message: error.message,
+          error_name: error.name,
+          error_stack: error.stack,
+          ...additionalProperties,
+        },
+      });
+    }
+  } catch (err) {
+    console.error('Failed to capture client error:', err);
+  }
+}
