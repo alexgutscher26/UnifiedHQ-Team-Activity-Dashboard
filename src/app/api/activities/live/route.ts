@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 
+/**
+ * Handles the Server-Sent Events (SSE) connection for live updates.
+ *
+ * This function first attempts to retrieve the user session from the request headers. If the session is valid and the user is authenticated, it establishes a readable stream for SSE, sending connection messages and periodic heartbeats. If the user is not authenticated, it returns an error message. The function also manages connection cleanup on disconnection events.
+ *
+ * @param request - The incoming NextRequest object containing the connection request details.
+ * @returns A Response object containing the SSE stream or an error message if the user is unauthorized or if an error occurs during connection establishment.
+ * @throws Error If there is an issue with the SSE stream or connection handling.
+ */
 export async function GET(request: NextRequest) {
   try {
     console.log('[SSE] Received connection request');
