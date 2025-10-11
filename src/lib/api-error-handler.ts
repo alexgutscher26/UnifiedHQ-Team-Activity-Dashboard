@@ -2,6 +2,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
+import { auth } from '@/lib/auth';
+import { PrismaClient } from '@/generated/prisma';
 
 // Error types
 export enum ApiErrorType {
@@ -187,23 +189,93 @@ export function handleApiError(
   return createApiErrorResponse(unknownError);
 }
 
-// Wrapper for API route handlers
+// Enhanced wrapper for API route handlers with authentication
 export function withErrorHandling<T = any>(
-  handler: (req: NextRequest, context?: any) => Promise<NextResponse<T>>
+  handler: (req: NextRequest, context?: any) => Promise<NextResponse<T>>,
+  options?: {
+    requireAuth?: boolean;
+    requireAdmin?: boolean;
+    requiredPermissions?: string[];
+    rateLimit?: {
+      limit: number;
+      windowMs: number;
+    };
+  }
 ) {
   return async (req: NextRequest, context?: any): Promise<NextResponse> => {
     const requestId = generateRequestId();
 
     try {
-      // Add request ID to headers for tracing
+      // Rate limiting check
+      if (options?.rateLimit) {
+        const identifier = req.headers.get('x-forwarded-for') || 
+                          req.headers.get('x-real-ip') || 
+                          'unknown';
+        
+        if (!checkRateLimit(identifier, options.rateLimit.limit, options.rateLimit.windowMs)) {
+          const rateLimitError = ApiErrors.rateLimit(
+            `Rate limit exceeded. Try again in ${Math.ceil(options.rateLimit.windowMs / 1000)} seconds`
+          );
+          return createApiErrorResponse(rateLimitError);
+        }
+      }
+
+      // Authentication checks
+      if (options?.requireAuth || options?.requireAdmin || options?.requiredPermissions) {
+        try {
+          if (options.requireAdmin) {
+            await requireAdmin(req);
+          } else if (options.requiredPermissions) {
+            await requireAuthWithContext(req, options.requiredPermissions);
+          } else {
+            await requireAuth(req);
+          }
+        } catch (authError) {
+          return handleApiError(authError, requestId);
+        }
+      }
+
+      // Execute handler
       const response = await handler(req, context);
       response.headers.set('X-Request-ID', requestId);
       return response;
     } catch (error) {
-      return handleApiError(error, requestId);
+      const errorResponse = handleApiError(error, requestId);
+      
+      // Log error with additional context
+      if (errorResponse.status >= 400) {
+        const errorBody = await errorResponse.json();
+        logApiError(errorBody.error, req, {
+          requestId,
+          context,
+          options,
+        });
+      }
+      
+      return errorResponse;
     }
   };
 }
+
+// Convenience wrappers for common authentication patterns
+export const withAuth = <T = any>(
+  handler: (req: NextRequest, context?: any) => Promise<NextResponse<T>>
+) => withErrorHandling(handler, { requireAuth: true });
+
+export const withAdmin = <T = any>(
+  handler: (req: NextRequest, context?: any) => Promise<NextResponse<T>>
+) => withErrorHandling(handler, { requireAdmin: true });
+
+export const withPermissions = <T = any>(
+  permissions: string[],
+  handler: (req: NextRequest, context?: any) => Promise<NextResponse<T>>
+) => withErrorHandling(handler, { requiredPermissions: permissions });
+
+export const withRateLimit = <T = any>(
+  limit: number,
+  windowMs: number,
+  handler: (req: NextRequest, context?: any) => Promise<NextResponse<T>>
+) => withErrorHandling(handler, { rateLimit: { limit, windowMs } });
 
 // Common error creators
 export const ApiErrors = {
@@ -349,30 +421,197 @@ export function checkRateLimit(
 // Authentication helpers
 export async function requireAuth(
   req: NextRequest
-): Promise<{ userId: string; user: any }> {
-  // ToDo: This should integrate with your auth system
-  // For now, we'll check for a simple header
-  const authHeader = req.headers.get('authorization');
+): Promise<{ userId: string; user: any; session: any }> {
+  try {
+    // Extract session from cookies
+    const sessionToken = req.cookies.get('session_token')?.value;
+    const sessionData = req.cookies.get('session_data')?.value;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw ApiErrors.authentication();
+    if (!sessionToken || !sessionData) {
+      throw ApiErrors.authentication('No session found');
+    }
+
+    // Verify session with Better Auth
+    const session = await auth.api.getSession({
+      headers: req.headers,
+    });
+
+    if (!session) {
+      throw ApiErrors.authentication('Invalid or expired session');
+    }
+
+    // Get user data from database
+    const prisma = new PrismaClient();
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        emailVerified: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLoginMethod: true,
+      },
+    });
+
+    if (!user) {
+      throw ApiErrors.authentication('User not found');
+    }
+
+    // Check if session is still valid
+    const now = new Date();
+    if (session.session.expiresAt && new Date(session.session.expiresAt) < now) {
+      throw ApiErrors.authentication('Session expired');
+    }
+
+    return {
+      userId: user.id,
+      user,
+      session,
+    };
+  } catch (error) {
+    if (error && typeof error === 'object' && 'type' in error) {
+      throw error; // Re-throw API errors
+    }
+    
+    // Handle authentication errors
+    if (error instanceof Error) {
+      if (error.message.includes('session') || error.message.includes('token')) {
+        throw ApiErrors.authentication(error.message);
+      }
+    }
+    
+    throw ApiErrors.authentication('Authentication failed');
+  }
+}
+
+// Optional authentication helper (doesn't throw if no auth)
+export async function getOptionalAuth(
+  req: NextRequest
+): Promise<{ userId: string; user: any; session: any } | null> {
+  try {
+    return await requireAuth(req);
+  } catch {
+    return null;
+  }
+}
+
+// Admin-only authentication helper
+export async function requireAdmin(
+  req: NextRequest
+): Promise<{ userId: string; user: any; session: any }> {
+  const authResult = await requireAuth(req);
+  
+  // Check if user has admin privileges
+  // This would depend on your user role system
+  // For now, we'll check if the user email contains 'admin' or is a specific admin email
+  const prisma = new PrismaClient();
+  const adminUser = await prisma.user.findUnique({
+    where: { id: authResult.userId },
+    select: { email: true },
+  });
+
+  if (!adminUser || !adminUser.email?.includes('admin')) {
+    throw ApiErrors.authorization('Admin privileges required');
   }
 
-  const token = authHeader.substring(7);
+  return authResult;
+}
 
-  // ToDo: In a real implementation, verify the token
-  // For now, we'll simulate a user
-  if (token === 'invalid') {
-    throw ApiErrors.authentication('Invalid token');
+// Enhanced authentication with user context
+export async function requireAuthWithContext(
+  req: NextRequest,
+  requiredPermissions?: string[]
+): Promise<{ 
+  userId: string; 
+  user: any; 
+  session: any;
+  permissions: string[];
+}> {
+  const authResult = await requireAuth(req);
+  
+  // Get user permissions/roles from database
+  // For now, we'll use a simple permission system based on user properties
+  const prisma = new PrismaClient();
+  const userPermissions = await prisma.user.findUnique({
+    where: { id: authResult.userId },
+    select: { 
+      email: true,
+      emailVerified: true,
+    },
+  });
+
+  // Simple permission system - can be extended based on your needs
+  const permissions: string[] = [];
+  if (userPermissions?.emailVerified) {
+    permissions.push('verified');
+  }
+  if (userPermissions?.email?.includes('admin')) {
+    permissions.push('admin');
+  }
+  
+  // Check required permissions if specified
+  if (requiredPermissions && requiredPermissions.length > 0) {
+    const hasRequiredPermissions = requiredPermissions.every(permission =>
+      permissions.includes(permission)
+    );
+    
+    if (!hasRequiredPermissions) {
+      throw ApiErrors.authorization(
+        `Missing required permissions: ${requiredPermissions.join(', ')}`
+      );
+    }
   }
 
   return {
-    userId: 'user_123',
-    user: { id: 'user_123', email: 'user@example.com' },
+    ...authResult,
+    permissions,
   };
 }
 
-// Logging helper
+// API key authentication helper
+export async function requireApiKey(
+  req: NextRequest
+): Promise<{ apiKey: string; client: any }> {
+  const apiKey = req.headers.get('x-api-key') || req.headers.get('authorization')?.replace('Bearer ', '');
+  
+  if (!apiKey) {
+    throw ApiErrors.authentication('API key required');
+  }
+
+  // For now, we'll use a simple API key validation
+  // In a real implementation, you'd store API keys in the database
+  const validApiKeys = process.env.VALID_API_KEYS?.split(',') || [];
+  
+  if (!validApiKeys.includes(apiKey)) {
+    throw ApiErrors.authentication('Invalid API key');
+  }
+
+  // Simulate client data
+  const client = {
+    key: apiKey,
+    active: true,
+    user: { id: 'api_user', email: 'api@example.com' },
+  };
+
+  return { apiKey, client };
+}
+
+// Rate limiting with user context
+export function checkRateLimitWithUser(
+  identifier: string,
+  userId?: string,
+  limit: number = 100,
+  windowMs: number = 15 * 60 * 1000
+): boolean {
+  // Use user ID if available, otherwise fall back to identifier
+  const rateLimitKey = userId ? `user_${userId}` : identifier;
+  return checkRateLimit(rateLimitKey, limit, windowMs);
+}
+
+// Logging helper with enhanced context
 export function logApiError(
   error: ApiError,
   req: NextRequest,
@@ -391,8 +630,14 @@ export function logApiError(
       url: req.url,
       headers: Object.fromEntries(req.headers.entries()),
       requestId: error.requestId,
+      userAgent: req.headers.get('user-agent'),
+      ip: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
     },
     timestamp: error.timestamp,
+    environment: {
+      nodeEnv: process.env.NODE_ENV,
+      version: process.env.npm_package_version,
+    },
     ...additionalContext,
   };
 

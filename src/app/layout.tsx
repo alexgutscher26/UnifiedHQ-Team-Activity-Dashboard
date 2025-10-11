@@ -8,6 +8,8 @@ import { GlobalErrorBoundary } from '@/components/error-boundaries';
 import { MemoryMonitor } from '@/components/memory-monitor';
 import { ThemeProvider } from '@/components/theme-provider';
 import { CustomThemeProvider } from '@/contexts/theme-context';
+import { ToastContainer } from '@/components/toast';
+import { RateLimitOverlay } from '@/components/rate-limit';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -29,6 +31,8 @@ export default function RootLayout({
             <GlobalErrorBoundary>
               <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
             </GlobalErrorBoundary>
+            <ToastContainer />
+            <RateLimitOverlay />
             <Analytics />
             <MemoryMonitor />
           </CustomThemeProvider>
