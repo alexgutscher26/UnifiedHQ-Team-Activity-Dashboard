@@ -12,14 +12,6 @@ export function SiteHeader() {
           className='mx-2 data-[orientation=vertical]:h-4'
         />
         <h1 className='text-base font-medium'>Team Activity</h1>
-        <div className='ml-auto flex items-center gap-2'>
-          <Button variant='ghost' size='sm' className='text-sm'>
-            Today
-          </Button>
-          <Button variant='outline' size='sm'>
-            Export
-          </Button>
-        </div>
       </div>
     </header>
   );

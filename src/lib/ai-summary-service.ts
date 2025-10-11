@@ -34,6 +34,8 @@ export interface AISummary {
   metadata: {
     activityCount: number;
     sourceBreakdown: Record<string, number>;
+    activeRepositories: number;
+    activeChannels: number;
     model: string;
     tokensUsed: number;
     traceId?: string;
@@ -118,6 +120,8 @@ export class AISummaryService {
         metadata: {
           activityCount: data.activities.length,
           sourceBreakdown: this.getSourceBreakdown(data.activities),
+          activeRepositories: data.teamContext?.repositories.length || 0,
+          activeChannels: data.teamContext?.channels.length || 0,
           model: this.DEFAULT_MODEL,
           tokensUsed: response.usage?.total_tokens || 0,
           traceId: traceId,

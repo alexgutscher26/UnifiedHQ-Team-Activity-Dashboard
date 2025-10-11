@@ -151,6 +151,7 @@ export interface StatsData {
     activeRepositories: number;
     pendingReviews: number;
     urgentItems: number;
+    summaryCount: number;
   };
   lastUpdated: string;
 }

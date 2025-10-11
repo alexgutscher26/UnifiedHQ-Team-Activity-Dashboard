@@ -57,6 +57,23 @@ export function SectionCards() {
             lastUpdate: 'No recent activity',
           };
 
+      // Fetch AI summary statistics
+      const aiSummaryResponse = await fetch('/api/ai-summary/stats');
+      const aiSummaryStats = aiSummaryResponse.ok
+        ? await aiSummaryResponse.json()
+        : {
+            count: 0,
+            status: 'Inactive',
+            details: 'No summaries generated',
+            lastUpdate: 'No recent activity',
+            breakdown: {
+              totalActivities: 0,
+              averageActivities: 0,
+              activeRepositories: 0,
+              summariesGenerated: 0,
+            },
+          };
+
       // Set stats data
       setStats({
         integrations: {
@@ -78,12 +95,13 @@ export function SectionCards() {
           },
         },
         summary: {
-          totalActivities: (githubStats.count || 0) + (slackStats.count || 0),
-          activeRepositories: githubStats.count || 0,
+          totalActivities: aiSummaryStats.breakdown?.totalActivities || 0,
+          activeRepositories: aiSummaryStats.breakdown?.activeRepositories || 0,
           pendingReviews: githubStats.breakdown?.reviews || 0,
           urgentItems: 0,
+          summaryCount: aiSummaryStats.count || 0,
         },
-        lastUpdated: new Date().toISOString(),
+        lastUpdated: aiSummaryStats.lastUpdate || new Date().toISOString(),
       });
     } finally {
       setIsLoading(false);
@@ -315,7 +333,7 @@ export function SectionCards() {
                   AI Summary
                 </CardDescription>
                 <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                  {stats.summary.totalActivities}
+                  {stats.summary.summaryCount}
                 </CardTitle>
                 <CardAction>
                   <Badge variant='outline' className='bg-background'>
