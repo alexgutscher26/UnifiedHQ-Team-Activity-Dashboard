@@ -24,12 +24,14 @@ export function GlobalErrorBoundary({
   return (
     <ErrorBoundary
       onError={(error, errorInfo) => {
-        // Capture error with PostHog
+        // Capture error with PostHog (safe for mock client)
         try {
-          posthog.captureException(error, {
-            error_boundary: 'global_error_boundary',
-            component_stack: errorInfo?.componentStack,
-          });
+          if (typeof window !== 'undefined' && posthog && typeof posthog.captureException === 'function') {
+            posthog.captureException(error, {
+              error_boundary: 'global_error_boundary',
+              component_stack: errorInfo?.componentStack,
+            });
+          }
         } catch (posthogError) {
           console.error('Failed to capture error with PostHog:', posthogError);
         }

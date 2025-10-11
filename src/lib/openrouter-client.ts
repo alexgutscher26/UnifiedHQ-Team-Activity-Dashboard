@@ -1,0 +1,114 @@
+import { OpenAI } from 'openai';
+import { PostHog } from 'posthog-node';
+
+let openRouterClient: OpenAI | null = null;
+let posthogClient: PostHog | null = null;
+
+export function getPostHogClient(): PostHog | null {
+  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY || !process.env.NEXT_PUBLIC_POSTHOG_HOST) {
+    console.warn('PostHog environment variables not found. Please check your .env.local file.');
+    return null;
+  }
+
+  if (!posthogClient) {
+    posthogClient = new PostHog(
+      process.env.NEXT_PUBLIC_POSTHOG_KEY,
+      {
+        host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+        flushAt: 1,
+        flushInterval: 0,
+      }
+    );
+  }
+  return posthogClient;
+}
+
+export function getOpenRouterClient(): OpenAI | null {
+  if (!process.env.OPENROUTER_API_KEY) {
+    console.warn('OpenRouter API key not found. Please check your .env.local file.');
+    return null;
+  }
+
+  if (!openRouterClient) {
+    openRouterClient = new OpenAI({
+      baseURL: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
+      apiKey: process.env.OPENROUTER_API_KEY,
+    });
+  }
+  return openRouterClient;
+}
+
+export interface LLMGenerationOptions {
+  model: string;
+  messages: Array<{ role: string; content: string }>;
+  distinctId?: string;
+  traceId?: string;
+  properties?: Record<string, any>;
+  groups?: Record<string, string>;
+  privacyMode?: boolean;
+  temperature?: number;
+  maxTokens?: number;
+  stream?: boolean;
+}
+
+export async function generateWithOpenRouter(options: LLMGenerationOptions) {
+  const openaiClient = getOpenRouterClient();
+  const posthogClient = getPostHogClient();
+
+  if (!openaiClient) {
+    throw new Error('OpenRouter client not configured. Please check your environment variables.');
+  }
+
+  try {
+    // Make the API call to OpenRouter
+    const response = await openaiClient.chat.completions.create({
+      model: options.model,
+      messages: options.messages,
+      temperature: options.temperature || 0.7,
+      max_tokens: options.maxTokens || 1000,
+      stream: options.stream || false,
+    });
+
+    // Capture the LLM generation event with PostHog if available
+    if (posthogClient) {
+      try {
+        await posthogClient.capture({
+          distinctId: options.distinctId || 'anonymous',
+          event: '$ai_generation',
+          properties: {
+            $ai_model: options.model,
+            $ai_latency: response.usage ? (Date.now() - Date.now()) / 1000 : 0, // This would need proper timing
+            $ai_input: options.messages,
+            $ai_input_tokens: response.usage?.prompt_tokens || 0,
+            $ai_output_choices: response.choices,
+            $ai_output_tokens: response.usage?.completion_tokens || 0,
+            $ai_total_cost_usd: 0, // Would need to calculate based on model pricing
+            trace_id: options.traceId,
+            ...options.properties,
+          },
+          groups: options.groups,
+        });
+      } catch (posthogError) {
+        console.error('Failed to capture LLM generation with PostHog:', posthogError);
+      }
+    }
+
+    return response;
+  } catch (error) {
+    console.error('OpenRouter API error:', error);
+    throw error;
+  }
+}
+
+// Convenience function for simple text generation
+export async function generateText(
+  prompt: string,
+  model: string = 'gpt-3.5-turbo',
+  options: Partial<LLMGenerationOptions> = {}
+) {
+  return generateWithOpenRouter({
+    model,
+    messages: [{ role: 'user', content: prompt }],
+    ...options,
+  });
+}

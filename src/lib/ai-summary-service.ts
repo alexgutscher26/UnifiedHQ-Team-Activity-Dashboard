@@ -1,16 +1,10 @@
 /**
- * AI Summary Service using OpenRouter
- * Provides intelligent summarization of team activity data
+ * AI Summary Service using OpenRouter with PostHog Analytics
+ * Provides intelligent summarization of team activity data with analytics tracking
  */
 
-import OpenAI from 'openai';
+import { generateWithPostHogAnalytics } from '@/lib/posthog-openrouter';
 import { Activity } from '@/types/components';
-
-// Initialize OpenRouter client
-const openai = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
 
 export interface AISummaryData {
   activities: Activity[];
@@ -42,6 +36,8 @@ export interface AISummary {
     sourceBreakdown: Record<string, number>;
     model: string;
     tokensUsed: number;
+    traceId?: string;
+    posthogTracked?: boolean;
   };
 }
 
@@ -51,7 +47,7 @@ export class AISummaryService {
   private static readonly TEMPERATURE = 0.7;
 
   /**
-   * Generate AI summary from team activity data
+   * Generate AI summary from team activity data with PostHog analytics
    */
   static async generateSummary(
     userId: string,
@@ -59,10 +55,12 @@ export class AISummaryService {
   ): Promise<AISummary> {
     try {
       const prompt = this.buildPrompt(data);
+      const traceId = `ai_summary_${userId}_${Date.now()}`;
 
-      const response = await openai.chat.completions.create({
-        model: this.DEFAULT_MODEL,
-        messages: [
+      // Use PostHog-enabled OpenRouter client for analytics tracking
+      const response = await generateWithPostHogAnalytics(
+        this.DEFAULT_MODEL,
+        [
           {
             role: 'system',
             content: this.getSystemPrompt(),
@@ -72,9 +70,30 @@ export class AISummaryService {
             content: prompt,
           },
         ],
-        max_tokens: this.MAX_TOKENS,
-        temperature: this.TEMPERATURE,
-      });
+        {
+          distinctId: userId,
+          traceId: traceId,
+          properties: {
+            service: 'ai-summary-service',
+            activity_count: data.activities.length,
+            time_range_start: data.timeRange.start.toISOString(),
+            time_range_end: data.timeRange.end.toISOString(),
+            team_context: data.teamContext ? {
+              repositories: data.teamContext.repositories.length,
+              channels: data.teamContext.channels.length,
+              team_size: data.teamContext.teamSize,
+            } : null,
+            source_breakdown: this.getSourceBreakdown(data.activities),
+            summary_type: 'daily_summary',
+          },
+          groups: data.teamContext ? {
+            repositories: data.teamContext.repositories.join(','),
+            channels: data.teamContext.channels.join(','),
+          } : undefined,
+          temperature: this.TEMPERATURE,
+          maxTokens: this.MAX_TOKENS,
+        }
+      );
 
       const content = response.choices[0]?.message?.content;
       if (!content) {
@@ -97,6 +116,8 @@ export class AISummaryService {
           sourceBreakdown: this.getSourceBreakdown(data.activities),
           model: this.DEFAULT_MODEL,
           tokensUsed: response.usage?.total_tokens || 0,
+          traceId: traceId,
+          posthogTracked: true,
         },
       };
     } catch (error) {
@@ -292,7 +313,7 @@ Always respond with valid JSON format as requested.`;
   }
 
   /**
-   * Validate API key and connection
+   * Validate API key and connection with PostHog analytics
    */
   static async validateConnection(): Promise<boolean> {
     try {
@@ -300,11 +321,19 @@ Always respond with valid JSON format as requested.`;
         return false;
       }
 
-      const response = await openai.chat.completions.create({
-        model: this.DEFAULT_MODEL,
-        messages: [{ role: 'user', content: 'Hello' }],
-        max_tokens: 10,
-      });
+      const response = await generateWithPostHogAnalytics(
+        this.DEFAULT_MODEL,
+        [{ role: 'user', content: 'Hello' }],
+        {
+          distinctId: 'system',
+          traceId: `validation_${Date.now()}`,
+          properties: {
+            service: 'ai-summary-service',
+            operation: 'connection_validation',
+          },
+          maxTokens: 10,
+        }
+      );
 
       return !!response.choices[0]?.message?.content;
     } catch (error) {

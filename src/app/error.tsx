@@ -14,11 +14,17 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Capture the error with PostHog
-    posthog.captureException(error, {
-      error_boundary: 'nextjs_error',
-      digest: error.digest,
-    });
+    // Capture the error with PostHog (safe for mock client)
+    try {
+      if (typeof window !== 'undefined' && posthog && typeof posthog.captureException === 'function') {
+        posthog.captureException(error, {
+          error_boundary: 'nextjs_error',
+          digest: error.digest,
+        });
+      }
+    } catch (posthogError) {
+      console.error('Failed to capture error with PostHog:', posthogError);
+    }
   }, [error]);
 
   return (
