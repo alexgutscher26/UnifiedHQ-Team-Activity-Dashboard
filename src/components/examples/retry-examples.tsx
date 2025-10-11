@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 // Example API functions
+/**
+ * Fetches user data by user ID.
+ */
 async function fetchUserData(userId: string) {
   const response = await fetch(`/api/users/${userId}`);
   if (!response.ok) {
@@ -18,6 +21,9 @@ async function fetchUserData(userId: string) {
   return response.json();
 }
 
+/**
+ * Fetches posts from the API.
+ */
 async function fetchPosts() {
   const response = await fetch('/api/posts');
   if (!response.ok) {
@@ -26,6 +32,11 @@ async function fetchPosts() {
   return response.json();
 }
 
+/**
+ * Updates the user profile with the given data.
+ * @param {string} userId - The ID of the user to update.
+ * @param {any} data - The data to update the user profile with.
+ */
 async function updateUserProfile(userId: string, data: any) {
   const response = await fetch(`/api/users/${userId}`, {
     method: 'PUT',
@@ -39,7 +50,7 @@ async function updateUserProfile(userId: string, data: any) {
 }
 
 /**
- * Example 1: Basic retry with manual execution
+ * Renders a basic retry example for loading posts with manual execution.
  */
 export function BasicRetryExample() {
   const retryHook = useRetry(fetchPosts, {
@@ -84,7 +95,7 @@ export function BasicRetryExample() {
 }
 
 /**
- * Example 2: Retry on mount with dependencies
+ * Component that retries fetching user data on mount or when userId changes.
  */
 export function RetryOnMountExample({ userId }: { userId: string }) {
   const retryHook = useRetryWithDeps(
@@ -127,7 +138,12 @@ export function RetryOnMountExample({ userId }: { userId: string }) {
 }
 
 /**
- * Example 3: Polling with retry
+ * Renders a polling component that retries fetching posts.
+ *
+ * This function utilizes the useRetryPolling hook to fetch posts at a specified interval,
+ * with options to start immediately and continue polling even on errors. It displays the
+ * current polling status and provides buttons to start or stop polling. The latest posts
+ * are shown if available, along with the last updated time.
  */
 export function PollingRetryExample() {
   const retryHook = useRetryPolling(
@@ -184,7 +200,7 @@ export function PollingRetryExample() {
 }
 
 /**
- * Example 4: Optimistic updates with retry
+ * Handles optimistic profile updates with retry functionality.
  */
 export function OptimisticRetryExample({ userId }: { userId: string }) {
   const [profile, setProfile] = React.useState({ name: '', email: '' });
@@ -199,6 +215,9 @@ export function OptimisticRetryExample({ userId }: { userId: string }) {
     }
   );
 
+  /**
+   * Handles the update of profile data with optimistic UI updates.
+   */
   const handleUpdate = async (newData: any) => {
     // Optimistic update
     setProfile(prev => ({ ...prev, ...newData }));
@@ -263,7 +282,9 @@ export function OptimisticRetryExample({ userId }: { userId: string }) {
 }
 
 /**
- * Example 5: Custom retry configuration
+ * Implements a custom retry mechanism for fetching posts.
+ *
+ * This function utilizes the `useRetry` hook to configure a retry strategy with specific parameters such as maximum retries, initial and maximum delays, and a backoff multiplier. It includes custom logic to determine when to retry based on error status codes, and provides callbacks for logging retry attempts and handling cases when the maximum number of retries is exceeded. The UI components display the retry status and allow users to manually trigger retries.
  */
 export function CustomRetryExample() {
   const retryHook = useRetry(fetchPosts, {
