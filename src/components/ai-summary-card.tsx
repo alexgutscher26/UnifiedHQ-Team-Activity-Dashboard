@@ -43,6 +43,15 @@ interface AISummaryCardProps {
   onError?: (error: string) => void;
 }
 
+/**
+ * Renders the AI Summary Card component that displays generated summaries.
+ *
+ * This component manages the state for loading, error handling, and summary generation. It fetches summaries based on the selected time range and allows users to generate new summaries, copy them to the clipboard, or download them. The component also handles retries for failed fetch attempts and displays appropriate messages based on the current state.
+ *
+ * @param className - Additional class names for styling the card.
+ * @param onSummaryGenerated - Callback function invoked when a summary is successfully generated.
+ * @param onError - Callback function invoked when an error occurs during summary fetching or generation.
+ */
 export function AISummaryCard({
   className,
   onSummaryGenerated,
