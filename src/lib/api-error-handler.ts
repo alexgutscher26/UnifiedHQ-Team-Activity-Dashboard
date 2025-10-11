@@ -191,6 +191,17 @@ export function handleApiError(
 }
 
 // Enhanced wrapper for API route handlers with authentication
+/**
+ * Wraps a request handler with error handling, authentication, and rate limiting.
+ *
+ * This function first checks for rate limiting based on the request's IP address. If rate limits are exceeded, it returns an error response.
+ * It then performs authentication checks based on the provided options, handling any authentication errors.
+ * Finally, it executes the handler with optional retry logic, logging any errors that occur during the process.
+ *
+ * @param handler - A function that processes the request and returns a promise of a NextResponse.
+ * @param options - An optional configuration object for authentication, rate limiting, and retry options.
+ * @returns A function that takes a NextRequest and context, returning a promise of a NextResponse.
+ */
 export function withErrorHandling<T = any>(
   handler: (req: NextRequest, context?: any) => Promise<NextResponse<T>>,
   options?: {
@@ -249,6 +260,9 @@ export function withErrorHandling<T = any>(
       }
 
       // Execute handler with optional retry
+      /**
+       * Executes the handler and sets the X-Request-ID header.
+       */
       const executeHandler = async () => {
         const response = await handler(req, context);
         response.headers.set('X-Request-ID', requestId);
