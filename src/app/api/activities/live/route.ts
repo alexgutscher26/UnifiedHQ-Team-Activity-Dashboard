@@ -3,12 +3,21 @@ import { auth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('[SSE] Received connection request');
+    
     // Try to get session from cookies first
     const session = await auth.api.getSession({
       headers: request.headers,
     });
 
+    console.log('[SSE] Session check:', {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: session?.user?.id,
+    });
+
     if (!session?.user) {
+      console.log('[SSE] Unauthorized access attempt');
       // Return SSE error message instead of JSON
       return new Response(
         `data: ${JSON.stringify({
@@ -101,7 +110,12 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('SSE connection error:', error);
+    console.error('SSE connection error:', {
+      error: error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
     return NextResponse.json(
       { error: 'Failed to establish connection' },
       { status: 500 }

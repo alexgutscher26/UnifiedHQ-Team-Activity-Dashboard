@@ -149,6 +149,19 @@ export function ActivityFeed() {
 
   const connectToLiveUpdates = () => {
     try {
+      // Test if EventSource is supported
+      if (typeof EventSource === 'undefined') {
+        console.error('❌ EventSource not supported in this browser');
+        toast({
+          title: 'Browser Not Supported',
+          description: 'Your browser does not support live updates.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      console.log('🔄 Attempting to connect to SSE endpoint...');
+      
       // Create EventSource with credentials
       const es = new EventSource('/api/activities/live', {
         withCredentials: true,
@@ -159,6 +172,25 @@ export function ActivityFeed() {
         setIsLiveConnected(true);
         console.log('✅ Connected to live updates');
       };
+
+      // Add connection timeout
+      const connectionTimeout = setTimeout(() => {
+        if (es.readyState === EventSource.CONNECTING) {
+          console.error('❌ SSE connection timeout after 10 seconds');
+          es.close();
+          setIsLiveConnected(false);
+          toast({
+            title: 'Connection Timeout',
+            description: 'Failed to connect to live updates. Please check your connection.',
+            variant: 'destructive',
+          });
+        }
+      }, 10000); // 10 second timeout
+
+      // Clear timeout on successful connection
+      es.addEventListener('open', () => {
+        clearTimeout(connectionTimeout);
+      });
 
       es.onmessage = event => {
         try {
@@ -202,7 +234,19 @@ export function ActivityFeed() {
       };
 
       es.onerror = error => {
-        console.error('❌ SSE connection error:', error);
+        // Clear connection timeout
+        clearTimeout(connectionTimeout);
+        
+        // EventSource.onerror provides limited error information
+        // Log connection state and URL for better debugging
+        console.error('❌ SSE connection error:', {
+          readyState: es.readyState,
+          url: es.url,
+          withCredentials: es.withCredentials,
+          error: error,
+          timestamp: new Date().toISOString(),
+        });
+        
         setIsLiveConnected(false);
 
         // Don't auto-reconnect on error, let user manually refresh
