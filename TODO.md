@@ -167,7 +167,6 @@ A unified team dashboard that connects Slack, and GitHub to provide a centralize
 
 ### Error Handling
 - [x] Global error boundary implementation
-- [ ] API error standardization
 - [x] User-friendly error messages
 - [ ] Error reporting and logging
 - [ ] Retry mechanisms for failed requests
