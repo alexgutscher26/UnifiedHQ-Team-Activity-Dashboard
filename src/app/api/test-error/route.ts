@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { captureServerException } from '@/lib/posthog-server';
 
+/**
+ * Handles POST requests and simulates a server-side error for testing.
+ *
+ * This function captures a simulated error using PostHog for tracking purposes. It constructs an error object,
+ * logs relevant information, and returns a JSON response indicating the error. If an exception occurs during
+ * the error capturing process, it logs the error and returns a generic failure response.
+ *
+ * @param request - The NextRequest object representing the incoming request.
+ */
 export async function POST(request: NextRequest) {
   try {
     // Simulate a server-side error for testing
@@ -29,6 +38,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * Handles GET requests and simulates a server error for tracking purposes.
+ *
+ * This function captures a simulated error using PostHog and returns a JSON response indicating the error.
+ * If an error occurs during the process, it logs the error and returns a generic failure response.
+ * The function utilizes the NextRequest object to gather request details for error tracking.
+ *
+ * @param request - The NextRequest object representing the incoming request.
+ */
 export async function GET(request: NextRequest) {
   try {
     // Simulate a different type of server error
