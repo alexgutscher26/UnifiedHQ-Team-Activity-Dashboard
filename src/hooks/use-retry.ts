@@ -24,7 +24,13 @@ export interface UseRetryReturn<T> extends UseRetryState<T> {
 }
 
 /**
- * Hook for retry functionality with React state management
+ * Hook for retry functionality with React state management.
+ *
+ * This hook manages the execution of an asynchronous function with retry capabilities. It maintains state for loading, error, and retry attempts, and allows for immediate execution on mount or re-execution based on dependencies. The function can be reset, and it handles the cleanup of state on component unmount. The retry logic is encapsulated in the `withRetry` function, which is called during execution.
+ *
+ * @param asyncFn - The asynchronous function to be executed with retry logic.
+ * @param options - Configuration options for the retry behavior, including immediate execution, dependencies for re-execution, and whether to reset state on new execution.
+ * @returns An object containing the current state, execution, retry, and reset functions, along with flags indicating retry status.
  */
 export function useRetry<T = any>(
   asyncFn: (...args: any[]) => Promise<T>,
@@ -180,7 +186,7 @@ export function useRetryOnMount<T = any>(
 }
 
 /**
- * Hook for retry with dependency-based re-execution
+ * Executes a retryable asynchronous function with dependency tracking.
  */
 export function useRetryWithDeps<T = any>(
   asyncFn: (...args: any[]) => Promise<T>,
@@ -191,7 +197,7 @@ export function useRetryWithDeps<T = any>(
 }
 
 /**
- * Hook for retry with manual execution only
+ * Hook for retrying an asynchronous function with manual execution only.
  */
 export function useRetryManual<T = any>(
   asyncFn: (...args: any[]) => Promise<T>,
@@ -201,7 +207,7 @@ export function useRetryManual<T = any>(
 }
 
 /**
- * Hook for retry with optimistic updates
+ * Hook for retrying an asynchronous function with optimistic updates.
  */
 export function useRetryOptimistic<T = any>(
   asyncFn: (...args: any[]) => Promise<T>,
@@ -299,7 +305,15 @@ export function useRetryPolling<T = any>(
 }
 
 /**
- * Hook for retry with exponential backoff for user-initiated retries
+ * Hook for retrying an asynchronous function with exponential backoff.
+ *
+ * This function utilizes a retry mechanism to handle user-initiated retries of an asynchronous function,
+ * implementing an exponential backoff strategy for delays between retries. It manages the backoff delay state
+ * and resets it upon successful execution of the function. The retry logic is encapsulated in the `retryHook`,
+ * which is derived from the `useRetry` function.
+ *
+ * @param asyncFn - The asynchronous function to be retried.
+ * @param options - Configuration options for the retry mechanism.
  */
 export function useRetryWithBackoff<T = any>(
   asyncFn: (...args: any[]) => Promise<T>,
