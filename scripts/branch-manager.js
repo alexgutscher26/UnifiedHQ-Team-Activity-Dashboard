@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const yaml = require('js-yaml');
 
 class BranchManager {
   constructor() {
@@ -25,28 +26,34 @@ class BranchManager {
       'branch-config.yml'
     );
     if (fs.existsSync(configPath)) {
-      // In a real implementation, you'd use a YAML parser
-      return {
-        branches: {
-          main: { protected: true, required_reviews: 2 },
-          develop: { protected: true, required_reviews: 1 },
-          release: { protected: true, required_reviews: 2 },
-        },
-        naming: {
-          feature: 'feature/',
-          bugfix: 'bugfix/',
-          hotfix: 'hotfix/',
-          release: 'release/',
-          docs: 'docs/',
-        },
-        workflows: {
-          auto_cleanup: true,
-          enforce_naming: true,
-          require_approval: true,
-        },
-      };
+      try {
+        const fileContents = fs.readFileSync(configPath, 'utf8');
+        const config = yaml.load(fileContents);
+        
+        // Validate and merge with defaults
+        return this.mergeWithDefaults(config);
+      } catch (error) {
+        console.warn(`⚠️  Warning: Failed to parse YAML config at ${configPath}:`, error.message);
+        console.warn('   Falling back to default configuration.');
+        return this.getDefaultConfig();
+      }
     }
     return this.getDefaultConfig();
+  }
+
+  /**
+   * Merge user config with defaults, ensuring all required fields exist
+   */
+  mergeWithDefaults(userConfig) {
+    const defaults = this.getDefaultConfig();
+    
+    return {
+      branches: { ...defaults.branches, ...(userConfig.branches || {}) },
+      naming: { ...defaults.naming, ...(userConfig.naming || {}) },
+      workflows: { ...defaults.workflows, ...(userConfig.workflows || {}) },
+      // Add any additional config sections
+      ...userConfig
+    };
   }
 
   /**
@@ -593,6 +600,58 @@ ${description}
   }
 
   /**
+   * Show current configuration
+   */
+  showConfig() {
+    console.log('⚙️  Branch Manager Configuration\n');
+    
+    console.log('📁 Config Source:');
+    const configPath = path.join(this.projectRoot, '.github', 'branch-config.yml');
+    if (fs.existsSync(configPath)) {
+      console.log(`   ✅ Using: ${configPath}`);
+    } else {
+      console.log(`   ⚠️  Using: Default configuration (${configPath} not found)`);
+    }
+    
+    console.log('\n🌿 Branch Settings:');
+    Object.entries(this.config.branches).forEach(([name, settings]) => {
+      const protectedIcon = settings.protected ? '🔒' : '🔓';
+      const reviews = settings.required_reviews || 0;
+      console.log(`   ${protectedIcon} ${name}: ${reviews} review${reviews !== 1 ? 's' : ''} required`);
+    });
+    
+    console.log('\n🏷️  Naming Conventions:');
+    Object.entries(this.config.naming).forEach(([type, prefix]) => {
+      console.log(`   ${type}: ${prefix}`);
+    });
+    
+    console.log('\n⚡ Workflow Settings:');
+    Object.entries(this.config.workflows).forEach(([setting, enabled]) => {
+      const icon = enabled ? '✅' : '❌';
+      console.log(`   ${icon} ${setting.replace(/_/g, ' ')}`);
+    });
+    
+    // Show additional settings if they exist
+    if (this.config.settings) {
+      console.log('\n🔧 Additional Settings:');
+      Object.entries(this.config.settings).forEach(([key, value]) => {
+        console.log(`   ${key}: ${value}`);
+      });
+    }
+    
+    if (this.config.integrations) {
+      console.log('\n🔌 Integrations:');
+      Object.entries(this.config.integrations).forEach(([service, settings]) => {
+        console.log(`   ${service}:`);
+        Object.entries(settings).forEach(([key, value]) => {
+          const icon = value ? '✅' : '❌';
+          console.log(`     ${icon} ${key.replace(/_/g, ' ')}`);
+        });
+      });
+    }
+  }
+
+  /**
    * Show help information
    */
   showHelp() {
@@ -611,6 +670,7 @@ Commands:
   merge <source> [target] [type]    Merge branch
   pr <source> [target] [title]      Create pull request
   health                            Run health check
+  config                            Show current configuration
   help                              Show this help
 
 Examples:
@@ -702,6 +762,10 @@ if (require.main === module) {
 
     case 'health':
       manager.runHealthCheck();
+      break;
+
+    case 'config':
+      manager.showConfig();
       break;
 
     case 'help':
