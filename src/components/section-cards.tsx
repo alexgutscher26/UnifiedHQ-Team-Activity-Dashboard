@@ -22,6 +22,15 @@ import {
   useSafeTimer,
 } from '@/lib/memory-leak-prevention';
 
+/**
+ * Renders the SectionCards component that displays real-time statistics from GitHub, Slack, and AI summaries.
+ *
+ * The component fetches statistics from various APIs, manages connection states for live updates, and handles loading states.
+ * It sets up periodic refreshes for the statistics and ensures proper cleanup to prevent memory leaks.
+ * The component also handles different message types from the server-sent events (SSE) for real-time updates.
+ *
+ * @returns {JSX.Element} The rendered SectionCards component.
+ */
 export function SectionCards() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,6 +42,16 @@ export function SectionCards() {
   useMemoryLeakPrevention('SectionCards');
   const { setTimeout, clearTimeout } = useSafeTimer();
 
+  /**
+   * Load statistics from various integrations and update the state.
+   *
+   * This function fetches statistics from GitHub, Slack, and AI summary APIs.
+   * It handles the responses, providing default values for inactive integrations,
+   * and sets the aggregated statistics into the state. Finally, it ensures that
+   * the loading state is updated regardless of the fetch outcome.
+   *
+   * @returns {Promise<void>} A promise that resolves when the statistics have been loaded and set.
+   */
   const loadStats = async () => {
     try {
       // Fetch real GitHub statistics
