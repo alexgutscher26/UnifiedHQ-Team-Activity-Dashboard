@@ -1,7 +1,19 @@
+/** No operation function for initialization. */
 export function register() {
   // No-op for initialization
 }
 
+/**
+ * Handles errors that occur during request processing.
+ *
+ * This function checks if the runtime is Node.js and attempts to capture server-side exceptions using PostHog.
+ * It extracts the distinct_id from the PostHog cookie if available, and logs the error along with relevant request details.
+ * If any error occurs during the process, it logs the failure to capture the server error.
+ *
+ * @param err - The error object that occurred during the request.
+ * @param request - The request object containing details about the HTTP request.
+ * @param context - Additional context for the request handling.
+ */
 export const onRequestError = async (err: Error, request: Request, context: any) => {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     try {
