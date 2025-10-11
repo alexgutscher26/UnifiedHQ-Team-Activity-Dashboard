@@ -1,6 +1,6 @@
 'use client';
 
-import posthog from 'posthog-js';
+import { captureClientError } from '@/lib/posthog-client';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,21 +20,11 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Capture the error with PostHog (safe for mock client)
-    try {
-      if (
-        typeof window !== 'undefined' &&
-        posthog &&
-        typeof posthog.captureException === 'function'
-      ) {
-        posthog.captureException(error, {
-          error_boundary: 'nextjs_error',
-          digest: error.digest,
-        });
-      }
-    } catch (posthogError) {
-      console.error('Failed to capture error with PostHog:', posthogError);
-    }
+    // Capture the error with PostHog
+    captureClientError(error, {
+      error_boundary: 'nextjs_error',
+      digest: error.digest,
+    });
   }, [error]);
 
   return (

@@ -1,8 +1,16 @@
 'use client';
 
-import posthog from 'posthog-js';
-import NextError from 'next/error';
+import { captureClientError } from '@/lib/posthog-client';
 import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 export default function GlobalError({
   error,
@@ -12,28 +20,39 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Capture the global error with PostHog (safe for mock client)
-    try {
-      if (
-        typeof window !== 'undefined' &&
-        posthog &&
-        typeof posthog.captureException === 'function'
-      ) {
-        posthog.captureException(error, {
-          error_boundary: 'global_error',
-          digest: error.digest,
-        });
-      }
-    } catch (posthogError) {
-      console.error('Failed to capture error with PostHog:', posthogError);
-    }
+    // Capture the global error with PostHog
+    captureClientError(error, {
+      error_boundary: 'global_error',
+      digest: error.digest,
+    });
   }, [error]);
 
   return (
-    <html>
-      <body>
-        <NextError statusCode={0} />
-      </body>
-    </html>
+    <div className='min-h-screen flex items-center justify-center bg-background p-4'>
+      <Card className='w-full max-w-md'>
+        <CardHeader className='text-center'>
+          <div className='mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10'>
+            <AlertTriangle className='h-6 w-6 text-destructive' />
+          </div>
+          <CardTitle>Global Error</CardTitle>
+          <CardDescription>
+            A critical error occurred. We've been notified and are working to fix it.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+          <Button onClick={reset} className='w-full'>
+            <RefreshCw className='mr-2 h-4 w-4' />
+            Try again
+          </Button>
+          <Button
+            variant='outline'
+            onClick={() => (window.location.href = '/')}
+            className='w-full'
+          >
+            Go to Home
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

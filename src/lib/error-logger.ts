@@ -2,7 +2,7 @@
  * Error logging utility for tracking and reporting errors
  */
 
-import posthog from 'posthog-js';
+import { captureClientError } from './posthog-client';
 
 export interface ErrorContext {
   userId?: string;
@@ -49,18 +49,12 @@ class ErrorLogger {
     }
 
     // Capture error with PostHog if available
-    if (typeof window !== 'undefined' && typeof posthog !== 'undefined') {
-      try {
-        posthog.captureException(error, {
-          error_boundary: 'custom_error_logger',
-          error_id: errorDetails.context.errorId,
-          component_stack: errorInfo?.componentStack,
-          ...errorDetails.context,
-        });
-      } catch (posthogError) {
-        console.error('Failed to capture error with PostHog:', posthogError);
-      }
-    }
+    captureClientError(error, {
+      error_boundary: 'custom_error_logger',
+      error_id: errorDetails.context.errorId,
+      component_stack: errorInfo?.componentStack,
+      ...errorDetails.context,
+    });
 
     if (process.env.NODE_ENV === 'development') {
       console.group('🚨 Error Boundary Caught Error');
