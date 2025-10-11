@@ -41,11 +41,8 @@ export function OptimizedScrollContainer({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
     const cleanup = () => {
-      container.removeEventListener('scroll', optimizedScrollHandler, {
-        passive: optimizationConfig.enablePassiveListeners,
-      });
+      container.removeEventListener('scroll', optimizedScrollHandler);
     };
 
     container.addEventListener('scroll', optimizedScrollHandler, {

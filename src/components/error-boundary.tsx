@@ -9,7 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { AlertTriangle, RefreshCw, Home, Bug, Copy, Check, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  RefreshCw,
+  Home,
+  Bug,
+  Copy,
+  Check,
+  X,
+} from 'lucide-react';
 import { logError } from '@/lib/error-logger';
 import { cn } from '@/lib/utils';
 
@@ -84,7 +92,11 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     // Enable automatic recovery if configured
-    const { enableAutoRecovery = false, autoRecoveryDelay = 5000, maxRetries = 3 } = this.props;
+    const {
+      enableAutoRecovery = false,
+      autoRecoveryDelay = 5000,
+      maxRetries = 3,
+    } = this.props;
     if (enableAutoRecovery && this.state.retryCount < maxRetries) {
       this.scheduleAutoRecovery(autoRecoveryDelay);
     }
@@ -129,7 +141,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   scheduleAutoRecovery = (delay: number) => {
     this.setState({ isRetrying: true });
-    
+
     this.autoRecoveryTimeoutId = window.setTimeout(() => {
       this.setState(prevState => ({
         retryCount: prevState.retryCount + 1,
@@ -248,7 +260,7 @@ function ErrorFallback({
 
   const copyErrorId = async () => {
     if (!errorId) return;
-    
+
     try {
       await navigator.clipboard.writeText(errorId);
       setCopied(true);
@@ -260,7 +272,7 @@ function ErrorFallback({
 
   const copyFullLog = async () => {
     if (!error) return;
-    
+
     try {
       const logData = {
         errorId,
@@ -279,7 +291,7 @@ function ErrorFallback({
           language: navigator.language,
           cookieEnabled: navigator.cookieEnabled,
           onLine: navigator.onLine,
-        }
+        },
       };
 
       const logText = `Error Log - ${errorId}
@@ -313,7 +325,7 @@ User Agent: ${logData.userAgent}`;
 
   const getErrorMessage = () => {
     if (!error) return 'An unexpected error occurred';
-    
+
     // Provide more user-friendly error messages
     if (error.message.includes('ChunkLoadError')) {
       return 'Failed to load application resources. Please refresh the page.';
@@ -324,16 +336,24 @@ User Agent: ${logData.userAgent}`;
     if (error.message.includes('TypeError')) {
       return 'Application error. Please try refreshing the page.';
     }
-    
+
     return error.message || 'An unexpected error occurred';
   };
 
   return (
-    <div className={cn('min-h-screen flex items-center justify-center bg-background p-4', className)}>
+    <div
+      className={cn(
+        'min-h-screen flex items-center justify-center bg-background p-4',
+        className
+      )}
+    >
       <Card className='w-full max-w-2xl' role='alert' aria-live='polite'>
         <CardHeader className='text-center'>
           <div className='mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10'>
-            <AlertTriangle className='h-6 w-6 text-destructive' aria-hidden='true' />
+            <AlertTriangle
+              className='h-6 w-6 text-destructive'
+              aria-hidden='true'
+            />
           </div>
           <CardTitle className='text-2xl'>Something went wrong</CardTitle>
           <CardDescription>
@@ -368,20 +388,32 @@ User Agent: ${logData.userAgent}`;
           )}
 
           <div className='flex flex-col gap-3 sm:flex-row'>
-            <Button 
-              onClick={onRetry} 
+            <Button
+              onClick={onRetry}
               className='flex-1'
               disabled={isRetrying}
               aria-label='Try again'
             >
-              <RefreshCw className={cn('mr-2 h-4 w-4', isRetrying && 'animate-spin')} />
+              <RefreshCw
+                className={cn('mr-2 h-4 w-4', isRetrying && 'animate-spin')}
+              />
               {isRetrying ? 'Retrying...' : 'Try Again'}
             </Button>
-            <Button onClick={onGoHome} variant='outline' className='flex-1' aria-label='Go to dashboard'>
+            <Button
+              onClick={onGoHome}
+              variant='outline'
+              className='flex-1'
+              aria-label='Go to dashboard'
+            >
               <Home className='mr-2 h-4 w-4' />
               Go to Dashboard
             </Button>
-            <Button onClick={onReload} variant='outline' className='flex-1' aria-label='Reload page'>
+            <Button
+              onClick={onReload}
+              variant='outline'
+              className='flex-1'
+              aria-label='Reload page'
+            >
               <RefreshCw className='mr-2 h-4 w-4' />
               Reload Page
             </Button>
@@ -436,7 +468,7 @@ User Agent: ${logData.userAgent}`;
             </div>
 
             {showDetails && (
-              <div 
+              <div
                 id='error-details'
                 className='space-y-4 rounded-lg border bg-muted/50 p-4'
                 role='region'
@@ -450,7 +482,9 @@ User Agent: ${logData.userAgent}`;
                     </pre>
                     {error.stack && (
                       <>
-                        <h4 className='font-semibold text-destructive mt-3'>Stack Trace:</h4>
+                        <h4 className='font-semibold text-destructive mt-3'>
+                          Stack Trace:
+                        </h4>
                         <pre className='mt-1 overflow-auto rounded bg-background p-2 text-xs max-h-32'>
                           {error.stack}
                         </pre>
@@ -471,8 +505,9 @@ User Agent: ${logData.userAgent}`;
                 )}
 
                 <div className='text-xs text-muted-foreground'>
-                  💡 Tip: Use the copy button above to grab the complete error log for support.
-                  If this error persists, please contact support with the Error ID above.
+                  💡 Tip: Use the copy button above to grab the complete error
+                  log for support. If this error persists, please contact
+                  support with the Error ID above.
                 </div>
               </div>
             )}
@@ -523,14 +558,14 @@ export const ErrorBoundaryPresets = {
     showErrorId: true,
     enableErrorReporting: true,
   },
-  
+
   // For non-critical components with graceful degradation
   graceful: {
     enableAutoRecovery: false,
     showErrorId: false,
     enableErrorReporting: false,
   },
-  
+
   // For development with detailed error information
   development: {
     enableAutoRecovery: true,
@@ -539,7 +574,7 @@ export const ErrorBoundaryPresets = {
     showErrorId: true,
     enableErrorReporting: true,
   },
-  
+
   // For production with minimal user impact
   production: {
     enableAutoRecovery: true,
@@ -552,7 +587,9 @@ export const ErrorBoundaryPresets = {
 
 // Utility function to create error boundary with preset
 export function createErrorBoundary(preset: keyof typeof ErrorBoundaryPresets) {
-  return function ErrorBoundaryWithPreset(props: Omit<Props, keyof typeof ErrorBoundaryPresets[typeof preset]>) {
+  return function ErrorBoundaryWithPreset(
+    props: Omit<Props, keyof (typeof ErrorBoundaryPresets)[typeof preset]>
+  ) {
     return <ErrorBoundary {...ErrorBoundaryPresets[preset]} {...props} />;
   };
 }

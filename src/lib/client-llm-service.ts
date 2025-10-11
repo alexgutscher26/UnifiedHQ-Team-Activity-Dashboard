@@ -77,7 +77,9 @@ export class ClientLLMService {
       return data.data;
     } catch (error) {
       console.error('Client LLM Service error:', error);
-      throw new Error(`Failed to generate text: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to generate text: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -106,7 +108,7 @@ export class ClientLLMService {
   async generateForTeam(
     teamId: string,
     prompt: string,
-    options: Omit<LLMRequest, 'prompt' | 'groups'> = {}
+    options: Omit<LLMRequest, 'prompt'> = {}
   ): Promise<LLMResponse> {
     return this.generateText({
       ...options,
@@ -123,14 +125,25 @@ export class ClientLLMService {
 export const clientLLMService = new ClientLLMService();
 
 // Convenience functions
-export async function generateTextClient(prompt: string, options: Partial<LLMRequest> = {}) {
+export async function generateTextClient(
+  prompt: string,
+  options: Partial<LLMRequest> = {}
+) {
   return clientLLMService.generateText({ prompt, ...options });
 }
 
-export async function generateForUserClient(userId: string, prompt: string, options: Partial<LLMRequest> = {}) {
+export async function generateForUserClient(
+  userId: string,
+  prompt: string,
+  options: Partial<LLMRequest> = {}
+) {
   return clientLLMService.generateForUser(userId, prompt, options);
 }
 
-export async function generateForTeamClient(teamId: string, prompt: string, options: Partial<LLMRequest> = {}) {
+export async function generateForTeamClient(
+  teamId: string,
+  prompt: string,
+  options: Partial<LLMRequest> = {}
+) {
   return clientLLMService.generateForTeam(teamId, prompt, options);
 }

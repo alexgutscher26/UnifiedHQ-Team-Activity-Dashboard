@@ -1,24 +1,32 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import {
   IconBell,
   IconMail,
-  IconBrandSlack,
   IconSparkles,
   IconClock,
   IconTestPipe,
-  IconCheck,
-  IconBellOff,
-  IconX,
 } from '@tabler/icons-react';
 
 interface NotificationSettingsProps {
@@ -41,7 +49,9 @@ interface NotificationSettings {
   aiSummaryReminderTime: string;
 }
 
-export function NotificationSettings({ onSettingsChange }: NotificationSettingsProps) {
+export function NotificationSettings({
+  onSettingsChange,
+}: NotificationSettingsProps) {
   const { toast } = useToast();
   const [settings, setSettings] = useState<NotificationSettings>({
     enabled: true,
@@ -74,7 +84,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
       }
 
       // Load AI summary notification settings
-      const aiSummarySettings = localStorage.getItem('ai-summary-notifications');
+      const aiSummarySettings = localStorage.getItem(
+        'ai-summary-notifications'
+      );
       if (aiSummarySettings) {
         const parsed = JSON.parse(aiSummarySettings);
         setSettings(prev => ({
@@ -96,7 +108,7 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
   const saveSettings = (newSettings: Partial<NotificationSettings>) => {
     const updatedSettings = { ...settings, ...newSettings };
     setSettings(updatedSettings);
-    
+
     try {
       // Save general notification settings
       const generalSettings = {
@@ -109,7 +121,10 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
         digestFrequency: updatedSettings.digestFrequency,
         activityThreshold: updatedSettings.activityThreshold,
       };
-      localStorage.setItem('notification-settings', JSON.stringify(generalSettings));
+      localStorage.setItem(
+        'notification-settings',
+        JSON.stringify(generalSettings)
+      );
 
       // Save AI summary notification settings
       const aiSummarySettings = {
@@ -119,7 +134,10 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
         emailNotifications: updatedSettings.aiSummaryEmail,
         reminderTime: updatedSettings.aiSummaryReminderTime,
       };
-      localStorage.setItem('ai-summary-notifications', JSON.stringify(aiSummarySettings));
+      localStorage.setItem(
+        'ai-summary-notifications',
+        JSON.stringify(aiSummarySettings)
+      );
 
       onSettingsChange?.('Notifications', 'Settings updated successfully');
       toast({
@@ -139,7 +157,8 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
   const testNotification = () => {
     toast({
       title: 'AI Summary Notification',
-      description: 'This is how AI summary notifications will appear when enabled.',
+      description:
+        'This is how AI summary notifications will appear when enabled.',
     });
   };
 
@@ -183,7 +202,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
         <CardContent className='space-y-6'>
           <div className='flex items-center justify-between'>
             <div className='space-y-1'>
-              <Label htmlFor='notifications-enabled'>Enable Notifications</Label>
+              <Label htmlFor='notifications-enabled'>
+                Enable Notifications
+              </Label>
               <p className='text-sm text-muted-foreground'>
                 Turn on or off all notifications
               </p>
@@ -191,7 +212,7 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
             <Switch
               id='notifications-enabled'
               checked={settings.enabled}
-              onCheckedChange={(checked) => saveSettings({ enabled: checked })}
+              onCheckedChange={checked => saveSettings({ enabled: checked })}
             />
           </div>
 
@@ -207,7 +228,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
             <Switch
               id='daily-reminder'
               checked={settings.dailyReminder}
-              onCheckedChange={(checked) => saveSettings({ dailyReminder: checked })}
+              onCheckedChange={checked =>
+                saveSettings({ dailyReminder: checked })
+              }
               disabled={!settings.enabled}
             />
           </div>
@@ -222,7 +245,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
             <Switch
               id='new-summary-alert'
               checked={settings.newSummaryAlert}
-              onCheckedChange={(checked) => saveSettings({ newSummaryAlert: checked })}
+              onCheckedChange={checked =>
+                saveSettings({ newSummaryAlert: checked })
+              }
               disabled={!settings.enabled}
             />
           </div>
@@ -251,7 +276,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
             <Switch
               id='email-notifications'
               checked={settings.emailNotifications}
-              onCheckedChange={(checked) => saveSettings({ emailNotifications: checked })}
+              onCheckedChange={checked =>
+                saveSettings({ emailNotifications: checked })
+              }
               disabled={!settings.enabled}
             />
           </div>
@@ -266,7 +293,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
             <Switch
               id='slack-notifications'
               checked={settings.slackNotifications}
-              onCheckedChange={(checked) => saveSettings({ slackNotifications: checked })}
+              onCheckedChange={checked =>
+                saveSettings({ slackNotifications: checked })
+              }
               disabled={!settings.enabled}
             />
           </div>
@@ -289,7 +318,7 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
             <Label htmlFor='reminder-time'>Daily Reminder Time</Label>
             <Select
               value={settings.reminderTime}
-              onValueChange={(value) => saveSettings({ reminderTime: value })}
+              onValueChange={value => saveSettings({ reminderTime: value })}
               disabled={!settings.enabled || !settings.dailyReminder}
             >
               <SelectTrigger>
@@ -312,7 +341,7 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
             <Label htmlFor='digest-frequency'>Digest Frequency</Label>
             <Select
               value={settings.digestFrequency}
-              onValueChange={(value: 'daily' | 'weekly' | 'monthly') => 
+              onValueChange={(value: 'daily' | 'weekly' | 'monthly') =>
                 saveSettings({ digestFrequency: value })
               }
               disabled={!settings.enabled}
@@ -332,7 +361,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
             <Label htmlFor='activity-threshold'>Activity Threshold</Label>
             <Select
               value={settings.activityThreshold.toString()}
-              onValueChange={(value) => saveSettings({ activityThreshold: parseInt(value) })}
+              onValueChange={value =>
+                saveSettings({ activityThreshold: parseInt(value) })
+              }
               disabled={!settings.enabled}
             >
               <SelectTrigger>
@@ -366,7 +397,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
         <CardContent className='space-y-6'>
           <div className='flex items-center justify-between'>
             <div className='space-y-1'>
-              <Label htmlFor='ai-summary-enabled'>Enable AI Summary Notifications</Label>
+              <Label htmlFor='ai-summary-enabled'>
+                Enable AI Summary Notifications
+              </Label>
               <p className='text-sm text-muted-foreground'>
                 Receive notifications about AI-generated summaries
               </p>
@@ -374,7 +407,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
             <Switch
               id='ai-summary-enabled'
               checked={settings.aiSummaryEnabled}
-              onCheckedChange={(checked) => saveSettings({ aiSummaryEnabled: checked })}
+              onCheckedChange={checked =>
+                saveSettings({ aiSummaryEnabled: checked })
+              }
               disabled={!settings.enabled}
             />
           </div>
@@ -385,7 +420,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
 
               <div className='flex items-center justify-between'>
                 <div className='space-y-1'>
-                  <Label htmlFor='ai-daily-reminder'>Daily Summary Reminder</Label>
+                  <Label htmlFor='ai-daily-reminder'>
+                    Daily Summary Reminder
+                  </Label>
                   <p className='text-sm text-muted-foreground'>
                     Get reminded to check your daily AI summary
                   </p>
@@ -393,7 +430,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
                 <Switch
                   id='ai-daily-reminder'
                   checked={settings.aiSummaryDailyReminder}
-                  onCheckedChange={(checked) => saveSettings({ aiSummaryDailyReminder: checked })}
+                  onCheckedChange={checked =>
+                    saveSettings({ aiSummaryDailyReminder: checked })
+                  }
                   disabled={!settings.enabled}
                 />
               </div>
@@ -408,7 +447,9 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
                 <Switch
                   id='ai-new-alert'
                   checked={settings.aiSummaryNewAlert}
-                  onCheckedChange={(checked) => saveSettings({ aiSummaryNewAlert: checked })}
+                  onCheckedChange={checked =>
+                    saveSettings({ aiSummaryNewAlert: checked })
+                  }
                   disabled={!settings.enabled}
                 />
               </div>
@@ -423,17 +464,23 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
                 <Switch
                   id='ai-email'
                   checked={settings.aiSummaryEmail}
-                  onCheckedChange={(checked) => saveSettings({ aiSummaryEmail: checked })}
+                  onCheckedChange={checked =>
+                    saveSettings({ aiSummaryEmail: checked })
+                  }
                   disabled={!settings.enabled}
                 />
               </div>
 
               {settings.aiSummaryDailyReminder && (
                 <div className='space-y-2'>
-                  <Label htmlFor='ai-reminder-time'>AI Summary Reminder Time</Label>
+                  <Label htmlFor='ai-reminder-time'>
+                    AI Summary Reminder Time
+                  </Label>
                   <Select
                     value={settings.aiSummaryReminderTime}
-                    onValueChange={(value) => saveSettings({ aiSummaryReminderTime: value })}
+                    onValueChange={value =>
+                      saveSettings({ aiSummaryReminderTime: value })
+                    }
                     disabled={!settings.enabled}
                   >
                     <SelectTrigger>
@@ -463,7 +510,7 @@ export function NotificationSettings({ onSettingsChange }: NotificationSettingsP
               Test AI Summary Notification
             </Button>
             <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-              <Badge 
+              <Badge
                 variant={settings.aiSummaryEnabled ? 'default' : 'secondary'}
                 className={settings.aiSummaryEnabled ? 'bg-green-500' : ''}
               >

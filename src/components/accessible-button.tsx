@@ -47,24 +47,13 @@ interface AccessibleButtonProps
   ariaValuemax?: number;
   ariaValuenow?: number;
   ariaValuetext?: string;
-  ariaOwns?: string;
   ariaFlowto?: string;
   ariaActivedescendant?: string;
   ariaAutocomplete?: 'none' | 'inline' | 'list' | 'both';
   ariaDropeffect?: 'none' | 'copy' | 'execute' | 'link' | 'move' | 'popup';
   ariaGrabbed?: boolean;
-  ariaHaspopup?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
-  ariaModal?: boolean;
   ariaMultiline?: boolean;
   ariaPlaceholder?: string;
-  ariaReadonly?: boolean;
-  ariaRequired?: boolean;
-  ariaSelected?: boolean;
-  ariaSort?: 'none' | 'ascending' | 'descending' | 'other';
-  ariaValuemin?: number;
-  ariaValuemax?: number;
-  ariaValuenow?: number;
-  ariaValuetext?: string;
 }
 
 export const AccessibleButton = forwardRef<
@@ -167,7 +156,6 @@ export const AccessibleButton = forwardRef<
         aria-live={ariaLive}
         aria-atomic={ariaAtomic}
         aria-relevant={ariaRelevant}
-        aria-busy={ariaBusy}
         aria-orientation={ariaOrientation}
         aria-sort={ariaSort}
         aria-required={ariaRequired}

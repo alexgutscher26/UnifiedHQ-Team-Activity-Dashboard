@@ -1,14 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import {
   IconShield,
@@ -88,9 +92,12 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
   const saveSettings = (newSettings: Partial<SecuritySettings>) => {
     const updatedSettings = { ...settings, ...newSettings };
     setSettings(updatedSettings);
-    
+
     try {
-      localStorage.setItem('security-settings', JSON.stringify(updatedSettings));
+      localStorage.setItem(
+        'security-settings',
+        JSON.stringify(updatedSettings)
+      );
       onSettingsChange?.('Security', 'Settings updated successfully');
       toast({
         title: 'Settings Updated',
@@ -127,16 +134,16 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
 
     try {
       setIsChangingPassword(true);
-      
+
       // Simulate password change API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       setPasswordForm({
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
       });
-      
+
       onSettingsChange?.('Security', 'Password changed successfully');
       toast({
         title: 'Password Changed',
@@ -212,7 +219,12 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
                   id='current-password'
                   type={showPassword ? 'text' : 'password'}
                   value={passwordForm.currentPassword}
-                  onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  onChange={e =>
+                    setPasswordForm(prev => ({
+                      ...prev,
+                      currentPassword: e.target.value,
+                    }))
+                  }
                   placeholder='Enter current password'
                 />
                 <Button
@@ -237,7 +249,12 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
                 id='new-password'
                 type={showPassword ? 'text' : 'password'}
                 value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                onChange={e =>
+                  setPasswordForm(prev => ({
+                    ...prev,
+                    newPassword: e.target.value,
+                  }))
+                }
                 placeholder='Enter new password'
               />
             </div>
@@ -248,14 +265,24 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
                 id='confirm-password'
                 type={showPassword ? 'text' : 'password'}
                 value={passwordForm.confirmPassword}
-                onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                onChange={e =>
+                  setPasswordForm(prev => ({
+                    ...prev,
+                    confirmPassword: e.target.value,
+                  }))
+                }
                 placeholder='Confirm new password'
               />
             </div>
 
             <Button
               onClick={handlePasswordChange}
-              disabled={isChangingPassword || !passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword}
+              disabled={
+                isChangingPassword ||
+                !passwordForm.currentPassword ||
+                !passwordForm.newPassword ||
+                !passwordForm.confirmPassword
+              }
             >
               {isChangingPassword ? (
                 <IconRefresh className='h-4 w-4 mr-2 animate-spin' />
@@ -290,7 +317,9 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
             <Switch
               id='two-factor'
               checked={settings.twoFactorEnabled}
-              onCheckedChange={(checked) => saveSettings({ twoFactorEnabled: checked })}
+              onCheckedChange={checked =>
+                saveSettings({ twoFactorEnabled: checked })
+              }
             />
           </div>
 
@@ -298,7 +327,9 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
             <div className='p-4 border rounded-lg bg-green-50 dark:bg-green-900/20'>
               <div className='flex items-center gap-2 text-green-700 dark:text-green-400'>
                 <IconCheck className='h-4 w-4' />
-                <span className='text-sm font-medium'>Two-factor authentication is enabled</span>
+                <span className='text-sm font-medium'>
+                  Two-factor authentication is enabled
+                </span>
               </div>
               <p className='text-sm text-green-600 dark:text-green-300 mt-1'>
                 Your account is protected with an additional security layer
@@ -315,19 +346,22 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
             <IconDeviceDesktop className='size-5' />
             Active Sessions
           </CardTitle>
-          <CardDescription>
-            Manage your active login sessions
-          </CardDescription>
+          <CardDescription>Manage your active login sessions</CardDescription>
         </CardHeader>
         <CardContent className='space-y-6'>
           <div className='space-y-4'>
-            {sessions.map((session) => (
-              <div key={session.id} className='flex items-center justify-between p-4 border rounded-lg'>
+            {sessions.map(session => (
+              <div
+                key={session.id}
+                className='flex items-center justify-between p-4 border rounded-lg'
+              >
                 <div className='space-y-1'>
                   <div className='flex items-center gap-2'>
                     <span className='font-medium'>{session.device}</span>
                     {session.current && (
-                      <Badge variant='default' className='text-xs'>Current</Badge>
+                      <Badge variant='default' className='text-xs'>
+                        Current
+                      </Badge>
                     )}
                   </div>
                   <div className='text-sm text-muted-foreground'>
@@ -381,7 +415,9 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
             <select
               id='session-timeout'
               value={settings.sessionTimeout}
-              onChange={(e) => saveSettings({ sessionTimeout: e.target.value as any })}
+              onChange={e =>
+                saveSettings({ sessionTimeout: e.target.value as any })
+              }
               className='w-full p-2 border rounded-md bg-background'
             >
               <option value='15min'>15 minutes</option>
@@ -401,7 +437,9 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
             <Switch
               id='login-notifications'
               checked={settings.loginNotifications}
-              onCheckedChange={(checked) => saveSettings({ loginNotifications: checked })}
+              onCheckedChange={checked =>
+                saveSettings({ loginNotifications: checked })
+              }
             />
           </div>
 
@@ -415,7 +453,9 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
             <Switch
               id='data-encryption'
               checked={settings.dataEncryption}
-              onCheckedChange={(checked) => saveSettings({ dataEncryption: checked })}
+              onCheckedChange={checked =>
+                saveSettings({ dataEncryption: checked })
+              }
             />
           </div>
 
@@ -429,7 +469,9 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
             <Switch
               id='audit-logging'
               checked={settings.auditLogging}
-              onCheckedChange={(checked) => saveSettings({ auditLogging: checked })}
+              onCheckedChange={checked =>
+                saveSettings({ auditLogging: checked })
+              }
             />
           </div>
         </CardContent>
@@ -455,7 +497,9 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
                 <div className='text-sm text-muted-foreground'>Connected</div>
               </div>
             </div>
-            <Badge variant='default' className='bg-green-500'>Active</Badge>
+            <Badge variant='default' className='bg-green-500'>
+              Active
+            </Badge>
           </div>
 
           <div className='flex items-center justify-between p-4 border rounded-lg'>
@@ -466,7 +510,9 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
                 <div className='text-sm text-muted-foreground'>Connected</div>
               </div>
             </div>
-            <Badge variant='default' className='bg-green-500'>Active</Badge>
+            <Badge variant='default' className='bg-green-500'>
+              Active
+            </Badge>
           </div>
         </CardContent>
       </Card>
@@ -483,7 +529,9 @@ export function SecuritySettings({ onSettingsChange }: SecuritySettingsProps) {
           <div className='space-y-2 text-sm text-muted-foreground'>
             <p>• Keep your password secure and don't share it with anyone</p>
             <p>• Enable two-factor authentication for enhanced security</p>
-            <p>• Regularly review your active sessions and revoke unused ones</p>
+            <p>
+              • Regularly review your active sessions and revoke unused ones
+            </p>
             <p>• Report any suspicious activity immediately</p>
           </div>
         </CardContent>

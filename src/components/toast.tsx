@@ -36,14 +36,14 @@ function ToastComponent({ toast, onRemove }: ToastProps) {
   const getIcon = () => {
     switch (toast.type) {
       case 'success':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
+        return <CheckCircle className='h-5 w-5 text-green-600' />;
       case 'error':
-        return <AlertCircle className="h-5 w-5 text-red-600" />;
+        return <AlertCircle className='h-5 w-5 text-red-600' />;
       case 'warning':
-        return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
+        return <AlertTriangle className='h-5 w-5 text-yellow-600' />;
       case 'info':
       default:
-        return <Info className="h-5 w-5 text-blue-600" />;
+        return <Info className='h-5 w-5 text-blue-600' />;
     }
   };
 
@@ -66,23 +66,25 @@ function ToastComponent({ toast, onRemove }: ToastProps) {
       className={cn(
         'flex items-start gap-3 rounded-lg border p-4 shadow-lg transition-all duration-300',
         getBackgroundColor(),
-        isVisible && !isLeaving ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+        isVisible && !isLeaving
+          ? 'translate-x-0 opacity-100'
+          : 'translate-x-full opacity-0'
       )}
-      role="alert"
-      aria-live="polite"
+      role='alert'
+      aria-live='polite'
     >
       {getIcon()}
-      <div className="flex-1 text-sm">
-        <p className="font-medium text-foreground">{toast.message}</p>
+      <div className='flex-1 text-sm'>
+        <p className='font-medium text-foreground'>{toast.message}</p>
       </div>
       <Button
-        variant="ghost"
-        size="sm"
+        variant='ghost'
+        size='sm'
         onClick={handleRemove}
-        className="h-6 w-6 p-0 hover:bg-transparent"
-        aria-label="Close notification"
+        className='h-6 w-6 p-0 hover:bg-transparent'
+        aria-label='Close notification'
       >
-        <X className="h-4 w-4" />
+        <X className='h-4 w-4' />
       </Button>
     </div>
   );
@@ -99,12 +101,12 @@ export function ToastContainer() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
-      {toasts.map((toast) => (
+    <div className='fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm'>
+      {toasts.map(toast => (
         <ToastComponent
           key={toast.id}
           toast={toast}
-          onRemove={(id) => toastManager.remove(id)}
+          onRemove={id => toastManager.remove(id)}
         />
       ))}
     </div>

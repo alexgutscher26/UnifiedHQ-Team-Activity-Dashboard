@@ -76,23 +76,25 @@ export async function GET(request: NextRequest) {
     let uniqueChannels = new Set<string>();
 
     for (const activity of activities) {
+      const metadata = activity.metadata as any;
+
       // Count different types of activities
-      if (activity.metadata?.eventType === 'message') {
+      if (metadata?.eventType === 'message') {
         messageCount++;
 
         // Track unique channels
-        if (activity.metadata?.channel) {
-          uniqueChannels.add(activity.metadata.channel);
+        if (metadata?.channel) {
+          uniqueChannels.add(metadata.channel);
         }
 
         // Check if it's a thread reply
-        if (activity.metadata?.payload?.thread_ts) {
+        if (metadata?.payload?.thread_ts) {
           threadCount++;
         }
       }
 
       // Count reactions (if we track them)
-      if (activity.metadata?.eventType === 'reaction') {
+      if (metadata?.eventType === 'reaction') {
         reactionCount++;
       }
 

@@ -194,7 +194,7 @@ export const AccessibleNavigation: React.FC<AccessibleNavigationProps> = ({
             level > 0 && 'ml-4'
           )}
           onClick={() => !item.disabled && handleItemClick(item)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={e => handleKeyDown(e.nativeEvent)}
         >
           <div className='flex items-center space-x-2'>
             {item.icon && <span className='flex-shrink-0'>{item.icon}</span>}

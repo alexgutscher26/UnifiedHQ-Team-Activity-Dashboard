@@ -208,11 +208,18 @@ export function withErrorHandling<T = any>(
     try {
       // Rate limiting check
       if (options?.rateLimit) {
-        const identifier = req.headers.get('x-forwarded-for') || 
-                          req.headers.get('x-real-ip') || 
-                          'unknown';
-        
-        if (!checkRateLimit(identifier, options.rateLimit.limit, options.rateLimit.windowMs)) {
+        const identifier =
+          req.headers.get('x-forwarded-for') ||
+          req.headers.get('x-real-ip') ||
+          'unknown';
+
+        if (
+          !checkRateLimit(
+            identifier,
+            options.rateLimit.limit,
+            options.rateLimit.windowMs
+          )
+        ) {
           const rateLimitError = ApiErrors.rateLimit(
             `Rate limit exceeded. Try again in ${Math.ceil(options.rateLimit.windowMs / 1000)} seconds`
           );
@@ -221,7 +228,11 @@ export function withErrorHandling<T = any>(
       }
 
       // Authentication checks
-      if (options?.requireAuth || options?.requireAdmin || options?.requiredPermissions) {
+      if (
+        options?.requireAuth ||
+        options?.requireAdmin ||
+        options?.requiredPermissions
+      ) {
         try {
           if (options.requireAdmin) {
             await requireAdmin(req);
@@ -241,7 +252,7 @@ export function withErrorHandling<T = any>(
       return response;
     } catch (error) {
       const errorResponse = handleApiError(error, requestId);
-      
+
       // Log error with additional context
       if (errorResponse.status >= 400) {
         const errorBody = await errorResponse.json();
@@ -251,7 +262,7 @@ export function withErrorHandling<T = any>(
           options,
         });
       }
-      
+
       return errorResponse;
     }
   };
@@ -462,7 +473,10 @@ export async function requireAuth(
 
     // Check if session is still valid
     const now = new Date();
-    if (session.session.expiresAt && new Date(session.session.expiresAt) < now) {
+    if (
+      session.session.expiresAt &&
+      new Date(session.session.expiresAt) < now
+    ) {
       throw ApiErrors.authentication('Session expired');
     }
 
@@ -475,14 +489,17 @@ export async function requireAuth(
     if (error && typeof error === 'object' && 'type' in error) {
       throw error; // Re-throw API errors
     }
-    
+
     // Handle authentication errors
     if (error instanceof Error) {
-      if (error.message.includes('session') || error.message.includes('token')) {
+      if (
+        error.message.includes('session') ||
+        error.message.includes('token')
+      ) {
         throw ApiErrors.authentication(error.message);
       }
     }
-    
+
     throw ApiErrors.authentication('Authentication failed');
   }
 }
@@ -503,7 +520,7 @@ export async function requireAdmin(
   req: NextRequest
 ): Promise<{ userId: string; user: any; session: any }> {
   const authResult = await requireAuth(req);
-  
+
   // Check if user has admin privileges
   // This would depend on your user role system
   // For now, we'll check if the user email contains 'admin' or is a specific admin email
@@ -524,20 +541,20 @@ export async function requireAdmin(
 export async function requireAuthWithContext(
   req: NextRequest,
   requiredPermissions?: string[]
-): Promise<{ 
-  userId: string; 
-  user: any; 
+): Promise<{
+  userId: string;
+  user: any;
   session: any;
   permissions: string[];
 }> {
   const authResult = await requireAuth(req);
-  
+
   // Get user permissions/roles from database
   // For now, we'll use a simple permission system based on user properties
   const prisma = new PrismaClient();
   const userPermissions = await prisma.user.findUnique({
     where: { id: authResult.userId },
-    select: { 
+    select: {
       email: true,
       emailVerified: true,
     },
@@ -551,13 +568,13 @@ export async function requireAuthWithContext(
   if (userPermissions?.email?.includes('admin')) {
     permissions.push('admin');
   }
-  
+
   // Check required permissions if specified
   if (requiredPermissions && requiredPermissions.length > 0) {
     const hasRequiredPermissions = requiredPermissions.every(permission =>
       permissions.includes(permission)
     );
-    
+
     if (!hasRequiredPermissions) {
       throw ApiErrors.authorization(
         `Missing required permissions: ${requiredPermissions.join(', ')}`
@@ -575,8 +592,10 @@ export async function requireAuthWithContext(
 export async function requireApiKey(
   req: NextRequest
 ): Promise<{ apiKey: string; client: any }> {
-  const apiKey = req.headers.get('x-api-key') || req.headers.get('authorization')?.replace('Bearer ', '');
-  
+  const apiKey =
+    req.headers.get('x-api-key') ||
+    req.headers.get('authorization')?.replace('Bearer ', '');
+
   if (!apiKey) {
     throw ApiErrors.authentication('API key required');
   }
@@ -584,7 +603,7 @@ export async function requireApiKey(
   // For now, we'll use a simple API key validation
   // In a real implementation, you'd store API keys in the database
   const validApiKeys = process.env.VALID_API_KEYS?.split(',') || [];
-  
+
   if (!validApiKeys.includes(apiKey)) {
     throw ApiErrors.authentication('Invalid API key');
   }

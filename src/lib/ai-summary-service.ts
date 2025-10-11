@@ -78,18 +78,22 @@ export class AISummaryService {
             activity_count: data.activities.length,
             time_range_start: data.timeRange.start.toISOString(),
             time_range_end: data.timeRange.end.toISOString(),
-            team_context: data.teamContext ? {
-              repositories: data.teamContext.repositories.length,
-              channels: data.teamContext.channels.length,
-              team_size: data.teamContext.teamSize,
-            } : null,
+            team_context: data.teamContext
+              ? {
+                  repositories: data.teamContext.repositories.length,
+                  channels: data.teamContext.channels.length,
+                  team_size: data.teamContext.teamSize,
+                }
+              : null,
             source_breakdown: this.getSourceBreakdown(data.activities),
             summary_type: 'daily_summary',
           },
-          groups: data.teamContext ? {
-            repositories: data.teamContext.repositories.join(','),
-            channels: data.teamContext.channels.join(','),
-          } : undefined,
+          groups: data.teamContext
+            ? {
+                repositories: data.teamContext.repositories.join(','),
+                channels: data.teamContext.channels.join(','),
+              }
+            : undefined,
           temperature: this.TEMPERATURE,
           maxTokens: this.MAX_TOKENS,
         }

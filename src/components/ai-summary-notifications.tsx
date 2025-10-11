@@ -28,9 +28,9 @@ interface AISummaryNotificationsProps {
   onSettingsChange?: (settings: NotificationSettings) => void;
 }
 
-export function AISummaryNotifications({ 
-  className, 
-  onSettingsChange 
+export function AISummaryNotifications({
+  className,
+  onSettingsChange,
 }: AISummaryNotificationsProps) {
   const { toast } = useToast();
   const [settings, setSettings] = useState<NotificationSettings>({
@@ -57,10 +57,13 @@ export function AISummaryNotifications({
   const updateSettings = (newSettings: Partial<NotificationSettings>) => {
     const updatedSettings = { ...settings, ...newSettings };
     setSettings(updatedSettings);
-    
+
     // Save to localStorage
-    localStorage.setItem('ai-summary-notifications', JSON.stringify(updatedSettings));
-    
+    localStorage.setItem(
+      'ai-summary-notifications',
+      JSON.stringify(updatedSettings)
+    );
+
     // Call callback if provided
     if (onSettingsChange) {
       onSettingsChange(updatedSettings);
@@ -113,9 +116,10 @@ export function AISummaryNotifications({
             size='sm'
             variant={settings.enabled ? 'default' : 'outline'}
             onClick={toggleNotifications}
-            className={settings.enabled 
-              ? 'bg-green-600 hover:bg-green-700' 
-              : 'border-gray-600 text-gray-400 hover:text-white'
+            className={
+              settings.enabled
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'border-gray-600 text-gray-400 hover:text-white'
             }
           >
             {settings.enabled ? (
@@ -142,7 +146,9 @@ export function AISummaryNotifications({
           <div className='flex items-center gap-3'>
             <IconSparkles className='size-5 text-blue-400' />
             <div>
-              <h4 className='text-white font-medium'>AI Summary Notifications</h4>
+              <h4 className='text-white font-medium'>
+                AI Summary Notifications
+              </h4>
               <p className='text-sm text-gray-400'>
                 Receive alerts when new summaries are generated
               </p>
@@ -154,7 +160,11 @@ export function AISummaryNotifications({
             onClick={toggleNotifications}
             className={settings.enabled ? 'text-green-400' : 'text-gray-500'}
           >
-            {settings.enabled ? <IconCheck className='size-5' /> : <IconX className='size-5' />}
+            {settings.enabled ? (
+              <IconCheck className='size-5' />
+            ) : (
+              <IconX className='size-5' />
+            )}
           </Button>
         </div>
 
@@ -166,7 +176,9 @@ export function AISummaryNotifications({
               <div className='flex items-center gap-3'>
                 <IconClock className='size-4 text-orange-400' />
                 <div>
-                  <h4 className='text-white font-medium text-sm'>Daily Reminder</h4>
+                  <h4 className='text-white font-medium text-sm'>
+                    Daily Reminder
+                  </h4>
                   <p className='text-xs text-gray-400'>
                     Get reminded to check your daily summary
                   </p>
@@ -176,9 +188,15 @@ export function AISummaryNotifications({
                 variant='ghost'
                 size='sm'
                 onClick={toggleDailyReminder}
-                className={settings.dailyReminder ? 'text-green-400' : 'text-gray-500'}
+                className={
+                  settings.dailyReminder ? 'text-green-400' : 'text-gray-500'
+                }
               >
-                {settings.dailyReminder ? <IconCheck className='size-4' /> : <IconX className='size-4' />}
+                {settings.dailyReminder ? (
+                  <IconCheck className='size-4' />
+                ) : (
+                  <IconX className='size-4' />
+                )}
               </Button>
             </div>
 
@@ -187,7 +205,9 @@ export function AISummaryNotifications({
               <div className='flex items-center gap-3'>
                 <IconSparkles className='size-4 text-blue-400' />
                 <div>
-                  <h4 className='text-white font-medium text-sm'>New Summary Alert</h4>
+                  <h4 className='text-white font-medium text-sm'>
+                    New Summary Alert
+                  </h4>
                   <p className='text-xs text-gray-400'>
                     Get notified when summaries are auto-generated
                   </p>
@@ -197,9 +217,15 @@ export function AISummaryNotifications({
                 variant='ghost'
                 size='sm'
                 onClick={toggleNewSummaryAlert}
-                className={settings.newSummaryAlert ? 'text-green-400' : 'text-gray-500'}
+                className={
+                  settings.newSummaryAlert ? 'text-green-400' : 'text-gray-500'
+                }
               >
-                {settings.newSummaryAlert ? <IconCheck className='size-4' /> : <IconX className='size-4' />}
+                {settings.newSummaryAlert ? (
+                  <IconCheck className='size-4' />
+                ) : (
+                  <IconX className='size-4' />
+                )}
               </Button>
             </div>
 
@@ -208,7 +234,9 @@ export function AISummaryNotifications({
               <div className='flex items-center gap-3'>
                 <IconBell className='size-4 text-purple-400' />
                 <div>
-                  <h4 className='text-white font-medium text-sm'>Email Notifications</h4>
+                  <h4 className='text-white font-medium text-sm'>
+                    Email Notifications
+                  </h4>
                   <p className='text-xs text-gray-400'>
                     Receive summary notifications via email
                   </p>
@@ -218,9 +246,17 @@ export function AISummaryNotifications({
                 variant='ghost'
                 size='sm'
                 onClick={toggleEmailNotifications}
-                className={settings.emailNotifications ? 'text-green-400' : 'text-gray-500'}
+                className={
+                  settings.emailNotifications
+                    ? 'text-green-400'
+                    : 'text-gray-500'
+                }
               >
-                {settings.emailNotifications ? <IconCheck className='size-4' /> : <IconX className='size-4' />}
+                {settings.emailNotifications ? (
+                  <IconCheck className='size-4' />
+                ) : (
+                  <IconX className='size-4' />
+                )}
               </Button>
             </div>
 
@@ -229,12 +265,14 @@ export function AISummaryNotifications({
               <div className='p-3 border border-slate-700 rounded-lg'>
                 <div className='flex items-center gap-3 mb-3'>
                   <IconClock className='size-4 text-orange-400' />
-                  <h4 className='text-white font-medium text-sm'>Reminder Time</h4>
+                  <h4 className='text-white font-medium text-sm'>
+                    Reminder Time
+                  </h4>
                 </div>
                 <input
                   type='time'
                   value={settings.reminderTime}
-                  onChange={(e) => handleTimeChange(e.target.value)}
+                  onChange={e => handleTimeChange(e.target.value)}
                   className='bg-slate-800 text-white text-sm px-3 py-2 rounded border border-slate-600 focus:border-blue-500 focus:outline-none'
                 />
                 <p className='text-xs text-gray-400 mt-2'>
@@ -261,7 +299,7 @@ export function AISummaryNotifications({
         <div className='pt-4 border-t border-slate-700'>
           <div className='flex items-center justify-between text-xs text-gray-500'>
             <span>Notification Status</span>
-            <Badge 
+            <Badge
               variant={settings.enabled ? 'default' : 'secondary'}
               className={settings.enabled ? 'bg-green-600' : ''}
             >

@@ -41,7 +41,10 @@ interface SummaryHistoryProps {
   onSummarySelect?: (summary: SummaryHistoryItem) => void;
 }
 
-export function SummaryHistory({ className, onSummarySelect }: SummaryHistoryProps) {
+export function SummaryHistory({
+  className,
+  onSummarySelect,
+}: SummaryHistoryProps) {
   const { toast } = useToast();
   const [summaries, setSummaries] = useState<SummaryHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,7 +67,7 @@ export function SummaryHistory({ className, onSummarySelect }: SummaryHistoryPro
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const response = await fetch(
         `/api/ai-summary/history?page=${pagination.page}&limit=${pagination.limit}&timeRange=${timeRange}`,
         {
@@ -74,26 +77,35 @@ export function SummaryHistory({ className, onSummarySelect }: SummaryHistoryPro
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch summary history`);
+        throw new Error(
+          errorData.error ||
+            `HTTP ${response.status}: Failed to fetch summary history`
+        );
       }
 
       const data = await response.json();
       setSummaries(data.summaries || []);
-      setPagination(data.pagination || {
-        page: 1,
-        limit: 10,
-        totalCount: 0,
-        totalPages: 0,
-        hasNext: false,
-        hasPrev: false,
-      });
+      setPagination(
+        data.pagination || {
+          page: 1,
+          limit: 10,
+          totalCount: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        }
+      );
     } catch (error) {
       console.error('Error fetching summary history:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load history';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to load history';
       setError(errorMessage);
-      
+
       // Don't show toast for authentication errors
-      if (!errorMessage.includes('401') && !errorMessage.includes('Unauthorized')) {
+      if (
+        !errorMessage.includes('401') &&
+        !errorMessage.includes('Unauthorized')
+      ) {
         toast({
           title: 'Error',
           description: errorMessage,
@@ -180,8 +192,8 @@ export function SummaryHistory({ className, onSummarySelect }: SummaryHistoryPro
               Failed to Load History
             </h4>
             <p className='text-gray-400 mb-4'>
-              {error.includes('401') || error.includes('Unauthorized') 
-                ? 'Please log in to view your summary history' 
+              {error.includes('401') || error.includes('Unauthorized')
+                ? 'Please log in to view your summary history'
                 : error}
             </p>
             <Button onClick={fetchHistory} variant='outline'>
@@ -207,7 +219,9 @@ export function SummaryHistory({ className, onSummarySelect }: SummaryHistoryPro
           <div className='flex items-center gap-2'>
             <select
               value={timeRange}
-              onChange={e => setTimeRange(e.target.value as '7d' | '30d' | '90d')}
+              onChange={e =>
+                setTimeRange(e.target.value as '7d' | '30d' | '90d')
+              }
               className='bg-slate-800 text-white text-xs px-2 py-1 rounded border border-slate-600'
             >
               <option value='7d'>Last 7 days</option>
@@ -234,7 +248,7 @@ export function SummaryHistory({ className, onSummarySelect }: SummaryHistoryPro
           </div>
         ) : (
           <>
-            {summaries.map((summary) => (
+            {summaries.map(summary => (
               <div
                 key={summary.id}
                 onClick={() => handleSummaryClick(summary)}
@@ -248,7 +262,7 @@ export function SummaryHistory({ className, onSummarySelect }: SummaryHistoryPro
                     {formatDate(summary.generatedAt)}
                   </span>
                 </div>
-                
+
                 <div className='space-y-2 mb-3'>
                   <div className='flex items-center gap-2 text-xs text-gray-400'>
                     <IconCircleCheck className='size-3' />
@@ -290,11 +304,11 @@ export function SummaryHistory({ className, onSummarySelect }: SummaryHistoryPro
                   <IconChevronLeft className='size-4 mr-1' />
                   Previous
                 </Button>
-                
+
                 <span className='text-sm text-gray-400'>
                   Page {pagination.page} of {pagination.totalPages}
                 </span>
-                
+
                 <Button
                   variant='outline'
                   size='sm'

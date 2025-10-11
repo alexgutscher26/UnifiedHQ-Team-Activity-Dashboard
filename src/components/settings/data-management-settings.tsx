@@ -1,13 +1,35 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import {
   IconDatabase,
@@ -17,7 +39,6 @@ import {
   IconAlertTriangle,
   IconClock,
   IconShield,
-  IconArchive,
 } from '@tabler/icons-react';
 
 interface DataManagementSettingsProps {
@@ -32,7 +53,9 @@ interface DataSettings {
   exportFormat: 'json' | 'csv' | 'pdf';
 }
 
-export function DataManagementSettings({ onSettingsChange }: DataManagementSettingsProps) {
+export function DataManagementSettings({
+  onSettingsChange,
+}: DataManagementSettingsProps) {
   const { toast } = useToast();
   const [settings, setSettings] = useState<DataSettings>({
     autoSync: true,
@@ -47,7 +70,7 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
   const saveSettings = (newSettings: Partial<DataSettings>) => {
     const updatedSettings = { ...settings, ...newSettings };
     setSettings(updatedSettings);
-    
+
     try {
       localStorage.setItem('data-settings', JSON.stringify(updatedSettings));
       onSettingsChange?.('Data Management', 'Settings updated successfully');
@@ -68,10 +91,10 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      
+
       // Simulate export process
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Create export data
       const exportData = {
         settings,
@@ -82,7 +105,7 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
       const blob = new Blob([JSON.stringify(exportData, null, 2)], {
         type: 'application/json',
       });
-      
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -112,7 +135,7 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
   const handleClearCache = async () => {
     try {
       setIsClearing(true);
-      
+
       const response = await fetch('/api/cache/cleanup', {
         method: 'POST',
       });
@@ -181,7 +204,7 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
             <Switch
               id='auto-sync'
               checked={settings.autoSync}
-              onCheckedChange={(checked) => saveSettings({ autoSync: checked })}
+              onCheckedChange={checked => saveSettings({ autoSync: checked })}
             />
           </div>
 
@@ -189,9 +212,9 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
             <Label htmlFor='sync-interval'>Sync Interval</Label>
             <Select
               value={settings.syncInterval}
-              onValueChange={(value: '15min' | '30min' | '1hour' | '6hours' | '24hours') => 
-                saveSettings({ syncInterval: value })
-              }
+              onValueChange={(
+                value: '15min' | '30min' | '1hour' | '6hours' | '24hours'
+              ) => saveSettings({ syncInterval: value })}
               disabled={!settings.autoSync}
             >
               <SelectTrigger>
@@ -216,18 +239,16 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
             <IconClock className='size-5' />
             Data Retention
           </CardTitle>
-          <CardDescription>
-            Control how long your data is kept
-          </CardDescription>
+          <CardDescription>Control how long your data is kept</CardDescription>
         </CardHeader>
         <CardContent className='space-y-6'>
           <div className='space-y-2'>
             <Label htmlFor='data-retention'>Retention Period</Label>
             <Select
               value={settings.dataRetention}
-              onValueChange={(value: '30days' | '90days' | '1year' | 'forever') => 
-                saveSettings({ dataRetention: value })
-              }
+              onValueChange={(
+                value: '30days' | '90days' | '1year' | 'forever'
+              ) => saveSettings({ dataRetention: value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder='Select retention period' />
@@ -254,7 +275,9 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
             <Switch
               id='cache-enabled'
               checked={settings.cacheEnabled}
-              onCheckedChange={(checked) => saveSettings({ cacheEnabled: checked })}
+              onCheckedChange={checked =>
+                saveSettings({ cacheEnabled: checked })
+              }
             />
           </div>
         </CardContent>
@@ -276,7 +299,7 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
             <Label htmlFor='export-format'>Export Format</Label>
             <Select
               value={settings.exportFormat}
-              onValueChange={(value: 'json' | 'csv' | 'pdf') => 
+              onValueChange={(value: 'json' | 'csv' | 'pdf') =>
                 saveSettings({ exportFormat: value })
               }
             >
@@ -305,7 +328,8 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
               Export Data
             </Button>
             <p className='text-sm text-muted-foreground'>
-              Download all your data in {settings.exportFormat.toUpperCase()} format
+              Download all your data in {settings.exportFormat.toUpperCase()}{' '}
+              format
             </p>
           </div>
         </CardContent>
@@ -318,9 +342,7 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
             <IconShield className='size-5' />
             Data Management
           </CardTitle>
-          <CardDescription>
-            Manage your stored data and cache
-          </CardDescription>
+          <CardDescription>Manage your stored data and cache</CardDescription>
         </CardHeader>
         <CardContent className='space-y-6'>
           <div className='space-y-4'>
@@ -367,8 +389,9 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
                       Clear All Data
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete all your data,
-                      settings, and preferences. Are you sure you want to continue?
+                      This action cannot be undone. This will permanently delete
+                      all your data, settings, and preferences. Are you sure you
+                      want to continue?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -394,9 +417,7 @@ export function DataManagementSettings({ onSettingsChange }: DataManagementSetti
             <IconDatabase className='size-5' />
             Storage Information
           </CardTitle>
-          <CardDescription>
-            View your current storage usage
-          </CardDescription>
+          <CardDescription>View your current storage usage</CardDescription>
         </CardHeader>
         <CardContent>
           <div className='space-y-4'>

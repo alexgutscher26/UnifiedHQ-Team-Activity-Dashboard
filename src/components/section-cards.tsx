@@ -16,8 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { LoadingState, LoadingSkeleton } from '@/components/ui/loading';
-import { useLoading } from '@/hooks/use-loading';
+import { LoadingSkeleton } from '@/components/ui/loading';
 import {
   useMemoryLeakPrevention,
   useSafeTimer,
@@ -69,7 +68,10 @@ export function SectionCards() {
             lastActivity: githubStats.lastUpdate || 'No recent activity',
           },
           slack: {
-            channels: slackStats.channels?.selected || slackStats.breakdown?.channels || 0,
+            channels:
+              slackStats.channels?.selected ||
+              slackStats.breakdown?.channels ||
+              0,
             messages: slackStats.count || 0,
             mentions: slackStats.breakdown?.reactions || 0, // Using reactions as mentions for now
             lastActivity: slackStats.lastUpdate || 'No recent activity',

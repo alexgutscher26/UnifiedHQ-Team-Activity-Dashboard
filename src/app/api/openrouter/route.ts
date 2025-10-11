@@ -4,15 +4,15 @@ import { generateWithPostHogAnalytics } from '@/lib/posthog-openrouter';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 
-      prompt, 
+    const {
+      prompt,
       model = 'gpt-3.5-turbo',
       distinctId,
       traceId,
       properties = {},
       groups = {},
       temperature = 0.7,
-      maxTokens = 1000
+      maxTokens = 1000,
     } = body;
 
     if (!prompt) {
@@ -49,14 +49,13 @@ export async function POST(request: NextRequest) {
         finishReason: response.choices[0]?.finish_reason,
       },
     });
-
   } catch (error) {
     console.error('OpenRouter API error:', error);
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to generate response',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
@@ -67,7 +66,8 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     message: 'OpenRouter API endpoint',
-    usage: 'POST with { prompt, model?, distinctId?, traceId?, properties?, groups?, temperature?, maxTokens? }',
+    usage:
+      'POST with { prompt, model?, distinctId?, traceId?, properties?, groups?, temperature?, maxTokens? }',
     example: {
       prompt: 'Tell me a fun fact about hedgehogs',
       model: 'gpt-3.5-turbo',

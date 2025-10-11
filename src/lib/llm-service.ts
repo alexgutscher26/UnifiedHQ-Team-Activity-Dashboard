@@ -1,9 +1,9 @@
 /**
  * LLM Service with PostHog Analytics Integration
- * 
+ *
  * This service provides a clean interface for using OpenRouter with PostHog analytics
  * following the PostHog LLM analytics documentation.
- * 
+ *
  * Note: This is a server-side service. For client-side usage, use client-llm-service.ts
  */
 
@@ -36,7 +36,10 @@ export class LLMService {
   private defaultModel: string;
   private defaultDistinctId: string;
 
-  constructor(defaultModel: string = 'gpt-3.5-turbo', defaultDistinctId: string = 'anonymous') {
+  constructor(
+    defaultModel: string = 'gpt-3.5-turbo',
+    defaultDistinctId: string = 'anonymous'
+  ) {
     this.defaultModel = defaultModel;
     this.defaultDistinctId = defaultDistinctId;
   }
@@ -85,7 +88,9 @@ export class LLMService {
       };
     } catch (error) {
       console.error('LLM Service error:', error);
-      throw new Error(`Failed to generate text: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to generate text: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -108,25 +113,21 @@ export class LLMService {
     } = options;
 
     try {
-      const response = await generateWithPostHogAnalytics(
-        model,
-        messages,
-        {
-          distinctId,
-          traceId,
-          properties: {
-            service: 'llm-service',
-            context_type: 'conversation',
-            message_count: messages.length,
-            timestamp: new Date().toISOString(),
-            ...properties,
-          },
-          groups,
-          temperature,
-          maxTokens,
-          stream,
-        }
-      );
+      const response = await generateWithPostHogAnalytics(model, messages, {
+        distinctId,
+        traceId,
+        properties: {
+          service: 'llm-service',
+          context_type: 'conversation',
+          message_count: messages.length,
+          timestamp: new Date().toISOString(),
+          ...properties,
+        },
+        groups,
+        temperature,
+        maxTokens,
+        stream,
+      });
 
       return {
         content: response.choices[0]?.message?.content || '',
@@ -136,7 +137,9 @@ export class LLMService {
       };
     } catch (error) {
       console.error('LLM Service error:', error);
-      throw new Error(`Failed to generate with context: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to generate with context: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -165,7 +168,7 @@ export class LLMService {
   async generateForTeam(
     teamId: string,
     prompt: string,
-    options: Omit<LLMRequest, 'prompt' | 'groups'> = {}
+    options: Omit<LLMRequest, 'prompt'> = {}
   ): Promise<LLMResponse> {
     return this.generateText({
       ...options,
@@ -182,14 +185,25 @@ export class LLMService {
 export const llmService = new LLMService();
 
 // Convenience functions - server-side only
-export async function generateText(prompt: string, options: Partial<LLMRequest> = {}) {
+export async function generateText(
+  prompt: string,
+  options: Partial<LLMRequest> = {}
+) {
   return llmService.generateText({ prompt, ...options });
 }
 
-export async function generateForUser(userId: string, prompt: string, options: Partial<LLMRequest> = {}) {
+export async function generateForUser(
+  userId: string,
+  prompt: string,
+  options: Partial<LLMRequest> = {}
+) {
   return llmService.generateForUser(userId, prompt, options);
 }
 
-export async function generateForTeam(teamId: string, prompt: string, options: Partial<LLMRequest> = {}) {
+export async function generateForTeam(
+  teamId: string,
+  prompt: string,
+  options: Partial<LLMRequest> = {}
+) {
   return llmService.generateForTeam(teamId, prompt, options);
 }

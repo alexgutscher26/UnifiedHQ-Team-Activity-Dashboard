@@ -1,11 +1,7 @@
 // API Error Handling Middleware
 
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  ApiError,
-  ApiErrorType,
-  createApiError,
-} from '@/lib/api-error-handler';
+import { ApiErrorType, createApiError } from '@/lib/api-error-handler';
 
 // Global error handler for API routes
 export function handleApiError(error: unknown, req: NextRequest): NextResponse {

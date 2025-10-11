@@ -54,12 +54,18 @@ export const AccessibleFormField: React.FC<AccessibleFormFieldProps> = ({
           {description}
         </p>
       )}
-      {React.cloneElement(children as React.ReactElement, {
-        id,
-        'aria-describedby': cn(description && descriptionId, error && errorId),
-        'aria-invalid': !!error,
-        'aria-required': required,
-      })}
+      {React.cloneElement(
+        children as React.ReactElement,
+        {
+          id,
+          'aria-describedby': cn(
+            description && descriptionId,
+            error && errorId
+          ),
+          'aria-invalid': !!error,
+          'aria-required': required,
+        } as any
+      )}
       {error && (
         <p id={errorId} className='text-sm text-red-500' role='alert'>
           {error}

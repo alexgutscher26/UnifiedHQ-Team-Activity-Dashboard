@@ -8,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -21,8 +20,8 @@ import {
   scrollOptimizationPresets,
 } from '@/hooks/use-scroll-optimization';
 import {
-  IconScroll,
-  IconZap,
+  IconArrowsVertical,
+  IconBolt,
   IconChartBar,
   IconSettings,
 } from '@tabler/icons-react';
@@ -74,7 +73,7 @@ export function ScrollOptimizationDemo() {
       <Card>
         <CardHeader>
           <CardTitle className='flex items-center gap-2'>
-            <IconScroll className='size-5' />
+            <IconArrowsVertical className='size-5' />
             Scroll Optimization Demo
           </CardTitle>
           <CardDescription>
@@ -125,7 +124,7 @@ export function ScrollOptimizationDemo() {
           <Card>
             <CardHeader>
               <CardTitle className='flex items-center gap-2'>
-                <IconZap className='size-4 text-green-600' />
+                <IconBolt className='size-4 text-green-600' />
                 Optimized Scroll Container
               </CardTitle>
               <CardDescription>

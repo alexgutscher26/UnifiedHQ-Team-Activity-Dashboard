@@ -4,20 +4,22 @@ let posthogInstance: PostHog | null = null;
 
 export function getPostHogServer(): PostHog | null {
   // Only create instance if we have the required environment variables
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY || !process.env.NEXT_PUBLIC_POSTHOG_HOST) {
-    console.warn('PostHog server environment variables not found. Please check your .env.local file.');
+  if (
+    !process.env.NEXT_PUBLIC_POSTHOG_KEY ||
+    !process.env.NEXT_PUBLIC_POSTHOG_HOST
+  ) {
+    console.warn(
+      'PostHog server environment variables not found. Please check your .env.local file.'
+    );
     return null;
   }
 
   if (!posthogInstance) {
-    posthogInstance = new PostHog(
-      process.env.NEXT_PUBLIC_POSTHOG_KEY,
-      {
-        host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-        flushAt: 1,
-        flushInterval: 0,
-      }
-    );
+    posthogInstance = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+      flushAt: 1,
+      flushInterval: 0,
+    });
   }
   return posthogInstance;
 }
@@ -30,8 +32,7 @@ export async function captureServerException(
   try {
     const posthog = getPostHogServer();
     if (posthog) {
-      await posthog.captureException(error, {
-        distinct_id: distinctId,
+      await posthog.captureException(error, distinctId || 'anonymous', {
         ...additionalProperties,
       });
     }

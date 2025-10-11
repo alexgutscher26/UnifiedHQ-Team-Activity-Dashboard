@@ -1,7 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +16,11 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { loadUserPreferences, saveUserPreferences, type UserPreferences } from '@/lib/user-preferences';
+import {
+  loadUserPreferences,
+  saveUserPreferences,
+  type UserPreferences,
+} from '@/lib/user-preferences';
 import {
   IconUser,
   IconMail,
@@ -25,7 +35,9 @@ interface UserPreferencesSettingsProps {
   onSettingsChange?: (section: string, message: string) => void;
 }
 
-export function UserPreferencesSettings({ onSettingsChange }: UserPreferencesSettingsProps) {
+export function UserPreferencesSettings({
+  onSettingsChange,
+}: UserPreferencesSettingsProps) {
   const { toast } = useToast();
   const [preferences, setPreferences] = useState<UserPreferences | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -157,7 +169,12 @@ export function UserPreferencesSettings({ onSettingsChange }: UserPreferencesSet
                 <Input
                   id='githubOwner'
                   value={editForm.githubOwner}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, githubOwner: e.target.value }))}
+                  onChange={e =>
+                    setEditForm(prev => ({
+                      ...prev,
+                      githubOwner: e.target.value,
+                    }))
+                  }
                   placeholder='Enter GitHub username or organization'
                 />
               ) : (
@@ -180,7 +197,12 @@ export function UserPreferencesSettings({ onSettingsChange }: UserPreferencesSet
                 <Input
                   id='githubRepo'
                   value={editForm.githubRepo}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, githubRepo: e.target.value }))}
+                  onChange={e =>
+                    setEditForm(prev => ({
+                      ...prev,
+                      githubRepo: e.target.value,
+                    }))
+                  }
                   placeholder='Enter repository name'
                 />
               ) : (
@@ -204,14 +226,21 @@ export function UserPreferencesSettings({ onSettingsChange }: UserPreferencesSet
             <div className='space-y-1'>
               <h4 className='text-sm font-medium'>Repository ID</h4>
               <p className='text-sm text-muted-foreground'>
-                {preferences?.githubRepoId ? `ID: ${preferences.githubRepoId}` : 'No repository selected'}
+                {preferences?.githubRepoId
+                  ? `ID: ${preferences.githubRepoId}`
+                  : 'No repository selected'}
               </p>
             </div>
             {isEditing && (
               <Input
                 type='number'
                 value={editForm.githubRepoId}
-                onChange={(e) => setEditForm(prev => ({ ...prev, githubRepoId: parseInt(e.target.value) || 0 }))}
+                onChange={e =>
+                  setEditForm(prev => ({
+                    ...prev,
+                    githubRepoId: parseInt(e.target.value) || 0,
+                  }))
+                }
                 placeholder='Repository ID'
                 className='w-32'
               />

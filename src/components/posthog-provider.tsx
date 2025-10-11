@@ -14,8 +14,13 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Check if we have the required environment variables
-    if (!process.env.NEXT_PUBLIC_POSTHOG_KEY || !process.env.NEXT_PUBLIC_POSTHOG_HOST) {
-      console.warn('PostHog environment variables not found. Please check your .env.local file.');
+    if (
+      !process.env.NEXT_PUBLIC_POSTHOG_KEY ||
+      !process.env.NEXT_PUBLIC_POSTHOG_HOST
+    ) {
+      console.warn(
+        'PostHog environment variables not found. Please check your .env.local file.'
+      );
       return;
     }
 
@@ -23,7 +28,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     const initializePostHog = async () => {
       try {
         const posthog = await import('posthog-js');
-        
+
         // Check if PostHog is already initialized
         if (posthog.default.__loaded) {
           console.log('PostHog already initialized');
@@ -59,9 +64,11 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         setIsInitialized(true);
       } catch (error) {
         console.error('Failed to initialize PostHog:', error);
-        
+
         // If PostHog fails completely, just continue without it
-        console.warn('PostHog initialization failed, continuing without analytics');
+        console.warn(
+          'PostHog initialization failed, continuing without analytics'
+        );
         setHasError(true);
       }
     };
@@ -76,21 +83,25 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Only wrap with PostHog provider if PostHog is initialized and no errors
-  if (typeof window !== 'undefined' && isInitialized && posthogClient && !hasError) {
+  if (
+    typeof window !== 'undefined' &&
+    isInitialized &&
+    posthogClient &&
+    !hasError
+  ) {
     try {
       // Check if we're using the mock client
-      if (posthogClient.__loaded && typeof posthogClient.capture === 'function') {
+      if (
+        posthogClient.__loaded &&
+        typeof posthogClient.capture === 'function'
+      ) {
         // For mock client, just render children without PostHog provider
         return <>{children}</>;
       }
-      
+
       // For real PostHog client, use the provider
       const { PostHogProvider: PHProvider } = require('posthog-js/react');
-      return (
-        <PHProvider client={posthogClient}>
-          {children}
-        </PHProvider>
-      );
+      return <PHProvider client={posthogClient}>{children}</PHProvider>;
     } catch (error) {
       console.error('Failed to create PostHog provider:', error);
     }

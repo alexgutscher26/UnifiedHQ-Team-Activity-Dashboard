@@ -5,33 +5,38 @@ let openRouterClient: OpenAI | null = null;
 let posthogClient: PostHog | null = null;
 
 export function getPostHogClient(): PostHog | null {
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY || !process.env.NEXT_PUBLIC_POSTHOG_HOST) {
-    console.warn('PostHog environment variables not found. Please check your .env.local file.');
+  if (
+    !process.env.NEXT_PUBLIC_POSTHOG_KEY ||
+    !process.env.NEXT_PUBLIC_POSTHOG_HOST
+  ) {
+    console.warn(
+      'PostHog environment variables not found. Please check your .env.local file.'
+    );
     return null;
   }
 
   if (!posthogClient) {
-    posthogClient = new PostHog(
-      process.env.NEXT_PUBLIC_POSTHOG_KEY,
-      {
-        host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-        flushAt: 1,
-        flushInterval: 0,
-      }
-    );
+    posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+      flushAt: 1,
+      flushInterval: 0,
+    });
   }
   return posthogClient;
 }
 
 export function getOpenRouterClient(): OpenAI | null {
   if (!process.env.OPENROUTER_API_KEY) {
-    console.warn('OpenRouter API key not found. Please check your .env.local file.');
+    console.warn(
+      'OpenRouter API key not found. Please check your .env.local file.'
+    );
     return null;
   }
 
   if (!openRouterClient) {
     openRouterClient = new OpenAI({
-      baseURL: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
+      baseURL:
+        process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
       apiKey: process.env.OPENROUTER_API_KEY,
     });
   }
@@ -40,7 +45,7 @@ export function getOpenRouterClient(): OpenAI | null {
 
 export interface LLMGenerationOptions {
   model: string;
-  messages: Array<{ role: string; content: string }>;
+  messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
   distinctId?: string;
   traceId?: string;
   properties?: Record<string, any>;
@@ -56,7 +61,9 @@ export async function generateWithOpenRouter(options: LLMGenerationOptions) {
   const posthogClient = getPostHogClient();
 
   if (!openaiClient) {
-    throw new Error('OpenRouter client not configured. Please check your environment variables.');
+    throw new Error(
+      'OpenRouter client not configured. Please check your environment variables.'
+    );
   }
 
   try {
@@ -69,8 +76,8 @@ export async function generateWithOpenRouter(options: LLMGenerationOptions) {
       stream: options.stream || false,
     });
 
-    // Capture the LLM generation event with PostHog if available
-    if (posthogClient) {
+    // Capture the LLM generation event with PostHog if available (only for non-streaming responses)
+    if (posthogClient && !options.stream && 'usage' in response) {
       try {
         await posthogClient.capture({
           distinctId: options.distinctId || 'anonymous',
@@ -89,7 +96,10 @@ export async function generateWithOpenRouter(options: LLMGenerationOptions) {
           groups: options.groups,
         });
       } catch (posthogError) {
-        console.error('Failed to capture LLM generation with PostHog:', posthogError);
+        console.error(
+          'Failed to capture LLM generation with PostHog:',
+          posthogError
+        );
       }
     }
 

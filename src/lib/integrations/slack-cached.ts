@@ -552,7 +552,7 @@ export async function fetchSlackActivity(
   const client = new CachedSlackClient(
     connection.accessToken,
     userId,
-    connection.botToken
+    connection.botToken || undefined
   );
   const allActivities: SlackActivity[] = [];
 

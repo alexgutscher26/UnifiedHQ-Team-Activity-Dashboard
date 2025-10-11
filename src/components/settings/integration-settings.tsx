@@ -1,7 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -28,9 +34,13 @@ interface IntegrationStatus {
   details?: string;
 }
 
-export function IntegrationSettings({ onSettingsChange }: IntegrationSettingsProps) {
+export function IntegrationSettings({
+  onSettingsChange,
+}: IntegrationSettingsProps) {
   const { toast } = useToast();
-  const [integrations, setIntegrations] = useState<Record<string, IntegrationStatus>>({
+  const [integrations, setIntegrations] = useState<
+    Record<string, IntegrationStatus>
+  >({
     github: { connected: false, status: 'loading' },
     slack: { connected: false, status: 'loading' },
   });
@@ -43,28 +53,32 @@ export function IntegrationSettings({ onSettingsChange }: IntegrationSettingsPro
   const loadIntegrationStatus = async () => {
     try {
       setIsLoading(true);
-      
+
       // Check GitHub status
       const githubResponse = await fetch('/api/github/stats');
       const githubConnected = githubResponse.ok;
-      
+
       // Check Slack status
       const slackResponse = await fetch('/api/slack/stats');
       const slackData = slackResponse.ok ? await slackResponse.json() : null;
       const slackConnected = slackData && slackData.status !== 'Not Connected';
-      
+
       setIntegrations({
         github: {
           connected: githubConnected,
           status: githubConnected ? 'connected' : 'disconnected',
           lastSync: githubConnected ? 'Recently synced' : undefined,
-          details: githubConnected ? 'Active repository monitoring' : 'Not connected',
+          details: githubConnected
+            ? 'Active repository monitoring'
+            : 'Not connected',
         },
         slack: {
           connected: slackConnected,
           status: slackConnected ? 'connected' : 'disconnected',
           lastSync: slackConnected ? slackData?.lastUpdate : undefined,
-          details: slackConnected ? `${slackData?.count || 0} messages tracked` : 'Not connected',
+          details: slackConnected
+            ? `${slackData?.count || 0} messages tracked`
+            : 'Not connected',
         },
       });
     } catch (error) {
@@ -119,13 +133,19 @@ export function IntegrationSettings({ onSettingsChange }: IntegrationSettingsPro
         [integration]: { ...prev[integration], status: 'loading' },
       }));
 
-      const response = await fetch(`/api/integrations/${integration}/disconnect`, {
-        method: 'POST',
-      });
+      const response = await fetch(
+        `/api/integrations/${integration}/disconnect`,
+        {
+          method: 'POST',
+        }
+      );
 
       if (response.ok) {
         await loadIntegrationStatus();
-        onSettingsChange?.('Integrations', `${integration} disconnected successfully`);
+        onSettingsChange?.(
+          'Integrations',
+          `${integration} disconnected successfully`
+        );
         toast({
           title: 'Success',
           description: `${integration} disconnected successfully`,
@@ -160,7 +180,10 @@ export function IntegrationSettings({ onSettingsChange }: IntegrationSettingsPro
 
       if (response.ok) {
         await loadIntegrationStatus();
-        onSettingsChange?.('Integrations', `${integration} synced successfully`);
+        onSettingsChange?.(
+          'Integrations',
+          `${integration} synced successfully`
+        );
         toast({
           title: 'Success',
           description: `${integration} synced successfully`,
@@ -196,7 +219,11 @@ export function IntegrationSettings({ onSettingsChange }: IntegrationSettingsPro
   const getStatusBadge = (status: IntegrationStatus) => {
     switch (status.status) {
       case 'connected':
-        return <Badge variant='default' className='bg-green-500'>Connected</Badge>;
+        return (
+          <Badge variant='default' className='bg-green-500'>
+            Connected
+          </Badge>
+        );
       case 'disconnected':
         return <Badge variant='secondary'>Disconnected</Badge>;
       case 'error':
@@ -211,7 +238,7 @@ export function IntegrationSettings({ onSettingsChange }: IntegrationSettingsPro
   if (isLoading) {
     return (
       <div className='space-y-6'>
-        {['github', 'slack'].map((integration) => (
+        {['github', 'slack'].map(integration => (
           <Card key={integration}>
             <CardHeader>
               <div className='flex items-center justify-between'>
@@ -251,7 +278,8 @@ export function IntegrationSettings({ onSettingsChange }: IntegrationSettingsPro
               <div>
                 <CardTitle className='text-lg'>GitHub</CardTitle>
                 <CardDescription>
-                  Connect your GitHub account to track commits, pull requests, and issues
+                  Connect your GitHub account to track commits, pull requests,
+                  and issues
                 </CardDescription>
               </div>
             </div>
@@ -322,7 +350,8 @@ export function IntegrationSettings({ onSettingsChange }: IntegrationSettingsPro
               <div>
                 <CardTitle className='text-lg'>Slack</CardTitle>
                 <CardDescription>
-                  Connect your Slack workspace to track messages and team activity
+                  Connect your Slack workspace to track messages and team
+                  activity
                 </CardDescription>
               </div>
             </div>
@@ -381,8 +410,8 @@ export function IntegrationSettings({ onSettingsChange }: IntegrationSettingsPro
           </div>
         </CardContent>
       </Card>
-      
- {/* Integration Help */}
+
+      {/* Integration Help */}
       <Card>
         <CardHeader>
           <CardTitle className='flex items-center gap-2'>
@@ -395,7 +424,9 @@ export function IntegrationSettings({ onSettingsChange }: IntegrationSettingsPro
         </CardHeader>
         <CardContent>
           <div className='space-y-2 text-sm text-muted-foreground'>
-            <p>• GitHub: Connect to track repository activity and pull requests</p>
+            <p>
+              • GitHub: Connect to track repository activity and pull requests
+            </p>
             <p>• Slack: Connect to monitor team messages and channels</p>
           </div>
         </CardContent>

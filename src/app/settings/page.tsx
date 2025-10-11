@@ -8,7 +8,7 @@ import { SettingsContent } from '@/components/settings-content';
 
 export default async function SettingsPage() {
   const user = await getCurrentUser();
-  
+
   return (
     <DashboardErrorBoundary>
       <SidebarProvider

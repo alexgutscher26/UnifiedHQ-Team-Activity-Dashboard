@@ -3,7 +3,6 @@ import { auth } from '@/lib/auth';
 import {
   withErrorHandling,
   createApiSuccessResponse,
-  ApiErrors,
 } from '@/lib/api-error-handler';
 import { validateRequestBody } from '@/lib/api-validation';
 import { z } from 'zod';

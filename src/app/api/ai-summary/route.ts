@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
     if (hoursSinceLastSummary >= 24) {
       // For auto-generation, always use the last 24 hours regardless of user's time range filter
       const dailyStartDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      
+
       const activityCount = await prisma.activity.count({
         where: {
           userId,

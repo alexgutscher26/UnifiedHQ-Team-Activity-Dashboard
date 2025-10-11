@@ -14,13 +14,13 @@ export class PostHogOpenAI extends OpenAI {
       baseURL: config.baseURL,
       apiKey: config.apiKey,
     });
-    
+
     this.posthogClient = config.posthogClient || null;
   }
 
   async chatCompletionsCreate(params: any) {
     const startTime = Date.now();
-    
+
     try {
       // Use the correct method to create chat completions
       const response = await this.chat.completions.create(params);
@@ -40,7 +40,10 @@ export class PostHogOpenAI extends OpenAI {
               $ai_input_tokens: response.usage?.prompt_tokens || 0,
               $ai_output_choices: response.choices,
               $ai_output_tokens: response.usage?.completion_tokens || 0,
-              $ai_total_cost_usd: this.calculateCost(params.model, response.usage),
+              $ai_total_cost_usd: this.calculateCost(
+                params.model,
+                response.usage
+              ),
               $ai_tools: params.tools || [],
               trace_id: params.posthog_trace_id,
               ...params.posthog_properties,
@@ -48,7 +51,10 @@ export class PostHogOpenAI extends OpenAI {
             groups: params.posthog_groups,
           });
         } catch (posthogError) {
-          console.error('Failed to capture LLM generation with PostHog:', posthogError);
+          console.error(
+            'Failed to capture LLM generation with PostHog:',
+            posthogError
+          );
         }
       }
 
@@ -62,13 +68,17 @@ export class PostHogOpenAI extends OpenAI {
             event: '$ai_generation_error',
             properties: {
               $ai_model: params.model,
-              error_message: error instanceof Error ? error.message : 'Unknown error',
+              error_message:
+                error instanceof Error ? error.message : 'Unknown error',
               trace_id: params.posthog_trace_id,
               ...params.posthog_properties,
             },
           });
         } catch (posthogError) {
-          console.error('Failed to capture LLM error with PostHog:', posthogError);
+          console.error(
+            'Failed to capture LLM error with PostHog:',
+            posthogError
+          );
         }
       }
       throw error;
@@ -86,9 +96,10 @@ export class PostHogOpenAI extends OpenAI {
     };
 
     const modelPricing = pricing[model] || { input: 0.001, output: 0.002 };
-    const inputCost = (usage?.prompt_tokens || 0) * modelPricing.input / 1000;
-    const outputCost = (usage?.completion_tokens || 0) * modelPricing.output / 1000;
-    
+    const inputCost = ((usage?.prompt_tokens || 0) * modelPricing.input) / 1000;
+    const outputCost =
+      ((usage?.completion_tokens || 0) * modelPricing.output) / 1000;
+
     return inputCost + outputCost;
   }
 }
@@ -97,15 +108,12 @@ export class PostHogOpenAI extends OpenAI {
 export async function createPostHogOpenRouterClient() {
   // Dynamically import PostHog Node.js SDK only on server-side
   const { PostHog } = await import('posthog-node');
-  
-  const posthogClient = new PostHog(
-    process.env.NEXT_PUBLIC_POSTHOG_KEY!,
-    {
-      host: process.env.NEXT_PUBLIC_POSTHOG_HOST!,
-      flushAt: 1,
-      flushInterval: 0,
-    }
-  );
+
+  const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+    host: process.env.NEXT_PUBLIC_POSTHOG_HOST!,
+    flushAt: 1,
+    flushInterval: 0,
+  });
 
   return new PostHogOpenAI({
     baseURL: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
@@ -130,7 +138,7 @@ export async function generateWithPostHogAnalytics(
   } = {}
 ) {
   const client = await createPostHogOpenRouterClient();
-  
+
   return client.chatCompletionsCreate({
     model,
     messages,

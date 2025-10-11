@@ -8,7 +8,7 @@ import { getCurrentUser } from '@/lib/get-user';
 
 export default async function SummaryHistoryPage() {
   const user = await getCurrentUser();
-  
+
   return (
     <DashboardErrorBoundary>
       <SidebarProvider

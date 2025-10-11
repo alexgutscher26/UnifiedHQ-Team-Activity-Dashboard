@@ -13,13 +13,12 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import {
   IconActivity,
-  IconMemory,
+  IconDatabase,
   IconClock,
   IconTrendingUp,
   IconTrendingDown,
   IconRefresh,
   IconAlertTriangle,
-  IconCircleCheck,
 } from '@tabler/icons-react';
 
 interface PerformanceMetrics {
@@ -200,7 +199,7 @@ export function PerformanceDashboard({
                   {metrics.memoryUsage.toFixed(1)}MB
                 </p>
               </div>
-              <IconMemory className='size-8 text-purple-500' />
+              <IconDatabase className='size-8 text-purple-500' />
             </div>
             {previousMetrics && (
               <div className='flex items-center gap-1 mt-2'>

@@ -16,7 +16,6 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'UnifiedHQ - Team Activity Dashboard',
   description: 'One dashboard to see everything your team did today',
-  generator: 'v0.app',
 };
 
 export default function RootLayout({

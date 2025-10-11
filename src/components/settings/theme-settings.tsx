@@ -1,14 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { themes, type ThemeConfig } from '@/lib/themes';
+import { themes } from '@/lib/themes';
 import {
   IconPalette,
   IconSun,
@@ -62,7 +68,7 @@ export function ThemeSettings({ onSettingsChange }: ThemeSettingsProps) {
   const saveSettings = (newSettings: Partial<ThemeSettings>) => {
     const updatedSettings = { ...settings, ...newSettings };
     setSettings(updatedSettings);
-    
+
     try {
       localStorage.setItem('theme-settings', JSON.stringify(updatedSettings));
       applyTheme(updatedSettings);
@@ -84,14 +90,16 @@ export function ThemeSettings({ onSettingsChange }: ThemeSettingsProps) {
   const applyTheme = (themeSettings: ThemeSettings) => {
     // Apply color scheme
     const root = document.documentElement;
-    
+
     if (themeSettings.colorScheme === 'dark') {
       root.classList.add('dark');
     } else if (themeSettings.colorScheme === 'light') {
       root.classList.remove('dark');
     } else {
       // System preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
       if (prefersDark) {
         root.classList.add('dark');
       } else {
@@ -102,16 +110,23 @@ export function ThemeSettings({ onSettingsChange }: ThemeSettingsProps) {
     // Apply theme colors
     const theme = themes[themeSettings.theme];
     if (theme) {
-      const colors = themeSettings.colorScheme === 'dark' ? theme.colors.dark : theme.colors.light;
+      const colors =
+        themeSettings.colorScheme === 'dark'
+          ? theme.colors.dark
+          : theme.colors.light;
       Object.entries(colors).forEach(([key, value]) => {
         root.style.setProperty(`--${key}`, value);
       });
     }
 
     // Apply font size
-    root.style.setProperty('--font-size-scale', 
-      themeSettings.fontSize === 'small' ? '0.875' : 
-      themeSettings.fontSize === 'large' ? '1.125' : '1'
+    root.style.setProperty(
+      '--font-size-scale',
+      themeSettings.fontSize === 'small'
+        ? '0.875'
+        : themeSettings.fontSize === 'large'
+          ? '1.125'
+          : '1'
     );
 
     // Apply compact mode
@@ -129,7 +144,7 @@ export function ThemeSettings({ onSettingsChange }: ThemeSettingsProps) {
     const root = document.documentElement;
     const isDark = document.documentElement.classList.contains('dark');
     const colors = isDark ? theme.colors.dark : theme.colors.light;
-    
+
     Object.entries(colors).forEach(([key, value]) => {
       root.style.setProperty(`--${key}`, value);
     });
@@ -173,16 +188,14 @@ export function ThemeSettings({ onSettingsChange }: ThemeSettingsProps) {
             <IconPalette className='size-5' />
             Color Scheme
           </CardTitle>
-          <CardDescription>
-            Choose your preferred color scheme
-          </CardDescription>
+          <CardDescription>Choose your preferred color scheme</CardDescription>
         </CardHeader>
         <CardContent className='space-y-6'>
           <div className='space-y-3'>
             <Label>Appearance</Label>
             <RadioGroup
               value={settings.colorScheme}
-              onValueChange={(value: 'light' | 'dark' | 'system') => 
+              onValueChange={(value: 'light' | 'dark' | 'system') =>
                 saveSettings({ colorScheme: value })
               }
             >
@@ -287,7 +300,9 @@ export function ThemeSettings({ onSettingsChange }: ThemeSettingsProps) {
             <Switch
               id='compact-mode'
               checked={settings.compactMode}
-              onCheckedChange={(checked) => saveSettings({ compactMode: checked })}
+              onCheckedChange={checked =>
+                saveSettings({ compactMode: checked })
+              }
             />
           </div>
 
@@ -297,7 +312,7 @@ export function ThemeSettings({ onSettingsChange }: ThemeSettingsProps) {
             <Label>Font Size</Label>
             <RadioGroup
               value={settings.fontSize}
-              onValueChange={(value: 'small' | 'medium' | 'large') => 
+              onValueChange={(value: 'small' | 'medium' | 'large') =>
                 saveSettings({ fontSize: value })
               }
             >
@@ -335,7 +350,9 @@ export function ThemeSettings({ onSettingsChange }: ThemeSettingsProps) {
               <div className='w-8 h-8 bg-primary rounded-full'></div>
               <div>
                 <div className='font-medium'>Sample User</div>
-                <div className='text-sm text-muted-foreground'>user@example.com</div>
+                <div className='text-sm text-muted-foreground'>
+                  user@example.com
+                </div>
               </div>
             </div>
             <div className='space-y-2'>
@@ -345,7 +362,9 @@ export function ThemeSettings({ onSettingsChange }: ThemeSettingsProps) {
             </div>
             <div className='flex gap-2'>
               <Button size='sm'>Primary Button</Button>
-              <Button size='sm' variant='outline'>Secondary Button</Button>
+              <Button size='sm' variant='outline'>
+                Secondary Button
+              </Button>
             </div>
           </div>
         </CardContent>

@@ -117,7 +117,7 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
       <DialogContent
         ref={modalRef}
         className={cn(sizeClasses[size], className)}
-        onKeyDown={handleKeyDown}
+        onKeyDown={e => handleKeyDown(e.nativeEvent)}
         onClick={handleOverlayClick}
         role='dialog'
         aria-modal='true'

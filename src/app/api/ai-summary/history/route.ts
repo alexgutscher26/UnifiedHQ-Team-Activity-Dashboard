@@ -92,12 +92,13 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const averageActivities = summariesForStats.length > 0 
-      ? summariesForStats.reduce((sum, summary) => {
-          const metadata = summary.metadata as any;
-          return sum + (metadata?.activityCount || 0);
-        }, 0) / summariesForStats.length
-      : 0;
+    const averageActivities =
+      summariesForStats.length > 0
+        ? summariesForStats.reduce((sum, summary) => {
+            const metadata = summary.metadata as any;
+            return sum + (metadata?.activityCount || 0);
+          }, 0) / summariesForStats.length
+        : 0;
 
     return NextResponse.json({
       summaries: summaries.map(summary => ({

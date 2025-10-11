@@ -26,7 +26,11 @@ export function GlobalErrorBoundary({
       onError={(error, errorInfo) => {
         // Capture error with PostHog (safe for mock client)
         try {
-          if (typeof window !== 'undefined' && posthog && typeof posthog.captureException === 'function') {
+          if (
+            typeof window !== 'undefined' &&
+            posthog &&
+            typeof posthog.captureException === 'function'
+          ) {
             posthog.captureException(error, {
               error_boundary: 'global_error_boundary',
               component_stack: errorInfo?.componentStack,

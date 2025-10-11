@@ -97,10 +97,14 @@ class ToastManager {
 
   private listeners: Array<(toasts: typeof this.toasts) => void> = [];
 
-  show(message: string, type: 'error' | 'warning' | 'info' | 'success' = 'info', duration = 5000) {
+  show(
+    message: string,
+    type: 'error' | 'warning' | 'info' | 'success' = 'info',
+    duration = 5000
+  ) {
     const id = `toast_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const toast = { id, message, type, duration };
-    
+
     this.toasts.push(toast);
     this.notifyListeners();
 
@@ -139,11 +143,13 @@ export const authClient = createAuthClient({
   fetchOptions: {
     onError: async context => {
       const { response } = context;
-      
+
       if (response.status === 429) {
         const retryAfterHeader = response.headers.get('X-Retry-After');
-        const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : 60;
-        
+        const retryAfter = retryAfterHeader
+          ? parseInt(retryAfterHeader, 10)
+          : 60;
+
         console.warn(`Rate limit exceeded. Retry after ${retryAfter} seconds`);
 
         // Set rate limit state
@@ -157,7 +163,8 @@ export const authClient = createAuthClient({
         );
 
         // Optional: Redirect to rate limit page for severe cases
-        if (retryAfter > 300) { // 5 minutes
+        if (retryAfter > 300) {
+          // 5 minutes
           if (typeof window !== 'undefined') {
             const currentPath = window.location.pathname;
             if (!currentPath.includes('/rate-limit')) {
