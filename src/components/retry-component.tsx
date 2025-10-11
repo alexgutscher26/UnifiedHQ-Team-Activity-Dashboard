@@ -36,6 +36,24 @@ export interface RetryComponentProps {
   children?: React.ReactNode;
 }
 
+/**
+ * Renders a retry component that displays different states based on the provided props.
+ *
+ * The component shows a success message if the operation is completed successfully, an error message if an error occurs,
+ * a loading indicator while the operation is in progress, or the children content if no state is active.
+ * It also provides retry and reset buttons based on the state and props provided.
+ *
+ * @param state - The current state of the component, including loading, error, attempts, retrying, and canRetry.
+ * @param onRetry - Callback function to be called when the retry button is clicked.
+ * @param onReset - Optional callback function to be called when the reset button is clicked.
+ * @param retryText - Text to display on the retry button (default is 'Retry').
+ * @param errorMessage - Optional custom error message to display when an error occurs.
+ * @param showAttempts - Flag to indicate whether to show the number of attempts (default is true).
+ * @param showSuccess - Flag to indicate whether to show the success message (default is false).
+ * @param successMessage - Text to display when the operation is successful (default is 'Operation completed successfully').
+ * @param className - Optional additional class names for styling the component (default is an empty string).
+ * @param children - Optional children elements to render when no other state is active.
+ */
 export function RetryComponent({
   state,
   onRetry,
@@ -152,6 +170,9 @@ export interface UseRetryComponentProps<T = any> {
   children?: React.ReactNode;
 }
 
+/**
+ * Renders a RetryComponent with the provided retry hook and props.
+ */
 export function UseRetryComponent<T = any>({
   retryHook,
   retryProps = {},
@@ -193,6 +214,22 @@ export interface InlineRetryProps {
   inline?: boolean;
 }
 
+/**
+ * Renders a retry component that displays loading or error states.
+ *
+ * The function checks if the loading state is true, in which case it displays a loading indicator.
+ * If there is an error, it shows an error message along with a retry button if the onRetry function is provided.
+ * The inline prop determines the display style of the error message.
+ * If neither loading nor error states are present, it returns null.
+ *
+ * @param {Object} props - The properties for the InlineRetry component.
+ * @param {Error} props.error - The error object to display.
+ * @param {boolean} [props.loading=false] - Indicates if the component is in a loading state.
+ * @param {Function} [props.onRetry] - The function to call when the retry button is clicked.
+ * @param {string} [props.errorMessage] - Custom error message to display.
+ * @param {string} [props.retryText='Retry'] - Text for the retry button.
+ * @param {boolean} [props.inline=false] - Determines if the error message should be displayed inline.
+ */
 export function InlineRetry({
   error,
   loading = false,
@@ -252,6 +289,9 @@ export interface RetryButtonProps {
   className?: string;
 }
 
+/**
+ * Renders a retry button with loading and disabled states.
+ */
 export function RetryButton({
   onRetry,
   loading = false,
