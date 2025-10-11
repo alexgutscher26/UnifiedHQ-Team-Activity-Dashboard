@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { auth } from '@/lib/auth';
 import { PrismaClient } from '@/generated/prisma';
+import { withRetry, RetryOptions, RetryPresets } from '@/lib/retry-utils';
 
 // Error types
 export enum ApiErrorType {
@@ -200,6 +201,7 @@ export function withErrorHandling<T = any>(
       limit: number;
       windowMs: number;
     };
+    retry?: RetryOptions | boolean;
   }
 ) {
   return async (req: NextRequest, context?: any): Promise<NextResponse> => {
@@ -246,9 +248,21 @@ export function withErrorHandling<T = any>(
         }
       }
 
-      // Execute handler
-      const response = await handler(req, context);
-      response.headers.set('X-Request-ID', requestId);
+      // Execute handler with optional retry
+      const executeHandler = async () => {
+        const response = await handler(req, context);
+        response.headers.set('X-Request-ID', requestId);
+        return response;
+      };
+
+      const response = options?.retry
+        ? await withRetry(executeHandler, 
+            typeof options.retry === 'boolean' 
+              ? RetryPresets.standard 
+              : options.retry
+          ).then(result => result.data)
+        : await executeHandler();
+
       return response;
     } catch (error) {
       const errorResponse = handleApiError(error, requestId);

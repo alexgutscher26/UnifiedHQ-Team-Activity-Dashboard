@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { PrismaClient } from '@/generated/prisma';
+import { withRetry, RetryPresets } from '@/lib/retry-utils';
 
 const prisma = new PrismaClient();
 
@@ -199,17 +200,29 @@ class CachedGitHubClient {
     );
 
     try {
-      const data = await fetcher();
-
-      // Store in cache
-      githubCache.set(cacheKey, data, ttl);
-
-      return data;
+      const result = await withRetry(
+        async () => {
+          const data = await fetcher();
+          // Store in cache
+          githubCache.set(cacheKey, data, ttl);
+          return data;
+        },
+        {
+          ...RetryPresets.github,
+          onRetry: (error, attempt, delay) => {
+            console.warn(`[GitHub Cache] API call failed for ${operation} (attempt ${attempt}), retrying in ${delay}ms:`, error.message);
+          },
+          onMaxRetriesExceeded: (error, attempts) => {
+            console.error(`[GitHub Cache] API call failed for ${operation} after ${attempts} attempts:`, error.message);
+          },
+        }
+      );
+      return result.data;
     } catch (error: any) {
-      // If it's a rate limit error, try to get cached data even if expired
+      // If it's a rate limit error after all retries, try to get cached data even if expired
       if (error.status === 403 && error.message?.includes('rate limit')) {
         console.warn(
-          `[GitHub Cache] Rate limit hit for ${operation}, trying expired cache`
+          `[GitHub Cache] Rate limit hit for ${operation} after retries, trying expired cache`
         );
         const expiredCache = githubCache.get<T>(cacheKey);
         if (expiredCache) {

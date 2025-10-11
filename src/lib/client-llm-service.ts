@@ -1,6 +1,8 @@
 // Client-side LLM service that uses API endpoints
 // This avoids importing posthog-node in client-side code
 
+import { withRetry, RetryPresets } from '@/lib/retry-utils';
+
 export interface LLMRequest {
   prompt: string;
   model?: string;
@@ -46,41 +48,49 @@ export class ClientLLMService {
       maxTokens = 1000,
     } = request;
 
-    try {
-      const response = await fetch(this.apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt,
-          model,
-          distinctId,
-          traceId,
-          properties: {
-            source: 'client',
-            timestamp: new Date().toISOString(),
-            ...properties,
+    return withRetry(
+      async () => {
+        const response = await fetch(this.apiEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-          groups,
-          temperature,
-          maxTokens,
-        }),
-      });
+          body: JSON.stringify({
+            prompt,
+            model,
+            distinctId,
+            traceId,
+            properties: {
+              source: 'client',
+              timestamp: new Date().toISOString(),
+              ...properties,
+            },
+            groups,
+            temperature,
+            maxTokens,
+          }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP ${response.status}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          const error = new Error(errorData.error || `HTTP ${response.status}`);
+          (error as any).status = response.status;
+          throw error;
+        }
+
+        const data = await response.json();
+        return data.data;
+      },
+      {
+        ...RetryPresets.openrouter,
+        onRetry: (error, attempt, delay) => {
+          console.warn(`LLM request failed (attempt ${attempt}), retrying in ${delay}ms:`, error.message);
+        },
+        onMaxRetriesExceeded: (error, attempts) => {
+          console.error(`LLM request failed after ${attempts} attempts:`, error.message);
+        },
       }
-
-      const data = await response.json();
-      return data.data;
-    } catch (error) {
-      console.error('Client LLM Service error:', error);
-      throw new Error(
-        `Failed to generate text: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
-    }
+    ).then(result => result.data);
   }
 
   /**
