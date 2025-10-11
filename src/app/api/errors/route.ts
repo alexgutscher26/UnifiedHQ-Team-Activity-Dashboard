@@ -26,6 +26,16 @@ const errorReportSchema = z.object({
   timestamp: z.string().optional(),
 });
 
+/**
+ * Report an error by capturing it and associating it with a user session.
+ *
+ * The function retrieves the user session from the request headers, validates the request body against a schema,
+ * and constructs an error object. It then captures the error in PostHog with relevant context, logs the error details,
+ * and returns a success response indicating that the error report was received.
+ *
+ * @param request - The NextRequest object containing the request data.
+ * @returns A success response indicating that the error report was received.
+ */
 async function reportError(request: NextRequest) {
   // Get the session to associate errors with users
   const session = await auth.api.getSession({
