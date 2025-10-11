@@ -2,6 +2,8 @@
  * Error logging utility for tracking and reporting errors
  */
 
+import posthog from 'posthog-js';
+
 export interface ErrorContext {
   userId?: string;
   sessionId?: string;
@@ -44,6 +46,20 @@ class ErrorLogger {
     this.errors.unshift(errorDetails);
     if (this.errors.length > this.maxErrors) {
       this.errors = this.errors.slice(0, this.maxErrors);
+    }
+
+    // Capture error with PostHog if available
+    if (typeof window !== 'undefined' && typeof posthog !== 'undefined') {
+      try {
+        posthog.captureException(error, {
+          error_boundary: 'custom_error_logger',
+          error_id: errorDetails.context.errorId,
+          component_stack: errorInfo?.componentStack,
+          ...errorDetails.context,
+        });
+      } catch (posthogError) {
+        console.error('Failed to capture error with PostHog:', posthogError);
+      }
     }
 
     if (process.env.NODE_ENV === 'development') {

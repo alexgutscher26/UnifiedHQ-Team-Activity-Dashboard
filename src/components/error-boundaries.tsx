@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import posthog from 'posthog-js';
 import { ErrorBoundary } from './error-boundary';
 import {
   Card,
@@ -23,7 +24,15 @@ export function GlobalErrorBoundary({
   return (
     <ErrorBoundary
       onError={(error, errorInfo) => {
-        // TODO: Global error handler - could send to analytics, logging service, etc.
+        // Capture error with PostHog
+        try {
+          posthog.captureException(error, {
+            error_boundary: 'global_error_boundary',
+            component_stack: errorInfo?.componentStack,
+          });
+        } catch (posthogError) {
+          console.error('Failed to capture error with PostHog:', posthogError);
+        }
         console.error('Global error caught:', error, errorInfo);
       }}
     >
