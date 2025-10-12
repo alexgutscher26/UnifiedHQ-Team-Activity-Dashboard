@@ -11,7 +11,11 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('authorization');
     const expectedToken = process.env.CRON_SECRET_TOKEN;
 
-    if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
+    // If CRON_SECRET_TOKEN is not set, log a warning but allow execution
+    if (!expectedToken) {
+      console.warn('⚠️ CRON_SECRET_TOKEN not set - running without authentication');
+    } else if (authHeader !== `Bearer ${expectedToken}`) {
+      console.error('❌ Invalid cron job authentication token');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -168,17 +172,71 @@ export async function POST(request: NextRequest) {
 
     console.log('🎉 Automated AI summary generation completed:', results);
 
+    // Log summary for monitoring
+    const summary = {
+      timestamp: new Date().toISOString(),
+      processed: results.processed,
+      generated: results.generated,
+      skipped: results.skipped,
+      errors: results.errors,
+      success: results.errors === 0,
+    };
+
+    // Store monitoring data in database for tracking
+    try {
+      await prisma.aISummaryMonitoring.create({
+        data: {
+          type: 'DAILY_CRON',
+          status: results.errors === 0 ? 'SUCCESS' : 'PARTIAL_FAILURE',
+          processed: results.processed,
+          generated: results.generated,
+          skipped: results.skipped,
+          errors: results.errors,
+          metadata: {
+            timestamp: summary.timestamp,
+            authEnabled: !!expectedToken,
+          },
+        },
+      });
+    } catch (monitoringError) {
+      console.warn('⚠️ Failed to store monitoring data:', monitoringError);
+    }
+
     return NextResponse.json({
       success: true,
       results,
+      summary,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('❌ Error in automated AI summary generation:', error);
+    
+    // Store error in monitoring
+    try {
+      await prisma.aISummaryMonitoring.create({
+        data: {
+          type: 'DAILY_CRON',
+          status: 'FAILURE',
+          processed: 0,
+          generated: 0,
+          skipped: 0,
+          errors: 1,
+          metadata: {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            timestamp: new Date().toISOString(),
+            authEnabled: !!expectedToken,
+          },
+        },
+      });
+    } catch (monitoringError) {
+      console.warn('⚠️ Failed to store error monitoring data:', monitoringError);
+    }
+
     return NextResponse.json(
       {
         error: 'Failed to generate automated summaries',
         details: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
       },
       { status: 500 }
     );

@@ -281,3 +281,17 @@ model AISummary {
 
   @@map("ai_summary")
 }
+
+model AISummaryMonitoring {
+  id        String   @id @default(cuid())
+  type      String   // 'DAILY_CRON', 'MANUAL', 'BACKGROUND'
+  status    String   // 'SUCCESS', 'PARTIAL_FAILURE', 'FAILURE'
+  processed Int      @default(0)
+  generated Int      @default(0)
+  skipped   Int      @default(0)
+  errors    Int      @default(0)
+  metadata  Json?    // Additional context (timestamp, auth status, etc.)
+  createdAt DateTime @default(now())
+
+  @@map("ai_summary_monitoring")
+}
