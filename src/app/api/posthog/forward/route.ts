@@ -28,6 +28,17 @@ function getPostHogClient() {
   return posthog;
 }
 
+/**
+ * Handles the POST request to forward events to PostHog.
+ *
+ * This function processes the incoming request, extracts the event and properties, and validates the input.
+ * It retrieves the PostHog client and prepares the properties for tracking, including user information.
+ * Depending on the event type, it either captures an exception or a regular event, and ensures data is flushed to PostHog.
+ *
+ * @param request - The incoming NextRequest object containing the event data.
+ * @returns A JSON response indicating the success or failure of the event forwarding.
+ * @throws Error If an error occurs during the processing of the request or forwarding to PostHog.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
