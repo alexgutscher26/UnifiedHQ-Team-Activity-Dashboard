@@ -15,6 +15,16 @@ const CustomThemeContext = createContext<CustomThemeContextType | undefined>(
 
 const THEME_STORAGE_KEY = 'custom-theme';
 
+/**
+ * Provides a context for managing and applying custom themes in a React application.
+ *
+ * This component initializes the current theme based on the default theme and checks for a saved theme in localStorage upon mounting.
+ * It allows for setting a new theme, which updates both the state and localStorage, and applies the theme to the document.
+ * The component also provides a context to its children, exposing the current theme, a function to set a new theme, and the list of available themes.
+ *
+ * @param {Object} props - The component props.
+ * @param {React.ReactNode} props.children - The child components to be rendered within the theme provider.
+ */
 export function CustomThemeProvider({
   children,
 }: {

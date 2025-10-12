@@ -65,6 +65,9 @@ interface ThemeCardProps {
   onSelect: () => void;
 }
 
+/**
+ * Renders a themed card button with color indicators and selection state.
+ */
 function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
   return (
     <button
