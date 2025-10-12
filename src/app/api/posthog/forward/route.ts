@@ -2,22 +2,52 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PostHog } from 'posthog-node';
 
 // Initialize PostHog server client
-const posthog = new PostHog(
-  process.env.NEXT_PUBLIC_POSTHOG_KEY!,
-  {
-    host: process.env.NEXT_PUBLIC_POSTHOG_HOST!,
+let posthog: PostHog | null = null;
+
+function getPostHogClient() {
+  if (!posthog) {
+    const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY || process.env.POSTHOG_KEY;
+    const host = process.env.NEXT_PUBLIC_POSTHOG_HOST || process.env.POSTHOG_HOST;
+    
+    if (!apiKey || !host) {
+      console.error('PostHog configuration missing:', {
+        hasKey: !!apiKey,
+        hasHost: !!host,
+        publicKey: !!process.env.NEXT_PUBLIC_POSTHOG_KEY,
+        publicHost: !!process.env.NEXT_PUBLIC_POSTHOG_HOST,
+        serverKey: !!process.env.POSTHOG_KEY,
+        serverHost: !!process.env.POSTHOG_HOST,
+      });
+      return null;
+    }
+    
+    posthog = new PostHog(apiKey, {
+      host: host,
+    });
   }
-);
+  return posthog;
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { event, properties } = body;
 
+    console.log('PostHog forwarding request:', { event, properties });
+
     if (!event) {
       return NextResponse.json(
         { error: 'Event is required' },
         { status: 400 }
+      );
+    }
+
+    // Get PostHog client
+    const posthogClient = getPostHogClient();
+    if (!posthogClient) {
+      return NextResponse.json(
+        { error: 'PostHog configuration missing' },
+        { status: 500 }
       );
     }
 
@@ -44,13 +74,26 @@ export async function POST(request: NextRequest) {
       error.stack = properties?.error_stack;
       error.name = properties?.error_name || 'Error';
       
-      posthog.captureException(error, {
+      console.log('Sending exception to PostHog:', {
+        distinctId,
+        errorMessage: error.message,
+        errorName: error.name,
+        properties: posthogProperties,
+      });
+      
+      posthogClient.captureException(error, {
         distinctId,
         properties: posthogProperties,
       });
     } else {
       // Handle regular events
-      posthog.capture({
+      console.log('Sending event to PostHog:', {
+        distinctId,
+        event,
+        properties: posthogProperties,
+      });
+      
+      posthogClient.capture({
         distinctId,
         event,
         properties: posthogProperties,
@@ -58,7 +101,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Flush to ensure data is sent
-    await posthog.flush();
+    console.log('Flushing PostHog data...');
+    await posthogClient.flush();
+    console.log('PostHog data flushed successfully');
 
     return NextResponse.json({
       success: true,

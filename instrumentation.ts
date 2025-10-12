@@ -1,5 +1,8 @@
 export function register() {
-  // No-op for initialization
+  // PostHog instrumentation registration
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    console.log('PostHog instrumentation registered');
+  }
 }
 
 export const onRequestError = async (

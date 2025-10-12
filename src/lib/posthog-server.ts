@@ -3,20 +3,27 @@ import { PostHog } from 'posthog-node';
 let posthogInstance: PostHog | null = null;
 
 export function getPostHogServer(): PostHog | null {
-  // Only create instance if we have the required environment variables
-  if (
-    !process.env.NEXT_PUBLIC_POSTHOG_KEY ||
-    !process.env.NEXT_PUBLIC_POSTHOG_HOST
-  ) {
+  // Check for both public and server environment variables
+  const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY || process.env.POSTHOG_KEY;
+  const host = process.env.NEXT_PUBLIC_POSTHOG_HOST || process.env.POSTHOG_HOST;
+  
+  if (!apiKey || !host) {
     console.warn(
-      'PostHog server environment variables not found. Please check your .env.local file.'
+      'PostHog server environment variables not found. Please check your .env file.',
+      {
+        hasPublicKey: !!process.env.NEXT_PUBLIC_POSTHOG_KEY,
+        hasPublicHost: !!process.env.NEXT_PUBLIC_POSTHOG_HOST,
+        hasServerKey: !!process.env.POSTHOG_KEY,
+        hasServerHost: !!process.env.POSTHOG_HOST,
+      }
     );
     return null;
   }
 
   if (!posthogInstance) {
-    posthogInstance = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-      host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    console.log('Initializing PostHog server client with:', { apiKey: apiKey.substring(0, 8) + '...', host });
+    posthogInstance = new PostHog(apiKey, {
+      host: host,
       flushAt: 1,
       flushInterval: 0,
     });
@@ -32,9 +39,31 @@ export async function captureServerException(
   try {
     const posthog = getPostHogServer();
     if (posthog) {
-      await posthog.captureException(error, distinctId || 'anonymous', {
-        ...additionalProperties,
+      console.log('Capturing server exception:', {
+        errorMessage: error.message,
+        errorName: error.name,
+        distinctId: distinctId || 'anonymous',
+        properties: additionalProperties,
       });
+      
+      // Use PostHog's proper error capture method
+      await posthog.capture({
+        distinctId: distinctId || 'anonymous',
+        event: '$exception',
+        properties: {
+          $exception_message: error.message,
+          $exception_type: error.name,
+          $exception_stack: error.stack,
+          $exception_handled: false,
+          ...additionalProperties,
+        },
+      });
+      
+      // Flush to ensure data is sent immediately
+      await posthog.flush();
+      console.log('Server exception captured and flushed successfully');
+    } else {
+      console.warn('PostHog server client not available for exception capture');
     }
   } catch (err) {
     console.error('Failed to capture server exception:', err);
@@ -49,16 +78,31 @@ export async function captureClientError(
   try {
     const posthog = getPostHogServer();
     if (posthog) {
+      console.log('Capturing client error:', {
+        errorMessage: error.message,
+        errorName: error.name,
+        distinctId: distinctId || 'anonymous',
+        properties: additionalProperties,
+      });
+      
       await posthog.capture({
         distinctId: distinctId || 'anonymous',
-        event: 'Client Error',
+        event: '$exception',
         properties: {
-          error_message: error.message,
-          error_name: error.name,
-          error_stack: error.stack,
+          $exception_message: error.message,
+          $exception_type: error.name,
+          $exception_stack: error.stack,
+          $exception_handled: false,
+          error_source: 'client',
           ...additionalProperties,
         },
       });
+      
+      // Flush to ensure data is sent immediately
+      await posthog.flush();
+      console.log('Client error captured and flushed successfully');
+    } else {
+      console.warn('PostHog server client not available for client error capture');
     }
   } catch (err) {
     console.error('Failed to capture client error:', err);

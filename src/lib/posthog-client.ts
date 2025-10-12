@@ -8,7 +8,12 @@ export function captureClientError(error: Error, properties?: Record<string, any
   
   if (status.isAvailable && status.client) {
     try {
-      status.client.captureException(error, {
+      // Use PostHog's proper error capture method
+      status.client.capture('$exception', {
+        $exception_message: error.message,
+        $exception_type: error.name,
+        $exception_stack: error.stack,
+        $exception_handled: false,
         ...properties,
         error_boundary: 'client_error_utility',
         error_id: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -84,4 +89,89 @@ export function getPostHogClient(): any {
     return (window as any).posthog;
   }
   return null;
+}
+
+export function capturePageView(pageName?: string, properties?: Record<string, any>): void {
+  const status = getPostHogStatus();
+  
+  if (status.isAvailable && status.client) {
+    try {
+      status.client.capture('$pageview', {
+        $current_url: window.location.href,
+        $host: window.location.host,
+        $pathname: window.location.pathname,
+        $page_title: document.title,
+        ...(pageName && { page_name: pageName }),
+        ...properties,
+      });
+    } catch (posthogError) {
+      console.error('Failed to capture page view with PostHog:', posthogError);
+    }
+  } else {
+    console.warn('PostHog client not available for page view capture');
+  }
+}
+
+export function captureUserAction(action: string, properties?: Record<string, any>): void {
+  const status = getPostHogStatus();
+  
+  if (status.isAvailable && status.client) {
+    try {
+      status.client.capture(action, {
+        ...properties,
+        timestamp: new Date().toISOString(),
+        url: window.location.href,
+      });
+    } catch (posthogError) {
+      console.error('Failed to capture user action with PostHog:', posthogError);
+    }
+  } else {
+    console.warn('PostHog client not available for user action capture');
+  }
+}
+
+export function setUserProperties(properties: Record<string, any>): void {
+  const status = getPostHogStatus();
+  
+  if (status.isAvailable && status.client) {
+    try {
+      status.client.people.set(properties);
+    } catch (posthogError) {
+      console.error('Failed to set user properties with PostHog:', posthogError);
+    }
+  } else {
+    console.warn('PostHog client not available for setting user properties');
+  }
+}
+
+export function getFeatureFlag(flagKey: string): boolean | string | undefined {
+  const status = getPostHogStatus();
+  
+  if (status.isAvailable && status.client) {
+    try {
+      return status.client.getFeatureFlag(flagKey);
+    } catch (posthogError) {
+      console.error('Failed to get feature flag with PostHog:', posthogError);
+      return undefined;
+    }
+  } else {
+    console.warn('PostHog client not available for feature flag check');
+    return undefined;
+  }
+}
+
+export function isFeatureEnabled(flagKey: string): boolean {
+  const status = getPostHogStatus();
+  
+  if (status.isAvailable && status.client) {
+    try {
+      return status.client.isFeatureEnabled(flagKey);
+    } catch (posthogError) {
+      console.error('Failed to check feature flag with PostHog:', posthogError);
+      return false;
+    }
+  } else {
+    console.warn('PostHog client not available for feature flag check');
+    return false;
+  }
 }

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { captureClientError, captureClientEvent, isPostHogAvailable } from '@/lib/posthog-client';
+import { captureClientError, captureClientEvent, isPostHogAvailable, captureUserAction } from '@/lib/posthog-client';
 import { getPostHogStatus } from '@/lib/posthog-adblocker-bypass';
 import {
   IconBug,
@@ -18,6 +18,7 @@ import {
   IconApi,
   IconCode,
   IconShield,
+  IconSettings,
 } from '@tabler/icons-react';
 
 // Client-only debug info component to avoid hydration mismatches
@@ -271,19 +272,73 @@ export function PostHogErrorTester() {
   // Test 7: PostHog Configuration Test
   const testPostHogConfig = () => {
     runTest('PostHog Configuration', () => {
-      const hasKey = !!process.env.NEXT_PUBLIC_POSTHOG_KEY;
-      const hasHost = !!process.env.NEXT_PUBLIC_POSTHOG_HOST;
-      const isAvailable = isPostHogAvailable();
+      // Test PostHog configuration and status
+      const status = getPostHogStatus();
       
-      if (!hasKey || !hasHost) {
-        throw new Error('PostHog environment variables not configured');
+      if (!status.isAvailable) {
+        throw new Error('PostHog client not available');
       }
-
-      if (!isAvailable) {
-        throw new Error('PostHog client not available in browser');
+      
+      // Test basic PostHog methods
+      const client = status.client;
+      if (!client) {
+        throw new Error('PostHog client is null');
       }
-
+      
+      // Test if PostHog has required methods
+      const requiredMethods = ['capture', 'captureException', 'identify'];
+      const missingMethods = requiredMethods.filter(method => typeof client[method] !== 'function');
+      
+      if (missingMethods.length > 0) {
+        throw new Error(`PostHog missing methods: ${missingMethods.join(', ')}`);
+      }
+      
       console.log('PostHog configuration test passed');
+    });
+  };
+
+  // Test 8: PostHog Server Configuration Test
+  const testPostHogServerConfig = () => {
+    console.log('testPostHogServerConfig called');
+    runTest('PostHog Server Configuration', async () => {
+      try {
+        console.log('Testing PostHog server configuration...');
+        
+        // Test server-side PostHog configuration
+        const response = await fetch('/api/posthog/test-config');
+        
+        console.log('Server config response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`Server config test failed: ${response.status} ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Server config result:', result);
+        
+        if (!result.success) {
+          throw new Error(`Server config test failed: ${result.error}`);
+        }
+        
+        console.log('PostHog server configuration:', result.config);
+        
+        // Check if we have the required configuration
+        const config = result.config;
+        if (!config.hasPublicKey && !config.hasServerKey) {
+          throw new Error('No PostHog API key found (neither public nor server)');
+        }
+        
+        if (!config.hasPublicHost && !config.hasServerHost) {
+          throw new Error('No PostHog host found (neither public nor server)');
+        }
+        
+        console.log('PostHog server configuration test passed');
+        return Promise.resolve();
+        
+      } catch (error) {
+        console.error('PostHog server configuration test error:', error);
+        throw error;
+      }
     });
   };
 
@@ -432,41 +487,75 @@ export function PostHogErrorTester() {
 
   // Test 8.5: React Error Boundary Test (actually triggers error boundary)
   const testReactErrorBoundary = () => {
-    // This test actually triggers React's error boundary
+    // This test simulates a React error boundary scenario without actually crashing
     toast({
       title: 'React Error Boundary Test',
-      description: 'About to trigger React error boundary...',
+      description: 'Simulating React error boundary scenario...',
     });
     
     // Add to test results
-    addTestResult('React Error Boundary Test', 'pending', 'Triggering React error boundary...');
+    addTestResult('React Error Boundary Test', 'pending', 'Simulating React error boundary scenario...');
     
     // Show a warning before triggering
     setTimeout(() => {
-      if (confirm('This will trigger React\'s error boundary and may cause the page to show an error screen. Continue?')) {
-        // Create a component that will throw an error
-        const ErrorComponent = () => {
-          throw new Error('Test React error boundary error for PostHog tracking');
-        };
-        
-        // This will be caught by React's error boundary
-        setTimeout(() => {
-          // We can't actually render the component here, so we'll simulate it
-          // by creating an error that React's error boundary will catch
-          const error = new Error('Test React error boundary error for PostHog tracking');
-          error.name = 'ReactErrorBoundaryError';
+      if (confirm('This will simulate a React error boundary scenario. It will NOT crash the page, but will test error capture. Continue?')) {
+        try {
+          // Use setTimeout to create the error outside the current call stack
+          // This prevents React's error boundary from catching it
+          // Instead of creating an actual Error object, simulate the error data
+          // This avoids triggering React's error boundary entirely
+          const errorData = {
+            message: 'Simulated React error boundary error for PostHog tracking',
+            name: 'ReactErrorBoundaryError',
+            stack: 'ReactErrorBoundaryError: Simulated React error boundary error for PostHog tracking\n    at ErrorBoundaryTest (PostHog Error Tester)\n    at setTimeout (PostHog Error Tester)',
+          };
           
-          // Dispatch as an unhandled error
+          // Use captureClientEvent instead of captureClientError to avoid Error constructor
+          captureClientEvent('react_error_boundary_simulation', {
+            test_type: 'react_error_boundary_simulation',
+            test_timestamp: new Date().toISOString(),
+            test_context: 'PostHog Error Tester',
+            error_boundary: true,
+            component_stack: 'ErrorBoundaryTest -> PostHogErrorTester',
+            simulated: true,
+            error_message: errorData.message,
+            error_name: errorData.name,
+            error_stack: errorData.stack,
+          });
+          
+          // Also dispatch a custom error event for automatic capture
           if (typeof window !== 'undefined') {
-            window.dispatchEvent(new ErrorEvent('error', {
-              message: error.message,
+            const errorEvent = new ErrorEvent('error', {
+              message: errorData.message,
               filename: window.location.href,
               lineno: 1,
               colno: 1,
-              error: error,
-            }));
+            });
+            
+            window.dispatchEvent(errorEvent);
           }
-        }, 100);
+          
+          console.log('React error boundary simulation completed successfully');
+          
+          // Show success message
+          toast({
+            title: 'React Error Boundary Test',
+            description: 'Error boundary scenario simulated and sent to PostHog (check console for details)',
+          });
+          
+          // Add to test results manually
+          addTestResult('React Error Boundary Test', 'success', 'Error boundary scenario simulated and sent to PostHog');
+          
+        } catch (testError) {
+          // If there's any error in the test itself, handle it gracefully
+          toast({
+            title: 'React Error Boundary Test Failed',
+            description: `Test failed: ${testError.message}`,
+            variant: 'destructive',
+          });
+          
+          addTestResult('React Error Boundary Test', 'error', `Test failed: ${testError.message}`);
+        }
       } else {
         addTestResult('React Error Boundary Test', 'cancelled', 'User cancelled the test');
       }
@@ -476,10 +565,12 @@ export function PostHogErrorTester() {
   // Test 9: Custom Event Test
   const testCustomEvent = async () => {
     runTest('Custom Event', async () => {
-      captureClientEvent('test_event', {
+      captureUserAction('test_event', {
         test_type: 'custom_event',
         test_timestamp: new Date().toISOString(),
         test_context: 'PostHog Error Tester',
+        custom_property: 'test_value',
+        user_action: 'manual_test',
       });
     });
   };
@@ -491,9 +582,19 @@ export function PostHogErrorTester() {
         method: 'GET',
       });
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      // For server error tests, we expect a 500 status code
+      if (response.status !== 500) {
+        throw new Error(`Expected 500 status code, got ${response.status} ${response.statusText}`);
       }
+
+      // Parse the response to get the error details
+      const errorData = await response.json();
+      
+      if (!errorData.error || !errorData.message) {
+        throw new Error('Server error response missing expected fields');
+      }
+
+      console.log('Server error test successful:', errorData);
     });
   };
 
@@ -623,6 +724,16 @@ export function PostHogErrorTester() {
             </Button>
 
             <Button
+              onClick={testPostHogServerConfig}
+              disabled={isRunning}
+              variant="outline"
+              className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+            >
+              <IconSettings className="h-4 w-4 mr-2" />
+              Server Config
+            </Button>
+
+            <Button
               onClick={testErrorBoundary}
               disabled={isRunning}
               variant="outline"
@@ -639,7 +750,7 @@ export function PostHogErrorTester() {
               className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
             >
               <IconShield className="h-4 w-4 mr-2" />
-              React Error Boundary (Dangerous)
+              React Error Boundary (Safe)
             </Button>
 
             <Button

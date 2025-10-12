@@ -11,6 +11,7 @@ import { CustomThemeProvider } from '@/contexts/theme-context';
 import { ToastContainer } from '@/components/toast';
 import { RateLimitOverlay } from '@/components/rate-limit';
 import { PostHogProvider } from '@/components/posthog-provider';
+import { PostHogAnalytics } from '@/components/posthog-analytics';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -27,6 +28,7 @@ export default function RootLayout({
     <html lang='en' suppressHydrationWarning>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <PostHogProvider>
+          <PostHogAnalytics />
           <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
             <CustomThemeProvider>
               <GlobalErrorBoundary>

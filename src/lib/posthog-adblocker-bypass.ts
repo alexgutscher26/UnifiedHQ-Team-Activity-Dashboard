@@ -119,8 +119,12 @@ async function sendViaFetch(event: string, properties?: any) {
       });
       
       if (response.ok) {
-        console.log('PostHog fallback success via server forwarding');
+        const result = await response.json();
+        console.log('PostHog fallback success via server forwarding:', result);
         return;
+      } else {
+        const errorText = await response.text();
+        console.error('PostHog server forwarding failed with status:', response.status, errorText);
       }
     } catch (error) {
       console.log('PostHog server forwarding failed:', error);

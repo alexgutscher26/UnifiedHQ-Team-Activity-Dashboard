@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PostHogProvider as PHProvider } from 'posthog-js/react';
 import { 
   getAdBlockerBypassConfig, 
   createFallbackPostHogClient, 
@@ -81,12 +82,21 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
           api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST!,
           ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST!,
           person_profiles: 'identified_only',
+          capture_pageview: true,
+          capture_pageleave: true,
+          autocapture: true,
+          capture_performance: true,
+          capture_exceptions: true,
+          capture_unhandled_rejections: true,
           ...bypassConfig,
           session_recording: {
             maskAllInputs: true,
             maskInputOptions: {
               password: true,
+              email: true,
             },
+            recordCrossOriginIframes: false,
+            recordCanvas: false,
           },
           loaded: (posthog) => {
             console.log('PostHog loaded successfully');
@@ -126,15 +136,14 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
   // Only wrap with PostHog provider if PostHog is initialized
   if (typeof window !== 'undefined' && isInitialized && posthogClient) {
     try {
-      // Check if we're using the mock client
-      if (hasError && posthogClient.__loaded) {
-        // For mock client, just render children without PostHog provider
-        console.log('Using PostHog mock client');
+      // Check if we're using the fallback client
+      if (hasError && posthogClient.__isFallback) {
+        // For fallback client, just render children without PostHog provider
+        console.log('Using PostHog fallback client');
         return <>{children}</>;
       }
 
       // For real PostHog client, use the provider
-      const { PostHogProvider: PHProvider } = require('posthog-js/react');
       return <PHProvider client={posthogClient}>{children}</PHProvider>;
     } catch (error) {
       console.error('Failed to create PostHog provider:', error);
