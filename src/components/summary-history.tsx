@@ -65,6 +65,14 @@ interface SummaryHistoryProps {
   onSummarySelect?: (summary: SummaryHistoryItem) => void;
 }
 
+/**
+ * Render the Summary History component that displays a list of summaries with filtering, sorting, and exporting capabilities.
+ *
+ * This component manages its own state for summaries, loading status, error handling, pagination, and various filters. It fetches summary history from an API based on the current pagination and time range, and allows users to bookmark summaries, export them in different formats, and view detailed information in a modal. The component also supports virtual scrolling for improved performance with large lists.
+ *
+ * @param className - Optional additional class names for styling the component.
+ * @param onSummarySelect - Callback function to handle the selection of a summary.
+ */
 export function SummaryHistory({
   className,
   onSummarySelect,
@@ -212,6 +220,9 @@ export function SummaryHistory({
     });
   };
 
+  /**
+   * Toggles the bookmark status of a summary by its ID.
+   */
   const handleBookmarkToggle = (summaryId: string) => {
     setBookmarkedSummaries(prev => {
       const newSet = new Set(prev);
@@ -232,6 +243,14 @@ export function SummaryHistory({
     });
   };
 
+  /**
+   * Handles the export of a summary in various formats.
+   *
+   * This function takes a SummaryHistoryItem and a format type, then constructs the appropriate content based on the specified format (json, csv, or txt). It creates a Blob from the content, generates a download link, and triggers the download. Finally, it displays a toast notification indicating the export was successful.
+   *
+   * @param summary - The summary data to be exported.
+   * @param format - The format in which to export the summary (default is 'json').
+   */
   const handleExportSummary = (summary: SummaryHistoryItem, format: 'json' | 'csv' | 'txt' = 'json') => {
     const data = {
       title: summary.title,
@@ -430,6 +449,15 @@ export function SummaryHistory({
     setUseVirtualScrolling(filteredSummaries.length > 20);
   }, [filteredSummaries.length]);
 
+  /**
+   * Fetch the summary history from the API.
+   *
+   * This function initiates a loading state, makes an API call to retrieve summary history based on pagination and time range, and handles potential errors.
+   * It updates the summaries and pagination state based on the response, and manages error handling, including displaying a toast notification for non-authentication errors.
+   *
+   * @returns {Promise<void>} A promise that resolves when the fetch operation is complete.
+   * @throws Error If the response is not ok or if there is an error during the fetch operation.
+   */
   const fetchHistory = async () => {
     try {
       setIsLoading(true);
@@ -484,6 +512,9 @@ export function SummaryHistory({
     }
   };
 
+  /**
+   * Handles the click event on a summary item.
+   */
   const handleSummaryClick = (summary: SummaryHistoryItem) => {
     if (onSummarySelect) {
       onSummarySelect(summary);
@@ -494,6 +525,16 @@ export function SummaryHistory({
     setPagination(prev => ({ ...prev, page: newPage }));
   };
 
+  /**
+   * Handles the export of summaries in various formats.
+   *
+   * This function filters the summaries based on the showBookmarksOnly flag and the filteredSummaries array.
+   * It then constructs the content in the specified format (json, csv, or txt) and triggers a download of the
+   * generated file. If no summaries are available for export, it displays a toast notification.
+   * The function also manages the creation and cleanup of the download link.
+   *
+   * @param format - The format in which to export the summaries. Can be 'json', 'csv', or 'txt'.
+   */
   const handleExportAll = (format: 'json' | 'csv' | 'txt' = 'json') => {
     const summariesToExport = showBookmarksOnly 
       ? filteredSummaries.filter(s => bookmarkedSummaries.has(s.id))
@@ -588,6 +629,9 @@ export function SummaryHistory({
     });
   };
 
+  /**
+   * Resets the search query and filter settings to their default values.
+   */
   const clearFilters = () => {
     setSearchQuery('');
     setFilterModel('all');

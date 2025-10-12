@@ -4,6 +4,15 @@ import { PrismaClient } from '@/generated/prisma';
 
 const prisma = new PrismaClient();
 
+/**
+ * Handles the GET request to fetch AI summary statistics for a user.
+ *
+ * This function retrieves the user's session, validates authorization, and calculates various statistics based on a specified time range. It gathers total summaries, the most recent summary, and all summaries for comprehensive analysis, including average activities and tokens used. Additionally, it computes daily trends, activity distribution, and extracts common insights from recent summaries before returning the aggregated data in JSON format.
+ *
+ * @param request - The NextRequest object containing the request details.
+ * @returns A JSON response containing the total summaries, average activities, total tokens used, average tokens per summary, model breakdown, daily trends, top insights, activity distribution, and metadata about the time range.
+ * @throws Error If there is an issue fetching AI summary statistics.
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({
