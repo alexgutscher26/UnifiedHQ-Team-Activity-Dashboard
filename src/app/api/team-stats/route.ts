@@ -40,6 +40,14 @@ interface TeamStats {
   }>;
 }
 
+/**
+ * Handles the GET request for team statistics.
+ *
+ * This function retrieves the current user and checks for authorization. It then fetches team activity data based on the specified time range, defaulting to '30d'. The response includes the team stats, success status, and metadata about the request. In case of an error, it logs the error and returns a structured error response.
+ *
+ * @param request - The NextRequest object containing the request details.
+ * @returns A JSON response containing team statistics or an error message.
+ */
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
