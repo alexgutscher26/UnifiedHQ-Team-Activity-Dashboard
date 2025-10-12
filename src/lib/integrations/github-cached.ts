@@ -527,6 +527,11 @@ export async function fetchGithubActivity(
 
   const client = new CachedGitHubClient(connection.accessToken, userId);
   const allActivities: GitHubActivity[] = [];
+  
+  console.log(`[GitHub Cache] Selected repositories: ${selectedRepos.length}`);
+  selectedRepos.forEach(repo => {
+    console.log(`  - ${repo.repoName}`);
+  });
 
   try {
     // Check rate limit first
@@ -544,6 +549,7 @@ export async function fetchGithubActivity(
     // Fetch activity from each selected repository
     for (const repo of selectedRepos) {
       const [owner, repoName] = repo.repoName.split('/');
+      console.log(`[GitHub Cache] Fetching activity for ${owner}/${repoName}...`);
 
       try {
         // Fetch recent commits, PRs, and issues with caching
@@ -552,6 +558,8 @@ export async function fetchGithubActivity(
           client.getPullRequests(owner, repoName, 10),
           client.getIssues(owner, repoName, 10),
         ]);
+        
+        console.log(`[GitHub Cache] Fetched for ${owner}/${repoName}: ${commits.length} commits, ${pullRequests.length} PRs, ${issues.length} issues`);
 
         // Convert commits to activities
         commits.forEach(commit => {
@@ -648,6 +656,14 @@ export async function fetchGithubActivity(
     console.log(
       `[GitHub Sync] Total activities fetched and cached: ${sortedActivities.length}`
     );
+    
+    if (sortedActivities.length > 0) {
+      console.log(`[GitHub Sync] Sample activity:`, {
+        title: sortedActivities[0].title,
+        timestamp: sortedActivities[0].timestamp,
+        metadata: sortedActivities[0].metadata
+      });
+    }
 
     return sortedActivities;
   } catch (error: any) {

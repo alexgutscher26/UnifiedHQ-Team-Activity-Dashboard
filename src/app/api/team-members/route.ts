@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/get-user';
-import { fetchTeamActivityDataCached } from '@/lib/team-activity-service';
+import { auth } from '@/lib/auth';
+import { withErrorHandling } from '@/lib/api-error-handler';
 import { captureClientError } from '@/lib/posthog-client';
 
 interface TeamMember {
@@ -17,46 +17,66 @@ interface TeamMember {
   reviews: number;
 }
 
-export async function GET(request: NextRequest) {
+async function getTeamMembers(request: NextRequest): Promise<NextResponse> {
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+
+  if (!session?.user) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
+  const user = {
+    id: session.user.id,
+    name: session.user.name,
+    email: session.user.email,
+    image: session.user.image,
+  };
+
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const timeRange = (searchParams.get('timeRange') || '30d') as '7d' | '30d' | '90d';
-
-    // Fetch team activity data using the cached service
-    const teamData = await fetchTeamActivityDataCached(user.id, timeRange);
+    // For now, return the current user as the only team member
+    // In a real implementation, this would fetch from a team management system
+    const teamMembers: TeamMember[] = [
+      {
+        id: user.id,
+        name: user.name || 'Unknown User',
+        email: user.email || '',
+        avatar: user.image,
+        role: 'Developer',
+        status: 'active',
+        lastActive: new Date().toISOString(),
+        commits: 0, // These would be calculated from actual activity
+        pullRequests: 0,
+        issues: 0,
+        reviews: 0,
+      }
+    ];
 
     return NextResponse.json({
-      data: teamData.members,
+      data: teamMembers,
       success: true,
       timestamp: new Date().toISOString(),
-      meta: {
-        total: teamData.members.length,
-        timeRange,
-        stats: teamData.stats,
-      },
     });
   } catch (error) {
-    console.error('Team members API error:', error);
+    console.error('Error fetching team members:', error);
     
-    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch team members';
-    captureClientError(error instanceof Error ? error : new Error(errorMessage), {
+    captureClientError(error as Error, {
       context: 'team_members_api',
-      endpoint: '/api/team-members',
+      user_id: user.id,
     });
 
     return NextResponse.json(
-      {
-        data: null,
+      { 
+        error: 'Failed to fetch team members',
         success: false,
-        message: errorMessage,
         timestamp: new Date().toISOString(),
       },
       { status: 500 }
     );
   }
 }
+
+export const GET = withErrorHandling(getTeamMembers);

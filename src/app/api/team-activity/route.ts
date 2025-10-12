@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/get-user';
-import { fetchTeamActivityDataCached } from '@/lib/team-activity-service';
+import { auth } from '@/lib/auth';
+import { withErrorHandling } from '@/lib/api-error-handler';
+import { fetchGithubActivity } from '@/lib/integrations/github-cached';
 import { captureClientError } from '@/lib/posthog-client';
+import { prisma } from '@/generated/prisma';
 
 interface TeamActivity {
   id: string;
@@ -16,6 +18,10 @@ interface TeamActivity {
     role: string;
     status: 'active' | 'away' | 'offline';
     lastActive: string;
+    commits: number;
+    pullRequests: number;
+    issues: number;
+    reviews: number;
   };
   repository: string;
   timestamp: string;
@@ -24,52 +30,199 @@ interface TeamActivity {
   metadata?: Record<string, unknown>;
 }
 
-export async function GET(request: NextRequest) {
+async function getTeamActivity(request: NextRequest): Promise<NextResponse> {
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+
+  if (!session?.user) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
+  const user = {
+    id: session.user.id,
+    name: session.user.name,
+    email: session.user.email,
+    image: session.user.image,
+  };
+
+  const { searchParams } = new URL(request.url);
+  const timeRange = searchParams.get('timeRange') || '30d';
+  
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const timeRange = (searchParams.get('timeRange') || '30d') as '7d' | '30d' | '90d';
-    const limit = parseInt(searchParams.get('limit') || '100');
-
-    // Fetch team activity data using the cached service
-    const teamData = await fetchTeamActivityDataCached(user.id, timeRange);
-
-    // Limit activities if requested
-    const limitedActivities = teamData.activities.slice(0, limit);
-
-    return NextResponse.json({
-      data: limitedActivities,
-      success: true,
-      timestamp: new Date().toISOString(),
-      meta: {
-        total: teamData.activities.length,
-        returned: limitedActivities.length,
-        timeRange,
-        members: teamData.members.length,
-        stats: teamData.stats,
-      },
-    });
-  } catch (error) {
-    console.error('Team activity API error:', error);
+    // Get GitHub activity for the current user
+    console.log(`[Team Activity] Fetching GitHub activity for user: ${user.id}`);
     
-    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch team activity';
-    captureClientError(error instanceof Error ? error : new Error(errorMessage), {
+    try {
+      const githubActivities = await fetchGithubActivity(user.id);
+      console.log(`[Team Activity] Found ${githubActivities.length} GitHub activities`);
+      
+      // Check if no repositories are selected
+      if (githubActivities.length === 0) {
+        // Check if user has GitHub connection but no selected repos
+        const connection = await prisma.connection.findFirst({
+          where: {
+            userId: user.id,
+            type: 'github',
+          },
+        });
+        
+        if (connection) {
+          const selectedRepos = await prisma.selectedRepository.findMany({
+            where: {
+              userId: user.id,
+            },
+          });
+          
+          if (selectedRepos.length === 0) {
+            return NextResponse.json({
+              data: [],
+              success: true,
+              message: 'No repositories selected. Please select repositories to track in the integrations page.',
+              timestamp: new Date().toISOString(),
+            });
+          }
+        }
+      }
+      
+      console.log(`[Team Activity] Transforming ${githubActivities.length} GitHub activities`);
+      
+      // Transform GitHub activities into team activity format
+      const teamActivities: TeamActivity[] = githubActivities.map((activity, index) => {
+        // Extract activity type from metadata
+        const eventType = activity.metadata?.eventType || 'commit';
+        const repoInfo = activity.metadata?.repo;
+        const actor = activity.metadata?.actor;
+        
+        console.log(`[Team Activity] Transforming activity ${index + 1}: ${activity.title}`);
+        console.log(`[Team Activity] Event type: ${eventType}, Repo: ${repoInfo?.name}`);
+        
+        return {
+          id: `activity-${activity.externalId || index}`,
+          type: eventType as 'commit' | 'pull_request' | 'issue' | 'review' | 'comment',
+          title: activity.title || 'Untitled Activity',
+          description: activity.description,
+          author: {
+            id: user.id,
+            name: user.name || 'Unknown User',
+            email: user.email || '',
+            avatar: user.image,
+            role: 'Developer',
+            status: 'active' as const,
+            lastActive: new Date().toISOString(),
+            commits: eventType === 'commit' ? 1 : 0,
+            pullRequests: eventType === 'pull_request' ? 1 : 0,
+            issues: eventType === 'issue' ? 1 : 0,
+            reviews: eventType === 'review' ? 1 : 0,
+          },
+          repository: repoInfo?.name || 'Unknown Repository',
+          timestamp: activity.timestamp.toISOString(),
+          status: activity.metadata?.payload?.pull_request?.state || 
+                  activity.metadata?.payload?.issue?.state || 
+                  'open',
+          url: activity.metadata?.payload?.commit?.url || 
+               activity.metadata?.payload?.pull_request?.html_url || 
+               activity.metadata?.payload?.issue?.html_url,
+          metadata: activity.metadata,
+        };
+      });
+
+      // Filter by time range
+      const now = new Date();
+      const timeRangeDays = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
+      const cutoffDate = new Date(now.getTime() - (timeRangeDays * 24 * 60 * 60 * 1000));
+      
+      const filteredActivities = teamActivities.filter(activity => 
+        new Date(activity.timestamp) >= cutoffDate
+      );
+
+      console.log(`[Team Activity] Returning ${filteredActivities.length} filtered activities`);
+      console.log(`[Team Activity] Sample activity:`, filteredActivities[0] ? {
+        id: filteredActivities[0].id,
+        type: filteredActivities[0].type,
+        title: filteredActivities[0].title,
+        repository: filteredActivities[0].repository,
+        timestamp: filteredActivities[0].timestamp
+      } : 'No activities');
+
+      return NextResponse.json({
+        data: filteredActivities,
+        success: true,
+        timestamp: new Date().toISOString(),
+      });
+      
+    } catch (githubError) {
+      // Handle GitHub-specific errors gracefully
+      console.log(`[Team Activity] GitHub error for user ${user.id}:`, githubError);
+      
+      if (githubError instanceof Error) {
+        if (githubError.message.includes('GitHub not connected')) {
+          return NextResponse.json({
+            data: [],
+            success: true,
+            message: 'GitHub account not connected. Please connect your GitHub account in the integrations page.',
+            timestamp: new Date().toISOString(),
+          });
+        } else if (githubError.message.includes('token expired') || githubError.message.includes('invalid')) {
+          return NextResponse.json({
+            data: [],
+            success: true,
+            message: 'GitHub token expired. Please reconnect your GitHub account.',
+            timestamp: new Date().toISOString(),
+          });
+        } else if (githubError.message.includes('rate limit')) {
+          return NextResponse.json({
+            data: [],
+            success: true,
+            message: 'GitHub API rate limit exceeded. Please try again later.',
+            timestamp: new Date().toISOString(),
+          });
+        }
+      }
+      
+      // For other errors, return empty data with generic message
+      return NextResponse.json({
+        data: [],
+        success: true,
+        message: 'Unable to fetch GitHub activity. Please check your GitHub connection.',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching team activity:', error);
+    
+    // Handle specific error cases
+    let errorMessage = 'Failed to fetch team activity';
+    if (error instanceof Error) {
+      if (error.message.includes('GitHub not connected')) {
+        errorMessage = 'GitHub account not connected. Please connect your GitHub account in the integrations page.';
+      } else if (error.message.includes('token expired') || error.message.includes('invalid')) {
+        errorMessage = 'GitHub token expired. Please reconnect your GitHub account.';
+      } else if (error.message.includes('rate limit')) {
+        errorMessage = 'GitHub API rate limit exceeded. Please try again later.';
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
+    captureClientError(error as Error, {
       context: 'team_activity_api',
-      endpoint: '/api/team-activity',
+      user_id: user.id,
+      time_range: timeRange,
     });
 
     return NextResponse.json(
-      {
-        data: null,
+      { 
+        error: errorMessage,
         success: false,
-        message: errorMessage,
         timestamp: new Date().toISOString(),
       },
       { status: 500 }
     );
   }
 }
+
+export const GET = withErrorHandling(getTeamActivity);

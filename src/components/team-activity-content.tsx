@@ -114,6 +114,14 @@ export function TeamActivityContent({ className }: TeamActivityContentProps) {
     fetchTeamData();
   }, [timeRange]);
 
+  // Debug: Log when activities state changes
+  useEffect(() => {
+    console.log('[Team Activity Component] Activities state changed:', activities.length);
+    if (activities.length > 0) {
+      console.log('[Team Activity Component] Sample activity:', activities[0]);
+    }
+  }, [activities]);
+
   const fetchTeamData = async () => {
     try {
       setIsLoading(true);
@@ -131,8 +139,19 @@ export function TeamActivityContent({ className }: TeamActivityContentProps) {
         }),
       ]);
 
+      console.log('[Team Activity Component] API Response Status:', {
+        activities: activitiesRes.status,
+        members: membersRes.status,
+        stats: statsRes.status
+      });
+
       if (!activitiesRes.ok || !membersRes.ok || !statsRes.ok) {
-        throw new Error('Failed to fetch team data');
+        console.error('[Team Activity Component] API Response Error:', {
+          activities: activitiesRes.status,
+          members: membersRes.status,
+          stats: statsRes.status
+        });
+        throw new Error(`Failed to fetch team data: ${activitiesRes.status} ${membersRes.status} ${statsRes.status}`);
       }
 
       const [activitiesData, membersData, statsData] = await Promise.all([
@@ -141,9 +160,45 @@ export function TeamActivityContent({ className }: TeamActivityContentProps) {
         statsRes.json(),
       ]);
 
-      setActivities(activitiesData.data || []);
+      console.log('[Team Activity Component] JSON Parsing Complete');
+
+      console.log('[Team Activity Component] Activities data:', {
+        success: activitiesData.success,
+        dataLength: activitiesData.data?.length || 0,
+        message: activitiesData.message,
+        sample: activitiesData.data?.[0] || 'No data'
+      });
+      console.log('[Team Activity Component] Members data:', {
+        success: membersData.success,
+        dataLength: membersData.data?.length || 0
+      });
+      console.log('[Team Activity Component] Stats data:', {
+        success: statsData.success,
+        hasData: !!statsData.data
+      });
+
+      const activitiesArray = activitiesData.data || [];
+      console.log('[Team Activity Component] Setting activities:', activitiesArray.length);
+      
+      setActivities(activitiesArray);
       setTeamMembers(membersData.data || []);
       setStats(statsData.data || null);
+
+      // Show helpful messages if provided
+      if (activitiesData.message) {
+        toast({
+          title: 'GitHub Integration',
+          description: activitiesData.message,
+          variant: 'default',
+        });
+      }
+      if (statsData.message) {
+        toast({
+          title: 'GitHub Integration',
+          description: statsData.message,
+          variant: 'default',
+        });
+      }
 
       captureClientEvent('team_activity_viewed', {
         time_range: timeRange,
@@ -152,6 +207,8 @@ export function TeamActivityContent({ className }: TeamActivityContentProps) {
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch team data';
+      console.error('[Team Activity Component] Error fetching data:', err);
+      console.error('[Team Activity Component] Error message:', errorMessage);
       setError(errorMessage);
       toast({
         title: 'Error',
@@ -526,7 +583,24 @@ export function TeamActivityContent({ className }: TeamActivityContentProps) {
                     <div className="text-center py-8">
                       <IconActivity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-semibold text-foreground mb-2">No activities found</h3>
-                      <p className="text-muted-foreground">Try adjusting your filters or time range</p>
+                      <p className="text-muted-foreground mb-4">
+                        {activities.length === 0 
+                          ? "No repositories selected for tracking. Please select repositories in the integrations page to see your team activity here."
+                          : "Try adjusting your filters or time range"
+                        }
+                      </p>
+                      {activities.length === 0 && (
+                        <div className="flex flex-col gap-2">
+                          <Button variant="outline" asChild>
+                            <a href="/integrations" className="text-blue-400 hover:text-blue-300">
+                              Go to Integrations
+                            </a>
+                          </Button>
+                          <p className="text-xs text-muted-foreground text-center">
+                            After connecting GitHub, make sure to select repositories to track
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     filteredActivities.map((activity) => (
