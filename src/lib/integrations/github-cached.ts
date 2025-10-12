@@ -67,7 +67,7 @@ class GitHubCache {
 
   // Get cache statistics
   /**
-   * Retrieves statistics about cache entries, including total, valid, and expired entries.
+   * Gets statistics about cache entries, including total, valid, and expired entries.
    */
   getStats() {
     const now = Date.now();
