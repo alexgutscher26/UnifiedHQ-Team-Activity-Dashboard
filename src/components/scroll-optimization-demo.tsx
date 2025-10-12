@@ -26,6 +26,9 @@ import {
   IconSettings,
 } from '@tabler/icons-react';
 
+/**
+ * Renders a scroll optimization demo with performance monitoring and settings.
+ */
 export function ScrollOptimizationDemo() {
   const [selectedPreset, setSelectedPreset] =
     useState<keyof typeof scrollOptimizationPresets>('smooth');
