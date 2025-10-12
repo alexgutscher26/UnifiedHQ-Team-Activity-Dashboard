@@ -73,6 +73,9 @@ export function SummaryStatistics({ className, timeRange = '30d' }: SummaryStati
     return num.toString();
   };
 
+  /**
+   * Formats a date string into a short localized date format.
+   */
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
