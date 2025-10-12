@@ -2,6 +2,17 @@ const { PrismaClient } = require('../src/generated/prisma');
 
 const prisma = new PrismaClient();
 
+/**
+ * Test the fetchGithubActivity function by simulating a user activity fetch.
+ *
+ * This function retrieves the first user from the database, checks for selected repositories,
+ * generates a cache key, and verifies if cached activities exist. If no cached activities are found,
+ * it tests the GitHub API for the first repository associated with the user, logging relevant commit information.
+ * It handles potential errors during the API call and ensures database disconnection in the end.
+ *
+ * @returns {Promise<void>} A promise that resolves when the test is complete.
+ * @throws {Error} If an error occurs during the test execution or database operations.
+ */
 async function testFetchGithubActivity() {
   try {
     console.log('🧪 Testing fetchGithubActivity function...\n');
