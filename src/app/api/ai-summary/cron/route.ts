@@ -186,6 +186,17 @@ export async function POST(request: NextRequest) {
 }
 
 // Also support GET for health checks
+/**
+ * Handles the GET request to check the health status of the AI service.
+ *
+ * This function validates the connection to the AI service using the
+ * AISummaryService. It returns a JSON response indicating whether the
+ * service is connected or disconnected, along with a timestamp. In case
+ * of an error during the connection validation, it returns an unhealthy
+ * status with the error message.
+ *
+ * @param request - The NextRequest object representing the incoming request.
+ */
 export async function GET(request: NextRequest) {
   try {
     const isConnected = await AISummaryService.validateConnection();
