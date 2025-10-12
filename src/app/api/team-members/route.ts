@@ -17,6 +17,17 @@ interface TeamMember {
   reviews: number;
 }
 
+/**
+ * Handles the GET request to fetch team members' activity data.
+ *
+ * The function first retrieves the current user and checks for authorization. If the user is unauthorized, it returns a 401 response.
+ * It then extracts the time range from the request's search parameters, defaults to '30d' if not provided, and fetches the team activity data using a cached service.
+ * Finally, it returns the team members' data along with metadata, or handles any errors that occur during the process.
+ *
+ * @param request - The incoming NextRequest object containing the request details.
+ * @returns A JSON response containing the team members' data, success status, and metadata.
+ * @throws Error If an error occurs while fetching the team members' data.
+ */
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
