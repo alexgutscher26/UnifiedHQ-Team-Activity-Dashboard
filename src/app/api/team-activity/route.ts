@@ -24,6 +24,14 @@ interface TeamActivity {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * Handles the GET request for team activity data.
+ *
+ * This function retrieves the current user and checks for authorization. It then extracts search parameters from the request URL, including the time range and limit for activities. The function fetches team activity data using a cached service and limits the activities based on the specified limit. Finally, it returns a JSON response containing the limited activities and relevant metadata. In case of an error, it logs the error and returns a JSON response with an error message.
+ *
+ * @param request - The NextRequest object representing the incoming request.
+ * @returns A JSON response containing the team activity data or an error message.
+ */
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
