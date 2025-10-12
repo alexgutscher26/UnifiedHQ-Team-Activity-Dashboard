@@ -93,10 +93,7 @@ export async function POST(request: NextRequest) {
         properties: posthogProperties,
       });
       
-      posthogClient.captureException(error, {
-        distinctId,
-        properties: posthogProperties,
-      });
+      posthogClient.captureException(error, distinctId, posthogProperties);
     } else {
       // // Handle regular events
       // console.log('Sending event to PostHog:', {
