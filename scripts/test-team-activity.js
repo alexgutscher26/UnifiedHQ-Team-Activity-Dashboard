@@ -3,6 +3,16 @@ const { fetchGithubActivity } = require('../src/lib/integrations/github-cached')
 
 const prisma = new PrismaClient();
 
+/**
+ * Test the Team Activity API and validate its functionality.
+ *
+ * This function retrieves the first user from the database and tests the fetchGithubActivity function to fetch user activities.
+ * It then transforms the activities into a specific format, applies time filtering, and logs the results.
+ * Error handling is implemented for both the fetching and transformation processes, ensuring that any issues are reported.
+ *
+ * @returns {Promise<void>} A promise that resolves when the testing is complete.
+ * @throws Error If there is an issue during the testing process.
+ */
 async function testTeamActivity() {
   try {
     console.log('🧪 Testing Team Activity API...\n');
