@@ -33,8 +33,11 @@ export class ClientLLMService {
   }
 
   /**
-   * Generate text using OpenRouter via API endpoint
-   * This will automatically track analytics on the server-side
+   * Generate text using OpenRouter via API endpoint.
+   *
+   * This function constructs a request to the OpenRouter API with the provided parameters, including prompt, model, and other optional settings. It handles the response, checking for errors and retrying the request if necessary. The function also tracks analytics by including distinctId and traceId, and it formats the request body with additional properties and groups.
+   *
+   * @param {LLMRequest} request - The request object containing parameters for generating text.
    */
   async generateText(request: LLMRequest): Promise<LLMResponse> {
     const {
