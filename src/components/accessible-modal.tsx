@@ -296,6 +296,18 @@ interface AccessibleTooltipProps {
   className?: string;
 }
 
+/**
+ * A React functional component that displays an accessible tooltip.
+ *
+ * The AccessibleTooltip component manages its visibility based on mouse and focus events. It uses the useAriaLiveAnnouncer to announce the tooltip content when it becomes visible. The tooltip's position can be adjusted using the 'side' prop, and it includes a delay before appearing. The component also applies conditional styling based on the provided className and the tooltip's position.
+ *
+ * @param children - The content to be displayed within the tooltip trigger area.
+ * @param content - The text to be displayed within the tooltip.
+ * @param side - The position of the tooltip relative to the trigger (default is 'top').
+ * @param delayDuration - The duration to delay the tooltip's appearance (default is 700ms).
+ * @param className - Additional CSS classes to apply to the tooltip container.
+ * @returns A JSX element representing the tooltip and its trigger.
+ */
 export const AccessibleTooltip: React.FC<AccessibleTooltipProps> = ({
   children,
   content,
@@ -387,6 +399,21 @@ interface AccessiblePopoverProps {
   announceOnOpen?: boolean;
 }
 
+/**
+ * A React functional component that renders an accessible popover.
+ *
+ * The AccessiblePopover component manages its open state, handles focus management, and announces its opening via ARIA live announcements. It provides a trigger element that toggles the popover's visibility and supports keyboard interactions for accessibility. The popover's position can be customized using the side and align props.
+ *
+ * @param children - The content to be displayed as the trigger for the popover.
+ * @param content - The content to be displayed inside the popover.
+ * @param open - A controlled prop to manage the open state of the popover.
+ * @param onOpenChange - A callback function to handle changes to the open state.
+ * @param side - The position of the popover relative to the trigger (default is 'bottom').
+ * @param align - The alignment of the popover content (default is 'center').
+ * @param className - Additional CSS classes to apply to the popover.
+ * @param announceOnOpen - A flag to determine if an announcement should be made when the popover opens (default is true).
+ * @returns A JSX element representing the accessible popover.
+ */
 export const AccessiblePopover: React.FC<AccessiblePopoverProps> = ({
   children,
   content,
