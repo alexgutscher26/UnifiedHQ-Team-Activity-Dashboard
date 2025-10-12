@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Get all summaries for activity count calculation
+    // Get all summaries for comprehensive analysis
     const allSummaries = await prisma.aISummary.findMany({
       where: {
         userId,
@@ -75,42 +75,96 @@ export async function GET(request: NextRequest) {
         },
       },
       select: {
+        id: true,
+        title: true,
+        keyHighlights: true,
+        actionItems: true,
+        insights: true,
+        generatedAt: true,
         metadata: true,
       },
     });
 
-    // Calculate total activities from all summaries
+    // Calculate comprehensive statistics
     const totalActivities = allSummaries.reduce((sum, summary) => {
       const metadata = summary.metadata as any;
       return sum + (metadata?.activityCount || 0);
     }, 0);
 
-    // Calculate average activities per summary
+    const totalTokensUsed = allSummaries.reduce((sum, summary) => {
+      const metadata = summary.metadata as any;
+      return sum + (metadata?.tokensUsed || 0);
+    }, 0);
+
     const averageActivities = allSummaries.length > 0 
       ? Math.round(totalActivities / allSummaries.length)
       : 0;
 
-    // Get active repositories count from the most recent summary
-    const activeRepositories = mostRecentSummary?.metadata 
-      ? (mostRecentSummary.metadata as any)?.activeRepositories || 0
+    const averageTokensPerSummary = allSummaries.length > 0
+      ? Math.round(totalTokensUsed / allSummaries.length)
       : 0;
 
-    // Get last update time
-    const lastUpdate = mostRecentSummary?.generatedAt || now;
+    // Model breakdown
+    const modelBreakdown: Record<string, number> = {};
+    allSummaries.forEach(summary => {
+      const metadata = summary.metadata as any;
+      const model = metadata?.model || 'unknown';
+      const modelName = model.split('/')[1] || model;
+      modelBreakdown[modelName] = (modelBreakdown[modelName] || 0) + 1;
+    });
+
+    // Daily trends (last 7 days)
+    const dailyTrends: Array<{ date: string; count: number; tokensUsed: number }> = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+      
+      const daySummaries = allSummaries.filter(summary => {
+        const summaryDate = new Date(summary.generatedAt);
+        return summaryDate >= dayStart && summaryDate < dayEnd;
+      });
+      
+      const dayTokens = daySummaries.reduce((sum, summary) => {
+        const metadata = summary.metadata as any;
+        return sum + (metadata?.tokensUsed || 0);
+      }, 0);
+      
+      dailyTrends.push({
+        date: dayStart.toISOString().split('T')[0],
+        count: daySummaries.length,
+        tokensUsed: dayTokens,
+      });
+    }
+
+    // Activity distribution
+    const activityDistribution: Record<string, number> = {};
+    allSummaries.forEach(summary => {
+      const metadata = summary.metadata as any;
+      const sourceBreakdown = metadata?.sourceBreakdown || {};
+      Object.entries(sourceBreakdown).forEach(([source, count]) => {
+        activityDistribution[source] = (activityDistribution[source] || 0) + (count as number);
+      });
+    });
+
+    // Extract common insights (simplified - just take first few insights from recent summaries)
+    const topInsights: string[] = [];
+    const recentSummaries = allSummaries.slice(0, 5);
+    recentSummaries.forEach(summary => {
+      if (summary.insights && summary.insights.length > 0) {
+        topInsights.push(...summary.insights.slice(0, 2));
+      }
+    });
 
     return NextResponse.json({
-      count: totalSummaries,
-      status: totalSummaries > 0 ? 'Active' : 'Inactive',
-      details: totalSummaries > 0 
-        ? `${totalSummaries} summary${totalSummaries === 1 ? '' : 'ies'} generated`
-        : 'No summaries generated',
-      lastUpdate: lastUpdate.toISOString(),
-      breakdown: {
-        totalActivities,
-        averageActivities,
-        activeRepositories,
-        summariesGenerated: totalSummaries,
-      },
+      totalSummaries: allSummaries.length,
+      averageActivities,
+      totalTokensUsed,
+      averageTokensPerSummary,
+      modelBreakdown,
+      dailyTrends,
+      topInsights: topInsights.slice(0, 10), // Limit to 10 insights
+      activityDistribution,
       metadata: {
         timeRange,
         startDate: startDate.toISOString(),

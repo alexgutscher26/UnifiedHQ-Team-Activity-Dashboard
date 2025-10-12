@@ -2,6 +2,7 @@ import type React from 'react';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SiteHeader } from '@/components/site-header';
 import { SummaryHistory } from '@/components/summary-history';
+import { SummaryStatistics } from '@/components/summary-statistics';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { DashboardErrorBoundary } from '@/components/error-boundaries';
 import { getCurrentUser } from '@/lib/get-user';
@@ -39,7 +40,14 @@ export default async function SummaryHistoryPage() {
 
                 {/* Summary History Component */}
                 <div className='px-4 lg:px-6'>
-                  <SummaryHistory className='max-w-4xl mx-auto' />
+                  <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto'>
+                    <div className='lg:col-span-2'>
+                      <SummaryHistory />
+                    </div>
+                    <div className='lg:col-span-1'>
+                      <SummaryStatistics />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
