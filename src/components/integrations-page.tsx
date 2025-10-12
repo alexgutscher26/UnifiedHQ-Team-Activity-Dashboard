@@ -38,6 +38,13 @@ import {
   IconRocket,
 } from '@tabler/icons-react';
 
+/**
+ * Render the Integrations Page component.
+ *
+ * This component manages the connection and synchronization of various integrations such as GitHub and Slack. It checks the connection status on mount, fetches relevant statistics, and provides functionality to connect, sync, and disconnect from these services. The component also handles loading states and displays user feedback through toasts. Integration cards are dynamically generated based on the connection status and provide actions for syncing and disconnecting.
+ *
+ * @returns {JSX.Element} The rendered Integrations Page component.
+ */
 export function IntegrationsPage() {
   const { toast } = useToast();
   const [githubConnected, setGithubConnected] = useState(false);
@@ -328,6 +335,13 @@ export function IntegrationsPage() {
     }
   };
 
+  /**
+   * Handles the disconnection of Slack integration.
+   *
+   * This function initiates a loading state, sends a POST request to the Slack disconnect API, and processes the response.
+   * If the disconnection is successful, it updates the connection status, displays a success message, and triggers a storage event to refresh the sidebar.
+   * In case of an error, it shows an appropriate error message. The loading state is reset in the finally block.
+   */
   const handleSlackDisconnect = async () => {
     setIsLoading(true);
     try {

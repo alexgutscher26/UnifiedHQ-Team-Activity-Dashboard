@@ -14,6 +14,15 @@ interface Integration {
   description?: string;
 }
 
+/**
+ * Renders a list of integrations with their connection statuses.
+ *
+ * This function initializes the integrations state and fetches the connection statuses for GitHub and Slack integrations.
+ * It updates the state based on the fetched data and handles visibility changes and storage events to refresh the statuses.
+ * The function also provides click handlers for navigating to the integrations page and determining the status color and text.
+ *
+ * @returns {JSX.Element} The rendered integrations list component.
+ */
 export function IntegrationsList() {
   const router = useRouter();
   const [integrations, setIntegrations] = useState<Integration[]>([
@@ -57,6 +66,14 @@ export function IntegrationsList() {
       }
     };
 
+    /**
+     * Fetches the Slack integration status and updates the state accordingly.
+     *
+     * This asynchronous function makes a request to the Slack API to synchronize the integration status.
+     * If the response is successful, it updates the state of integrations by mapping over the previous state
+     * and modifying the Slack integration's connected status and status message based on the fetched data.
+     * In case of an error during the fetch operation, it logs the error to the console.
+     */
     const fetchSlackStatus = async () => {
       try {
         const response = await fetch('/api/integrations/slack/sync');
@@ -79,6 +96,9 @@ export function IntegrationsList() {
       }
     };
 
+    /**
+     * Fetches statuses from GitHub and Slack concurrently.
+     */
     const fetchAllStatuses = async () => {
       await Promise.all([fetchGitHubStatus(), fetchSlackStatus()]);
     };
