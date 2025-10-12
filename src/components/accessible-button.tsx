@@ -112,6 +112,9 @@ export const AccessibleButton = forwardRef<
     const { announce } = useAriaLiveAnnouncer();
     const { handleKeyDown } = useKeyboardNavigation();
 
+    /**
+     * Handles the click event for a button, announcing a message if required.
+     */
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
       if (announceOnClick) {
         const message =
@@ -122,6 +125,9 @@ export const AccessibleButton = forwardRef<
       onClick?.(event);
     };
 
+    /**
+     * Handles the key down event for a button element.
+     */
     const handleKeyDownEvent = (
       event: React.KeyboardEvent<HTMLButtonElement>
     ) => {

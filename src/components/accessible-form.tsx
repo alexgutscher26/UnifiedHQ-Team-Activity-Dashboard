@@ -27,6 +27,21 @@ interface AccessibleFormFieldProps {
   className?: string;
 }
 
+/**
+ * Renders an accessible form field with a label, description, and error message.
+ *
+ * This component utilizes React's `useId` to generate unique IDs for the label, description, and error elements.
+ * It conditionally displays the description and error message based on the provided props. The `children` prop is
+ * cloned to include accessibility attributes such as `aria-describedby`, `aria-invalid`, and `aria-required`.
+ *
+ * @param {Object} props - The properties for the AccessibleFormField component.
+ * @param {string} props.label - The label for the form field.
+ * @param {string} [props.description] - An optional description for the form field.
+ * @param {string} [props.error] - An optional error message for the form field.
+ * @param {boolean} [props.required] - Indicates if the field is required.
+ * @param {React.ReactNode} props.children - The child elements to be rendered within the form field.
+ * @param {string} [props.className] - Additional class names for styling.
+ */
 export const AccessibleFormField: React.FC<AccessibleFormFieldProps> = ({
   label,
   description,
@@ -102,6 +117,9 @@ export const AccessibleInput = forwardRef<
   ) => {
     const { announce } = useAriaLiveAnnouncer();
 
+    /**
+     * Handles input change events and optionally announces the change.
+     */
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       if (announceOnChange) {
         announce(`Input changed to: ${event.target.value}`);
@@ -151,6 +169,9 @@ export const AccessibleTextarea = forwardRef<
   ) => {
     const { announce } = useAriaLiveAnnouncer();
 
+    /**
+     * Handles changes in a textarea and optionally announces the change.
+     */
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       if (announceOnChange) {
         announce(`Textarea changed to: ${event.target.value}`);
@@ -185,6 +206,25 @@ interface AccessibleSelectProps {
   announceOnChange?: boolean;
 }
 
+/**
+ * Renders an accessible select component with support for live announcements.
+ *
+ * This component utilizes the useAriaLiveAnnouncer to announce the selected option when the value changes,
+ * provided the announceOnChange prop is true. It also manages the rendering of the select field,
+ * including its label, description, error state, and required status. The options are dynamically generated
+ * from the provided options array, ensuring that each option is represented correctly.
+ *
+ * @param {Object} props - The properties for the AccessibleSelect component.
+ * @param {string} props.label - The label for the select field.
+ * @param {string} [props.description] - An optional description for the select field.
+ * @param {string} [props.error] - An optional error message for the select field.
+ * @param {boolean} [props.required] - Indicates if the select field is required.
+ * @param {Array<{ value: string, label: string, disabled?: boolean }>} props.options - The options for the select field.
+ * @param {string} props.value - The current value of the select field.
+ * @param {function} props.onValueChange - Callback function to handle value changes.
+ * @param {string} [props.placeholder] - An optional placeholder for the select field.
+ * @param {boolean} [props.announceOnChange] - Indicates if changes should be announced.
+ */
 export const AccessibleSelect: React.FC<AccessibleSelectProps> = ({
   label,
   description,
@@ -250,6 +290,23 @@ interface AccessibleCheckboxProps {
   announceOnChange?: boolean;
 }
 
+/**
+ * Renders an accessible checkbox component with associated label, description, and error message.
+ *
+ * This component utilizes the useAriaLiveAnnouncer for announcing changes in the checkbox state.
+ * It generates unique IDs for the checkbox, description, and error elements using useId.
+ * The handleCheckedChange function manages the checkbox state and triggers announcements if required.
+ * The component conditionally renders the description and error messages based on the provided props.
+ *
+ * @param {Object} props - The properties for the AccessibleCheckbox component.
+ * @param {string} props.label - The label for the checkbox.
+ * @param {string} [props.description] - An optional description for the checkbox.
+ * @param {string} [props.error] - An optional error message to display.
+ * @param {boolean} props.checked - The current checked state of the checkbox.
+ * @param {function} props.onCheckedChange - Callback function to handle changes in the checked state.
+ * @param {boolean} [props.required] - Indicates if the checkbox is required.
+ * @param {boolean} [props.announceOnChange] - Determines if changes should be announced.
+ */
 export const AccessibleCheckbox: React.FC<AccessibleCheckboxProps> = ({
   label,
   description,
@@ -264,6 +321,9 @@ export const AccessibleCheckbox: React.FC<AccessibleCheckboxProps> = ({
   const descriptionId = useId();
   const errorId = useId();
 
+  /**
+   * Handles the change of a checked state and announces the change if required.
+   */
   const handleCheckedChange = (newChecked: boolean) => {
     if (announceOnChange) {
       announce(`${label} ${newChecked ? 'checked' : 'unchecked'}`);
@@ -317,6 +377,21 @@ interface AccessibleRadioGroupProps {
   announceOnChange?: boolean;
 }
 
+/**
+ * Renders an accessible radio group component with support for live announcements.
+ *
+ * This component displays a set of radio buttons based on the provided options. It handles value changes by announcing the selected option if `announceOnChange` is true. The component also manages accessibility attributes such as aria-describedby and aria-invalid based on the presence of description and error messages.
+ *
+ * @param label - The label for the radio group.
+ * @param description - An optional description for the radio group.
+ * @param error - An optional error message to display.
+ * @param options - An array of options for the radio buttons, each containing a value and label.
+ * @param value - The currently selected value of the radio group.
+ * @param onValueChange - A callback function that is called when the value changes.
+ * @param required - A boolean indicating if the radio group is required.
+ * @param announceOnChange - A boolean indicating if the selection change should be announced.
+ * @returns A React element representing the accessible radio group.
+ */
 export const AccessibleRadioGroup: React.FC<AccessibleRadioGroupProps> = ({
   label,
   description,
@@ -332,6 +407,16 @@ export const AccessibleRadioGroup: React.FC<AccessibleRadioGroupProps> = ({
   const descriptionId = useId();
   const errorId = useId();
 
+  /**
+   * Handles the change of a value and announces the selection if required.
+   *
+   * This function checks if announcements are enabled through the `announceOnChange` flag.
+   * If enabled, it finds the corresponding option from the `options` array based on the `newValue`
+   * and announces the selected option's label. Finally, it invokes the `onValueChange` callback
+   * with the new value if it exists.
+   *
+   * @param newValue - The new value that has been selected.
+   */
   const handleValueChange = (newValue: string) => {
     if (announceOnChange) {
       const selectedOption = options.find(option => option.value === newValue);
@@ -393,6 +478,23 @@ interface AccessibleSwitchProps {
   announceOnChange?: boolean;
 }
 
+/**
+ * Renders an accessible switch component with optional label, description, and error message.
+ *
+ * This component utilizes the useAriaLiveAnnouncer to announce changes in the switch state.
+ * It manages the checked state through the handleCheckedChange function, which triggers an announcement
+ * if announceOnChange is true. The component also conditionally renders a description and error message
+ * based on the provided props.
+ *
+ * @param {Object} props - The properties for the AccessibleSwitch component.
+ * @param {string} props.label - The label for the switch.
+ * @param {string} [props.description] - An optional description for the switch.
+ * @param {string} [props.error] - An optional error message to display.
+ * @param {boolean} props.checked - The current checked state of the switch.
+ * @param {function} props.onCheckedChange - Callback function to handle changes in the checked state.
+ * @param {boolean} [props.required] - Indicates if the switch is required.
+ * @param {boolean} [props.announceOnChange] - Determines if changes should be announced.
+ */
 export const AccessibleSwitch: React.FC<AccessibleSwitchProps> = ({
   label,
   description,
@@ -407,6 +509,9 @@ export const AccessibleSwitch: React.FC<AccessibleSwitchProps> = ({
   const descriptionId = useId();
   const errorId = useId();
 
+  /**
+   * Handles the change of a checked state and announces the change if required.
+   */
   const handleCheckedChange = (newChecked: boolean) => {
     if (announceOnChange) {
       announce(`${label} ${newChecked ? 'enabled' : 'disabled'}`);
@@ -462,6 +567,23 @@ interface AccessibleSliderProps {
   announceOnChange?: boolean;
 }
 
+/**
+ * A React functional component that renders an accessible slider.
+ *
+ * This component allows users to select a value within a specified range. It utilizes ARIA attributes for accessibility and can announce value changes if specified. The component handles value changes through the `onValueChange` callback and displays error messages if provided. It also conditionally renders a description and the current value of the slider.
+ *
+ * @param label - The label for the slider.
+ * @param description - An optional description for the slider.
+ * @param error - An optional error message to display.
+ * @param value - The current value of the slider.
+ * @param onValueChange - Callback function to handle value changes.
+ * @param min - The minimum value of the slider (default is 0).
+ * @param max - The maximum value of the slider (default is 100).
+ * @param step - The step value for the slider (default is 1).
+ * @param required - Indicates if the slider is required.
+ * @param announceOnChange - Indicates if changes should be announced.
+ * @returns A JSX element representing the accessible slider.
+ */
 export const AccessibleSlider: React.FC<AccessibleSliderProps> = ({
   label,
   description,
@@ -479,6 +601,9 @@ export const AccessibleSlider: React.FC<AccessibleSliderProps> = ({
   const descriptionId = useId();
   const errorId = useId();
 
+  /**
+   * Handles the change of slider value and announces it if required.
+   */
   const handleValueChange = (newValue: number[]) => {
     if (announceOnChange) {
       announce(`Slider value changed to: ${newValue[0]}`);

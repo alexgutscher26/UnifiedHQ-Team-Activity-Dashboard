@@ -33,6 +33,13 @@ interface AccessibilityTestResult {
   recommendations: string[];
 }
 
+/**
+ * AccessibilityTester component for auditing accessibility compliance in a React application.
+ *
+ * This component manages the state for test results, overall score, and running status. It utilizes hooks to perform accessibility audits on various components, generates recommendations based on identified issues, and displays the results in a user-friendly interface. The component also provides visual feedback on the overall accessibility score and the status of screen reader detection.
+ *
+ * @returns A JSX element representing the accessibility testing dashboard.
+ */
 export const AccessibilityTester: React.FC = () => {
   const [testResults, setTestResults] = useState<AccessibilityTestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);
@@ -41,6 +48,9 @@ export const AccessibilityTester: React.FC = () => {
   const { announce } = useAriaLiveAnnouncer();
   const { isScreenReaderActive } = useScreenReaderSupport();
 
+  /**
+   * Runs an accessibility audit on predefined components and sets the results.
+   */
   const testComponents = () => {
     setIsRunning(true);
     announce('Starting accessibility audit');
@@ -89,6 +99,15 @@ export const AccessibilityTester: React.FC = () => {
     );
   };
 
+  /**
+   * Generates a list of recommendations based on identified issues.
+   *
+   * The function iterates over an array of issues, checking for specific keywords related to accessibility.
+   * For each keyword found, a corresponding recommendation is added to the recommendations array.
+   * Finally, it returns a unique set of recommendations to avoid duplicates.
+   *
+   * @param {string[]} issues - An array of issues to analyze for generating recommendations.
+   */
   const generateRecommendations = (issues: string[]): string[] => {
     const recommendations: string[] = [];
 
@@ -112,12 +131,31 @@ export const AccessibilityTester: React.FC = () => {
     return [...new Set(recommendations)];
   };
 
+  /**
+   * Determines the color class based on the given score.
+   *
+   * The function evaluates the score and returns a corresponding color class string.
+   * If the score is 90 or above, it returns 'text-green-600'. If the score is between
+   * 70 and 89, it returns 'text-yellow-600'. For scores below 70, it returns
+   * 'text-red-600'.
+   *
+   * @param score - The numeric score to evaluate.
+   */
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-600';
     if (score >= 70) return 'text-yellow-600';
     return 'text-red-600';
   };
 
+  /**
+   * Determines the score badge based on the provided score.
+   *
+   * The function evaluates the score and returns an object containing a variant and text description.
+   * If the score is 90 or above, it returns an 'Excellent' badge. For scores between 70 and 89, it returns a 'Good' badge.
+   * Any score below 70 results in a 'Needs Work' badge.
+   *
+   * @param score - The numeric score used to determine the badge.
+   */
   const getScoreBadge = (score: number) => {
     if (score >= 90) return { variant: 'default' as const, text: 'Excellent' };
     if (score >= 70) return { variant: 'secondary' as const, text: 'Good' };

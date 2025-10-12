@@ -28,6 +28,21 @@ interface AccessibleNavigationProps {
   announceNavigation?: boolean;
 }
 
+/**
+ * A React functional component that provides accessible navigation with keyboard support.
+ *
+ * This component manages the state of active and expanded navigation items, allowing users to navigate through
+ * a list of items using keyboard controls. It utilizes aria attributes for accessibility and provides visual
+ * feedback for active and expanded states. The component also handles item clicks and announces navigation changes
+ * for screen readers.
+ *
+ * @param items - An array of navigation items to be rendered.
+ * @param orientation - The orientation of the navigation, either 'vertical' or 'horizontal'. Defaults to 'vertical'.
+ * @param className - Additional CSS classes to apply to the navigation component.
+ * @param onItemClick - A callback function that is called when an item is clicked.
+ * @param announceNavigation - A boolean indicating whether to announce navigation changes. Defaults to true.
+ * @returns A JSX element representing the accessible navigation component.
+ */
 export const AccessibleNavigation: React.FC<AccessibleNavigationProps> = ({
   items,
   orientation = 'vertical',
@@ -96,6 +111,9 @@ export const AccessibleNavigation: React.FC<AccessibleNavigationProps> = ({
     return null;
   };
 
+  /**
+   * Recursively retrieves all items from a list of accessible navigation items.
+   */
   const getAllItems = (itemList: AccessibleNavItem[]): AccessibleNavItem[] => {
     const allItems: AccessibleNavItem[] = [];
     for (const item of itemList) {
@@ -107,6 +125,17 @@ export const AccessibleNavigation: React.FC<AccessibleNavigationProps> = ({
     return allItems;
   };
 
+  /**
+   * Navigates through items based on the specified direction.
+   *
+   * This function retrieves all items and determines the current active item index.
+   * It calculates the next index based on the provided direction and checks if the
+   * next item is valid and not disabled. If valid, it updates the active item and
+   * optionally announces the navigation.
+   *
+   * @param direction - The direction to navigate, where positive values move forward
+   *                    and negative values move backward in the item list.
+   */
   const navigateItems = (direction: number) => {
     const allItems = getAllItems(items);
     const currentIndex = allItems.findIndex(item => item.id === activeItem);
@@ -123,6 +152,13 @@ export const AccessibleNavigation: React.FC<AccessibleNavigationProps> = ({
     }
   };
 
+  /**
+   * Expands the currently active item if it exists.
+   *
+   * The function checks if there is an active item and retrieves it using findItemById.
+   * If the item has children, it adds the item's ID to the set of expanded items.
+   * Additionally, if announceNavigation is true, it announces the expansion of the item.
+   */
   const expandCurrentItem = () => {
     if (activeItem) {
       const item = findItemById(items, activeItem);
@@ -151,6 +187,13 @@ export const AccessibleNavigation: React.FC<AccessibleNavigationProps> = ({
     }
   };
 
+  /**
+   * Handles the click event for an item in the navigation.
+   *
+   * This function checks if the clicked item has children. If it does, it toggles the expanded state of the item in the `expandedItems` set. If the item does not have children, it sets the active item and announces the selection if `announceNavigation` is enabled. Finally, it calls the `onItemClick` callback if provided.
+   *
+   * @param item - The navigation item that was clicked, which may contain children and a label.
+   */
   const handleItemClick = (item: AccessibleNavItem) => {
     if (item.children) {
       const isExpanded = expandedItems.has(item.id);
@@ -172,6 +215,15 @@ export const AccessibleNavigation: React.FC<AccessibleNavigationProps> = ({
     onItemClick?.(item);
   };
 
+  /**
+   * Renders a navigation item with potential child items.
+   *
+   * The function checks if the item is expanded, active, and if it has children. It constructs a list item with appropriate ARIA roles and attributes, and handles click and keydown events. If the item has children and is expanded, it recursively renders the child items.
+   *
+   * @param item - An AccessibleNavItem object representing the navigation item to render.
+   * @param level - The current nesting level of the navigation item, defaulting to 0.
+   * @returns A JSX element representing the rendered navigation item.
+   */
   const renderNavItem = (item: AccessibleNavItem, level: number = 0) => {
     const isExpanded = expandedItems.has(item.id);
     const isActive = activeItem === item.id;
@@ -259,6 +311,9 @@ interface AccessibleBreadcrumbProps {
   onItemClick?: (item: { label: string; href?: string }) => void;
 }
 
+/**
+ * Renders an accessible breadcrumb navigation component.
+ */
 export const AccessibleBreadcrumb: React.FC<AccessibleBreadcrumbProps> = ({
   items,
   separator = '/',
@@ -267,6 +322,9 @@ export const AccessibleBreadcrumb: React.FC<AccessibleBreadcrumbProps> = ({
 }) => {
   const { announce } = useAriaLiveAnnouncer();
 
+  /**
+   * Handles the click event for an item.
+   */
   const handleItemClick = (item: { label: string; href?: string }) => {
     announce(`Navigated to ${item.label}`);
     onItemClick?.(item);
@@ -332,6 +390,9 @@ export const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
   const { announce } = useAriaLiveAnnouncer();
   const { handleKeyDown } = useKeyboardNavigation();
 
+  /**
+   * Handles the click event on a tab, updating the active tab and announcing the change.
+   */
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
     if (announceTabChange) {
@@ -341,6 +402,17 @@ export const AccessibleTabs: React.FC<AccessibleTabsProps> = ({
     onTabChange?.(tabId);
   };
 
+  /**
+   * Handles the key down event for tab navigation.
+   *
+   * This function determines the next tab index based on the pressed key (ArrowLeft, ArrowRight, Home, End)
+   * and updates the active tab accordingly. It prevents the default action of the event and invokes
+   * handleTabClick if the next tab is not disabled. If the key does not match any case, it calls
+   * handleKeyDown with the event.
+   *
+   * @param event - The keyboard event triggered by the user.
+   * @param tabId - The ID of the currently active tab.
+   */
   const handleKeyDownEvent = (event: React.KeyboardEvent, tabId: string) => {
     const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
     let nextIndex = currentIndex;
