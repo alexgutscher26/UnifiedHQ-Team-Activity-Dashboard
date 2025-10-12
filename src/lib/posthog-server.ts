@@ -70,6 +70,15 @@ export async function captureServerException(
   }
 }
 
+/**
+ * Captures client errors and sends them to the PostHog server.
+ *
+ * This function retrieves the PostHog server instance and, if available, sends a capture event with the error details, including the error message, name, stack, and any additional properties provided. If the PostHog server is not available or an error occurs during the capture process, it logs the failure to the console.
+ *
+ * @param {Error} error - The error object containing details about the client error.
+ * @param {string} [distinctId] - An optional unique identifier for the user.
+ * @param {Record<string, any>} [additionalProperties] - Optional additional properties to include with the error capture.
+ */
 export async function captureClientError(
   error: Error,
   distinctId?: string,

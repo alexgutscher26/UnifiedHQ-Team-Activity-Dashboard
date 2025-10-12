@@ -74,7 +74,11 @@ class ReviewTools {
   }
 
   /**
-   * Check for TODO comments
+   * Check for TODO comments.
+   *
+   * This function searches through the source files for any lines containing TODO, FIXME, or HACK comments.
+   * It utilizes the execSync method to run a grep command on the specified file types. If any such comments are found,
+   * it processes each line to extract the file name and line number, and pushes a warning object into the results.warnings array.
    */
   checkTODOComments() {
     try {
