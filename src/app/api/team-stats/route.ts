@@ -126,22 +126,36 @@ async function getTeamStats(request: NextRequest): Promise<NextResponse> {
         }
       }
       
-      // Calculate statistics
-      const totalCommits = githubActivities.filter(a => a.metadata?.eventType === 'commit').length;
-      const totalPullRequests = githubActivities.filter(a => a.metadata?.eventType === 'pull_request').length;
-      const totalIssues = githubActivities.filter(a => a.metadata?.eventType === 'issue').length;
-      const totalReviews = githubActivities.filter(a => a.metadata?.eventType === 'review').length;
+      // Filter activities by time range first
+      const now = new Date();
+      const timeRangeDays = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
+      const cutoffDate = new Date(now.getTime() - (timeRangeDays * 24 * 60 * 60 * 1000));
+      
+      console.log(`[Team Stats] Time filtering: cutoffDate=${cutoffDate.toISOString()}, timeRange=${timeRange}`);
+      console.log(`[Team Stats] Before filtering: ${githubActivities.length} activities`);
+      
+      const filteredActivities = githubActivities.filter(activity => {
+        const activityDate = activity.timestamp instanceof Date ? activity.timestamp : new Date(activity.timestamp);
+        return activityDate >= cutoffDate;
+      });
+      
+      console.log(`[Team Stats] After filtering: ${filteredActivities.length} activities`);
+      
+      // Calculate statistics from filtered activities
+      const totalCommits = filteredActivities.filter(a => a.metadata?.eventType === 'commit').length;
+      const totalPullRequests = filteredActivities.filter(a => a.metadata?.eventType === 'pull_request').length;
+      const totalIssues = filteredActivities.filter(a => a.metadata?.eventType === 'issue').length;
+      const totalReviews = filteredActivities.filter(a => a.metadata?.eventType === 'review').length;
       
       // Calculate average activity per day
-      const timeRangeDays = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
-      const averageActivityPerDay = Math.round(githubActivities.length / timeRangeDays);
+      const averageActivityPerDay = Math.round(filteredActivities.length / timeRangeDays);
       
-      // Get unique repositories
-      const repositories = [...new Set(githubActivities.map(a => a.metadata?.repo?.name).filter(Boolean))];
+      // Get unique repositories from filtered activities
+      const repositories = [...new Set(filteredActivities.map(a => a.metadata?.repo?.name).filter(Boolean))];
       
-      // Calculate repository stats
+      // Calculate repository stats from filtered activities
       const repositoryStats = repositories.map(repo => {
-        const repoActivities = githubActivities.filter(a => a.metadata?.repo?.name === repo);
+        const repoActivities = filteredActivities.filter(a => a.metadata?.repo?.name === repo);
         return {
           name: repo,
           commits: repoActivities.filter(a => a.metadata?.eventType === 'commit').length,

@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { event, properties } = body;
 
-    console.log('PostHog forwarding request:', { event, properties });
+    // console.log('PostHog forwarding request:', { event, properties });
 
     if (!event) {
       return NextResponse.json(
@@ -98,12 +98,12 @@ export async function POST(request: NextRequest) {
         properties: posthogProperties,
       });
     } else {
-      // Handle regular events
-      console.log('Sending event to PostHog:', {
-        distinctId,
-        event,
-        properties: posthogProperties,
-      });
+      // // Handle regular events
+      // console.log('Sending event to PostHog:', {
+      //   distinctId,
+      //   event,
+      //   properties: posthogProperties,
+      // });
       
       posthogClient.capture({
         distinctId,
@@ -113,9 +113,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Flush to ensure data is sent
-    console.log('Flushing PostHog data...');
+    // console.log('Flushing PostHog data...');
     await posthogClient.flush();
-    console.log('PostHog data flushed successfully');
+    // console.log('PostHog data flushed successfully');
 
     return NextResponse.json({
       success: true,
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('PostHog forwarding error:', error);
+    // console.error('PostHog forwarding error:', error);
     
     return NextResponse.json(
       { 

@@ -290,17 +290,34 @@ export function TeamActivityContent({ className }: TeamActivityContentProps) {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'commit':
-        return <IconGitCommit className="h-4 w-4 text-green-600 dark:text-green-400" />;
+        return IconGitCommit;
       case 'pull_request':
-        return <IconGitPullRequest className="h-4 w-4 text-blue-600 dark:text-blue-400" />;
+        return IconGitPullRequest;
       case 'issue':
-        return <IconBug className="h-4 w-4 text-red-600 dark:text-red-400" />;
+        return IconBug;
       case 'review':
-        return <IconEye className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />;
+        return IconEye;
       case 'comment':
-        return <IconMessageCircle className="h-4 w-4 text-muted-foreground" />;
+        return IconMessageCircle;
       default:
-        return <IconActivity className="h-4 w-4 text-muted-foreground" />;
+        return IconActivity;
+    }
+  };
+
+  const getActivityColor = (type: string) => {
+    switch (type) {
+      case 'commit':
+        return 'text-green-600';
+      case 'pull_request':
+        return 'text-blue-600';
+      case 'issue':
+        return 'text-orange-600';
+      case 'review':
+        return 'text-yellow-600';
+      case 'comment':
+        return 'text-gray-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
@@ -603,49 +620,78 @@ export function TeamActivityContent({ className }: TeamActivityContentProps) {
                       )}
                     </div>
                   ) : (
-                    filteredActivities.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className="flex items-start gap-4 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                      >
-                        <div className="flex-shrink-0">
-                          {getActivityIcon(activity.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="text-sm font-medium text-foreground truncate">
-                              {activity.title}
-                            </h4>
-                            {getStatusBadge(activity.status)}
+                    filteredActivities.map((activity) => {
+                      const Icon = getActivityIcon(activity.type);
+                      const colorClass = getActivityColor(activity.type);
+                      const actor = activity.author;
+                      const payload = activity.metadata;
+
+                      // Get the external URL for the activity
+                      const getExternalUrl = () => {
+                        if (payload) {
+                          if (payload.commit?.url) return payload.commit.url;
+                          if (payload.pull_request?.html_url) return payload.pull_request.html_url;
+                          if (payload.issue?.html_url) return payload.issue.html_url;
+                        }
+                        return activity.url || null;
+                      };
+
+                      const externalUrl = getExternalUrl();
+
+                      return (
+                        <div
+                          key={activity.id}
+                          className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                        >
+                          <div className={`p-2 rounded-lg bg-muted ${colorClass}`}>
+                            <Icon className="size-4" />
                           </div>
-                          {activity.description && (
-                            <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                              {activity.description}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Avatar className="h-4 w-4">
-                                <AvatarImage src={activity.author.avatar} />
-                                <AvatarFallback className="text-xs">
-                                  {activity.author.name.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span>{activity.author.name}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-sm">
+                                {externalUrl ? (
+                                  <a
+                                    href={externalUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:underline text-blue-600 hover:text-blue-800"
+                                  >
+                                    {activity.title}
+                                  </a>
+                                ) : (
+                                  activity.title
+                                )}
+                              </h4>
+                              <Badge variant="secondary" className="text-xs">
+                                {activity.type.replace('_', ' ')}
+                              </Badge>
                             </div>
-                            <span>{activity.repository}</span>
-                            <span>{formatTimestamp(activity.timestamp)}</span>
+                            {activity.description && (
+                              <p className="text-sm text-muted-foreground mb-2">
+                                {activity.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              {actor && (
+                                <>
+                                  <Avatar className="size-4">
+                                    <AvatarImage src={actor.avatar} />
+                                    <AvatarFallback>
+                                      {actor.name?.charAt(0) || '?'}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span>{actor.name}</span>
+                                  <span>•</span>
+                                </>
+                              )}
+                              <span>{activity.repository}</span>
+                              <span>•</span>
+                              <span>{formatTimestamp(activity.timestamp)}</span>
+                            </div>
                           </div>
                         </div>
-                        {activity.url && (
-                          <Button variant="ghost" size="sm" asChild>
-                            <a href={activity.url} target="_blank" rel="noopener noreferrer">
-                              <IconEye className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </ScrollArea>

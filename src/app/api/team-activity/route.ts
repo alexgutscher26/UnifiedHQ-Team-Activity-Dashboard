@@ -90,6 +90,16 @@ async function getTeamActivity(request: NextRequest): Promise<NextResponse> {
       
       console.log(`[Team Activity] Transforming ${githubActivities.length} GitHub activities`);
       
+      // Debug: Log sample GitHub activity
+      if (githubActivities.length > 0) {
+        console.log(`[Team Activity] Sample GitHub activity:`, {
+          title: githubActivities[0].title,
+          timestamp: githubActivities[0].timestamp,
+          timestampType: typeof githubActivities[0].timestamp,
+          metadata: githubActivities[0].metadata
+        });
+      }
+      
       // Transform GitHub activities into team activity format
       const teamActivities: TeamActivity[] = githubActivities.map((activity, index) => {
         // Extract activity type from metadata
@@ -119,7 +129,7 @@ async function getTeamActivity(request: NextRequest): Promise<NextResponse> {
             reviews: eventType === 'review' ? 1 : 0,
           },
           repository: repoInfo?.name || 'Unknown Repository',
-          timestamp: activity.timestamp.toISOString(),
+          timestamp: activity.timestamp instanceof Date ? activity.timestamp.toISOString() : new Date(activity.timestamp).toISOString(),
           status: activity.metadata?.payload?.pull_request?.state || 
                   activity.metadata?.payload?.issue?.state || 
                   'open',
@@ -135,9 +145,17 @@ async function getTeamActivity(request: NextRequest): Promise<NextResponse> {
       const timeRangeDays = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
       const cutoffDate = new Date(now.getTime() - (timeRangeDays * 24 * 60 * 60 * 1000));
       
-      const filteredActivities = teamActivities.filter(activity => 
-        new Date(activity.timestamp) >= cutoffDate
-      );
+      console.log(`[Team Activity] Time filtering: cutoffDate=${cutoffDate.toISOString()}, timeRange=${timeRange}`);
+      console.log(`[Team Activity] Before filtering: ${teamActivities.length} activities`);
+      
+      const filteredActivities = teamActivities.filter(activity => {
+        const activityDate = new Date(activity.timestamp);
+        const isWithinRange = activityDate >= cutoffDate;
+        console.log(`[Team Activity] Activity ${activity.id}: ${activity.timestamp} >= ${cutoffDate.toISOString()} = ${isWithinRange}`);
+        return isWithinRange;
+      });
+      
+      console.log(`[Team Activity] After filtering: ${filteredActivities.length} activities`);
 
       console.log(`[Team Activity] Returning ${filteredActivities.length} filtered activities`);
       console.log(`[Team Activity] Sample activity:`, filteredActivities[0] ? {
