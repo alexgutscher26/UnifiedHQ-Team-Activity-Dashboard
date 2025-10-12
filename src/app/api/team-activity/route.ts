@@ -30,6 +30,14 @@ interface TeamActivity {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * Fetch the GitHub activity for the authenticated user and return it in a structured format.
+ *
+ * The function first retrieves the user's session and checks for authorization. It then fetches the user's GitHub activities, transforming them into a team activity format. If no activities are found, it checks for selected repositories and handles various error scenarios related to GitHub connections and API limits. Finally, it filters the activities based on the specified time range before returning the result.
+ *
+ * @param request - The NextRequest object containing the request details.
+ * @returns A Promise that resolves to a NextResponse object containing the user's GitHub activities or an error message.
+ */
 async function getTeamActivity(request: NextRequest): Promise<NextResponse> {
   const session = await auth.api.getSession({
     headers: request.headers,

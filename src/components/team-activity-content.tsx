@@ -96,6 +96,17 @@ interface TeamActivityContentProps {
   className?: string;
 }
 
+/**
+ * Component that displays team activity, including activities, team members, and statistics.
+ *
+ * It manages multiple states such as activities, team members, loading status, and error messages.
+ * The component fetches data from various APIs based on the selected time range and updates the UI accordingly.
+ * It also provides filtering and sorting options for activities, and handles loading and error states gracefully.
+ *
+ * @param {TeamActivityContentProps} props - The properties for the component.
+ * @param {string} props.className - Additional class names for styling the component.
+ * @returns {JSX.Element} The rendered component.
+ */
 export function TeamActivityContent({ className }: TeamActivityContentProps) {
   const [activities, setActivities] = useState<TeamActivity[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -287,6 +298,15 @@ export function TeamActivityContent({ className }: TeamActivityContentProps) {
     });
   }, [fetchTeamData, toast]);
 
+  /**
+   * Retrieve the appropriate activity icon based on the given type.
+   *
+   * The function uses a switch statement to determine which icon to return based on the input type.
+   * If the type matches one of the predefined cases, the corresponding icon is returned; otherwise, a default icon is returned.
+   *
+   * @param type - A string representing the type of activity.
+   * @returns The icon associated with the specified activity type.
+   */
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'commit':
@@ -627,6 +647,13 @@ export function TeamActivityContent({ className }: TeamActivityContentProps) {
                       const payload = activity.metadata;
 
                       // Get the external URL for the activity
+                      /**
+                       * Retrieve the external URL from the payload or fallback to activity URL.
+                       *
+                       * The function checks if the payload is defined and attempts to return the URL from the commit, pull request, or issue properties in that order. If none of these are available, it returns the URL from the activity object or null if that is also not present.
+                       *
+                       * @returns The external URL from the payload or activity, or null if none are available.
+                       */
                       const getExternalUrl = () => {
                         if (payload) {
                           if (payload.commit?.url) return payload.commit.url;

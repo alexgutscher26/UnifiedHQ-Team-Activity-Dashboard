@@ -42,6 +42,15 @@ interface TeamStats {
   }>;
 }
 
+/**
+ * Fetch and return team statistics based on GitHub activity for the authenticated user.
+ *
+ * The function retrieves the user's session and checks for authorization. It then fetches the user's GitHub activity, filters it based on the specified time range, and calculates various statistics such as total commits, pull requests, issues, and reviews. If no repositories are selected, it returns an informative message. The function also handles potential errors gracefully, providing appropriate feedback based on the error type.
+ *
+ * @param request - The NextRequest object containing the request details.
+ * @returns A Promise that resolves to a NextResponse object containing the team statistics or an error message.
+ * @throws Error If there is an issue fetching the team stats or GitHub activity.
+ */
 async function getTeamStats(request: NextRequest): Promise<NextResponse> {
   const session = await auth.api.getSession({
     headers: request.headers,
