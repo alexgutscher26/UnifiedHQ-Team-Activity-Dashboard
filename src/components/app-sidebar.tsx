@@ -39,7 +39,7 @@ const data = {
     },
     {
       title: 'Team Activity',
-      url: '#',
+      url: '/team-activity',
       icon: IconUsers,
     },
     {
