@@ -75,7 +75,7 @@ This will create:
 
 ## Testing the Integration
 
-1. Start your development server: `npm run dev`
+1. Start your development server: `bun run dev`
 2. Go to `/integrations` in your app
 3. Click "Connect Slack" on the Slack integration card
 4. Authorize the app in Slack

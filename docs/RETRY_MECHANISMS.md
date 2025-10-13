@@ -349,11 +349,6 @@ The retry system automatically handles:
 - Error context is preserved through retry chain
 - Performance metrics are tracked
 
-### PostHog Integration
-- Retry events can be tracked in PostHog
-- Error rates and retry success rates are monitored
-- Performance impact is measured
-
 ## Best Practices
 
 ### 1. Choose Appropriate Presets

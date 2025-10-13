@@ -364,7 +364,7 @@ class PerformanceComparison {
 
       if (reports.length < 2) {
         console.log(
-          '❌ Need at least 2 performance reports to compare. Run "npm run perf:monitor" multiple times.'
+          '❌ Need at least 2 performance reports to compare. Run "bun run perf:monitor" multiple times.'
         );
         return;
       }

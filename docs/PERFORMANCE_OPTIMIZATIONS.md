@@ -255,13 +255,13 @@ The system automatically detects and alerts on:
 
 ```bash
 # Monitor performance metrics
-npm run perf:monitor
+bun run perf:monitor
 
 # Analyze performance data
-npm run perf:analyze
+bun run perf:analyze
 
 # Compare performance between versions
-npm run perf:compare
+bun run perf:compare
 ```
 
 ### Performance Testing Checklist
@@ -321,7 +321,7 @@ npm run perf:compare
 
 4. **Test Performance**
    ```bash
-   npm run perf:monitor
+   bun run perf:monitor
    ```
 
 ## 🎯 Future Optimizations

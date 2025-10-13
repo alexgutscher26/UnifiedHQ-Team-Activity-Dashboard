@@ -446,7 +446,7 @@ class PerformanceAnalyzer {
 
       if (reports.length === 0) {
         console.log(
-          '❌ No performance reports found. Run "npm run perf:monitor" first.'
+          '❌ No performance reports found. Run "bun run perf:monitor" first.'
         );
         return;
       }

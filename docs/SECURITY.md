@@ -141,19 +141,6 @@ const slackScopes = [
 - **Privacy Respect**: Only access public channels or channels user is member of
 - **Data Minimization**: Only collect necessary message metadata
 
-### PostHog Analytics
-
-#### Privacy Controls
-```typescript
-// PostHog configuration with privacy controls
-const posthogConfig = {
-  api_host: process.env.POSTHOG_HOST,
-  person_profiles: 'never',
-  capture_pageview: false,
-  capture_pageleave: false,
-  disable_session_recording: true,
-  opt_out_capturing_by_default: true
-};
 ```
 
 #### Data Filtering

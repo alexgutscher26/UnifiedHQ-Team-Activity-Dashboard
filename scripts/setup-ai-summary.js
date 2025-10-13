@@ -76,7 +76,7 @@ console.log('\n🧪 Testing AI Service Connection');
 console.log('==================================');
 console.log('To test if your OpenRouter API key is working:');
 console.log('1. Make sure you have set your OPENROUTER_API_KEY in .env.local');
-console.log('2. Start your development server: npm run dev');
+console.log('2. Start your development server: bun run dev');
 console.log('3. Visit: http://localhost:3000/api/ai-summary/cron');
 console.log('4. You should see a health check response\n');
 
@@ -97,7 +97,7 @@ console.log('==================');
 console.log('Your AI Summary feature is now configured.');
 console.log('Next steps:');
 console.log('1. Set your OpenRouter API key in .env.local');
-console.log('2. Start your development server: npm run dev');
+console.log('2. Start your development server: bun run dev');
 console.log('3. Visit your dashboard to see the AI Summary card');
 console.log(
   '4. Connect your GitHub and Slack integrations for better summaries'

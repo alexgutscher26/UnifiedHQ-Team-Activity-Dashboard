@@ -13,7 +13,7 @@ This document outlines the comprehensive rules and guidelines for this project. 
 - **ALWAYS** use `bun` for all package operations:
   - `bun install` instead of `npm install`
   - `bun add <package>` instead of `npm install <package>`
-  - `bun run <script>` instead of `npm run <script>`
+  - `bun run <script>` instead of `bun run <script>`
   - `bun remove <package>` instead of `npm uninstall <package>`
 
 ### Bun Commands
@@ -187,32 +187,6 @@ const result = await withRetry(
 - **github**: Optimized for GitHub API
 - **openrouter**: Optimized for OpenRouter API
 
-## 🎯 PostHog Rules
-
-### Always Use Client-Side PostHog Utilities
-- **NEVER** import `posthog-node` in client components
-- **ALWAYS** use `@/lib/posthog-client` for client-side operations
-- **ALWAYS** use `captureClientError` for error tracking
-- **ALWAYS** use `captureClientEvent` for event tracking
-
-### PostHog Code Examples
-```typescript
-// ✅ CORRECT - Use client utilities
-import { captureClientError, captureClientEvent } from '@/lib/posthog-client';
-
-// Capture errors
-captureClientError(error, {
-  context: 'user_action',
-  timestamp: new Date().toISOString(),
-});
-
-// Capture events
-captureClientEvent('button_clicked', {
-  button_name: 'submit',
-  page: 'dashboard',
-});
-```
-
 ## 🚨 Error Handling Rules
 
 ### Always Use Error Boundaries
@@ -317,7 +291,6 @@ import { Card } from '@/components/ui/card';
 
 // 5. Internal imports (utilities)
 import { withRetry } from '@/lib/retry-utils';
-import { captureClientError } from '@/lib/posthog-client';
 
 // 6. Type imports
 import type { User } from '@/types/user';
@@ -450,19 +423,6 @@ return <LegacyDashboard />;
 - **ALWAYS** update README files
 - **ALWAYS** maintain API documentation
 
-### Documentation Examples
-```typescript
-/**
- * Captures a client-side error with PostHog
- * @param error - The error to capture
- * @param properties - Additional properties to include
- * @returns void
- */
-export function captureClientError(error: Error, properties?: Record<string, unknown>): void {
-  // Implementation
-}
-```
-
 ## 🚀 Deployment Rules
 
 ### Always Follow Deployment Best Practices
@@ -489,7 +449,6 @@ Before implementing any new feature, ensure:
 - [ ] Using OptimizedImage for images
 - [ ] Using cached GitHub integration
 - [ ] Implementing retry mechanisms
-- [ ] Using client-side PostHog utilities
 - [ ] Error boundaries implemented
 - [ ] Tailwind CSS for styling
 - [ ] Shadcn/ui components used

@@ -1,11 +1,8 @@
-# OpenRouter + PostHog LLM Analytics Setup Complete! 🚀
+# OpenRouter LLM Analytics Setup Complete! 🚀
 
 ## What's Been Implemented
 
-Following the [PostHog LLM analytics documentation](https://posthog.com/docs/llm-analytics/installation/openrouter), I've set up a complete OpenRouter integration with PostHog analytics tracking.
-
 ### ✅ **Core Integration**
-- **PostHog OpenAI Wrapper**: Custom wrapper that extends OpenAI client with PostHog analytics
 - **OpenRouter Client**: Configured to work with OpenRouter API
 - **LLM Service**: Clean service layer for easy integration
 - **API Endpoint**: RESTful API for OpenRouter requests
@@ -20,7 +17,6 @@ Following the [PostHog LLM analytics documentation](https://posthog.com/docs/llm
 - **Error Tracking**: Failed requests captured as $ai_generation_error events
 
 ### ✅ **Files Created**
-- `src/lib/posthog-openrouter.ts` - PostHog OpenAI wrapper
 - `src/lib/openrouter-client.ts` - Basic OpenRouter client
 - `src/lib/llm-service.ts` - Service layer with convenience methods
 - `src/app/api/openrouter/route.ts` - API endpoint
@@ -33,27 +29,10 @@ Following the [PostHog LLM analytics documentation](https://posthog.com/docs/llm
 Edit `.env.local` and add your actual API keys:
 
 ```bash
-# PostHog Configuration
-NEXT_PUBLIC_POSTHOG_KEY=phc_your_actual_posthog_key_here
-NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
-
 # OpenRouter Configuration  
 OPENROUTER_API_KEY=your_actual_openrouter_key_here
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 ```
-
-### 2. **Test the Integration** 🧪
-Visit `/openrouter-demo` to test the integration:
-- Try different models (GPT-3.5, GPT-4, Claude, Llama)
-- Send prompts and see responses
-- Check PostHog dashboard for analytics data
-
-### 3. **Verify PostHog Analytics** 📊
-In your PostHog dashboard:
-- Go to **LLM Analytics** section
-- Check **Traces** and **Generations** tabs
-- Look for `$ai_generation` events
-- Verify model usage, latency, and token data
 
 ## Usage Examples
 
@@ -157,11 +136,6 @@ curl -X POST http://localhost:3000/api/openrouter \
 
 ### **Common Issues**
 
-1. **No analytics data in PostHog?**
-   - Check your PostHog API key
-   - Verify environment variables are loaded
-   - Check browser console for errors
-
 2. **OpenRouter API errors?**
    - Verify your OpenRouter API key
    - Check model availability
@@ -171,9 +145,6 @@ curl -X POST http://localhost:3000/api/openrouter \
    - Restart your development server
    - Check `.env.local` file exists
    - Verify variable names are correct
-
-### **Debug Mode**
-PostHog debug mode is enabled in development. Check browser console for PostHog logs.
 
 ## Integration Benefits
 

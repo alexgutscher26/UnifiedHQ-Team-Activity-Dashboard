@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the security policies and procedures for the UnifiedHQ project - a Next.js application that integrates with GitHub, Slack, PostHog, and other third-party services to provide team activity tracking and AI-powered summaries.
+This document outlines the security policies and procedures for the UnifiedHQ project - a Next.js application that integrates with GitHub, Slack, and other third-party services to provide team activity tracking and AI-powered summaries.
 
 ## Supported Versions
 
@@ -43,11 +43,6 @@ This document outlines the security policies and procedures for the UnifiedHQ pr
 - **Bot Permissions**: Minimal required bot permissions
 - **Channel Access**: User-controlled channel selection
 - **Token Security**: Secure storage of bot tokens and user tokens
-
-### PostHog Analytics
-- **Data Privacy**: Client-side analytics with privacy controls
-- **Error Tracking**: Secure error reporting without sensitive data exposure
-- **Event Filtering**: Filtered event collection to prevent sensitive data leakage
 
 ## Security Best Practices
 
@@ -141,7 +136,6 @@ We currently do not have a formal bug bounty program, but we appreciate security
 - Initial security policy implementation
 - OAuth 2.0 authentication system
 - GitHub and Slack integration security
-- PostHog analytics privacy controls
 - Rate limiting and input validation
 
 ---

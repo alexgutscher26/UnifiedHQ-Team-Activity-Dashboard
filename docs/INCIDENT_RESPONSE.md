@@ -101,7 +101,6 @@ This document outlines the incident response procedures for the UnifiedHQ projec
 // Automated detection systems
 const detectionSystems = {
   sentry: 'Error tracking and performance monitoring',
-  posthog: 'User behavior analytics',
   github: 'Repository access monitoring',
   slack: 'Integration activity monitoring',
   database: 'Database access logging',
@@ -578,11 +577,6 @@ const securityTools = {
     purpose: 'Error tracking and performance monitoring',
     alerts: ['Authentication failures', 'API errors', 'Performance issues'],
     integration: 'Real-time alerting'
-  },
-  posthog: {
-    purpose: 'User behavior analytics',
-    alerts: ['Unusual user patterns', 'Suspicious activity'],
-    integration: 'Behavioral analysis'
   },
   github: {
     purpose: 'Repository access monitoring',

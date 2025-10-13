@@ -244,13 +244,13 @@ function MyComponent() {
 ### Performance Testing
 ```bash
 # Run performance monitoring
-npm run perf:monitor
+bun run perf:monitor
 
 # Analyze performance data
-npm run perf:analyze
+bun run perf:analyze
 
 # Compare performance reports
-npm run perf:compare
+bun run perf:compare
 ```
 
 ### Manual Testing

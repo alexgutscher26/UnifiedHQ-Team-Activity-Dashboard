@@ -33,7 +33,6 @@ UnifiedHQ is a comprehensive team activity dashboard that aggregates data from m
 ### 🔗 **Integrations**
 - **GitHub** - Track commits, pull requests, issues, and repository activity
 - **Slack** - Monitor messages, channels, and team communications
-- **PostHog** - Analytics and user behavior tracking
 - **Coming Soon** - Microsoft Teams, Google Workspace, Jira, Trello, Discord, Linear, Asana
 
 ### 🤖 **AI-Powered Insights**
@@ -86,7 +85,6 @@ UnifiedHQ is a comprehensive team activity dashboard that aggregates data from m
 - **GitHub API** - Repository and activity data
 - **Slack API** - Team communication data
 - **OpenAI API** - AI-powered summaries and insights
-- **PostHog** - User analytics and behavior tracking
 - **Sentry** - Error monitoring and performance tracking
 
 ### **Development & Deployment**
@@ -146,12 +144,7 @@ UnifiedHQ is a comprehensive team activity dashboard that aggregates data from m
    # AI Services
    OPENAI_API_KEY="your-openai-api-key"
    OPENROUTER_API_KEY="your-openrouter-api-key"
-   
-   # Analytics & Monitoring
-   POSTHOG_KEY="your-posthog-key"
-   POSTHOG_HOST="https://app.posthog.com"
-   SENTRY_DSN="your-sentry-dsn"
-   
+    
    # Security
    ENCRYPTION_KEY="your-32-character-encryption-key"
    CRON_SECRET_TOKEN="your-cron-secret-token"
@@ -167,7 +160,7 @@ UnifiedHQ is a comprehensive team activity dashboard that aggregates data from m
    ```bash
    bun dev
    # or
-   npm run dev
+   bun run dev
    ```
 
 6. **Open your browser**
@@ -179,7 +172,6 @@ UnifiedHQ is a comprehensive team activity dashboard that aggregates data from m
 - [GitHub Integration Setup](docs/GITHUB_INTEGRATION_SETUP.md) - Connect GitHub repositories
 - [Slack Integration Setup](docs/SLACK_INTEGRATION_SETUP.md) - Connect Slack workspace
 - [AI Summary Setup](docs/AI_SUMMARY_SETUP.md) - Configure AI-powered summaries
-- [PostHog Analytics Setup](docs/POSTHOG_SETUP_COMPLETE.md) - User analytics configuration
 
 ### **Development**
 - [Performance Optimizations](docs/PERFORMANCE_OPTIMIZATIONS.md) - Performance best practices
@@ -210,7 +202,6 @@ UnifiedHQ is a comprehensive team activity dashboard that aggregates data from m
 | **Authentication** | ✅ Complete | 100% | Better Auth with OAuth 2.0 and session management |
 | **UI/UX** | ✅ Complete | 95% | Modern design with accessibility support |
 | **AI Features** | 🚧 In Progress | 60% | Daily summaries implemented, more features planned |
-| **Analytics** | ✅ Complete | 90% | PostHog integration with privacy controls |
 | **Security** | ✅ Complete | 95% | Comprehensive security implementation |
 | **Performance** | ✅ Complete | 90% | Optimized with caching and monitoring |
 | **Documentation** | ✅ Complete | 85% | Comprehensive docs and guides |
@@ -321,7 +312,6 @@ src/
 
 #### **AI & Analytics**
 - **OpenAI Integration** - AI-powered summaries and insights
-- **PostHog Analytics** - User behavior and performance tracking
 - **Sentry Monitoring** - Error tracking and performance monitoring
 - **Custom Analytics** - Team productivity metrics
 
@@ -359,13 +349,6 @@ SLACK_CLIENT_SECRET="your-slack-client-secret"
 ```env
 OPENAI_API_KEY="your-openai-api-key"
 OPENROUTER_API_KEY="your-openrouter-api-key"
-```
-
-#### **Analytics & Monitoring**
-```env
-POSTHOG_KEY="your-posthog-key"
-POSTHOG_HOST="https://app.posthog.com"
-SENTRY_DSN="your-sentry-dsn"
 ```
 
 ### **Database Configuration**
@@ -446,7 +429,6 @@ bun prisma migrate reset
 #### **Performance Issues**
 - Check Redis cache status
 - Monitor database query performance
-- Review PostHog analytics
 
 ### **Getting Help**
 
@@ -473,7 +455,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [GitHub API](https://docs.github.com/en/rest) - Repository and activity data
 - [Slack API](https://api.slack.com/) - Team communication platform
 - [OpenAI API](https://openai.com/api/) - AI-powered insights
-- [PostHog](https://posthog.com/) - Product analytics platform
 - [Sentry](https://sentry.io/) - Error monitoring and performance tracking
 
 ### **Community**

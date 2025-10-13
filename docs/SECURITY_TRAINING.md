@@ -602,41 +602,6 @@ const slackSecurityTraining = {
 };
 ```
 
-#### PostHog Analytics Security
-```typescript
-// PostHog analytics security training
-const posthogSecurityTraining = {
-  privacy: {
-    controls: 'Privacy controls configuration',
-    implementation: `
-      const posthogConfig = {
-        person_profiles: 'never',
-        capture_pageview: false,
-        disable_session_recording: true,
-        opt_out_capturing_by_default: true
-      };
-    `,
-    compliance: 'GDPR compliance measures'
-  },
-  dataFiltering: {
-    pii: 'Filter personally identifiable information',
-    sanitization: 'Event sanitization procedures',
-    implementation: `
-      function sanitizeEvent(event: string, properties: Record<string, unknown>) {
-        const sanitizedProperties = { ...properties };
-        
-        // Remove sensitive fields
-        delete sanitizedProperties.password;
-        delete sanitizedProperties.token;
-        delete sanitizedProperties.email;
-        
-        return { event, properties: sanitizedProperties };
-      }
-    `
-  }
-};
-```
-
 ## Incident Response Training
 
 ### Module 7: Incident Detection and Classification
@@ -648,7 +613,7 @@ const detectionTraining = {
   automated: {
     monitoring: 'Automated monitoring systems',
     alerts: 'Automated alert systems',
-    tools: ['Sentry', 'PostHog', 'GitHub', 'Database logs']
+    tools: ['GitHub', 'Database logs']
   },
   manual: {
     monitoring: 'Manual monitoring procedures',

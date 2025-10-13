@@ -317,27 +317,6 @@ async function validateChannelAccess(userId: string, channelId: string) {
 }
 ```
 
-### PostHog Analytics
-
-#### Privacy Controls
-```typescript
-// ✅ GOOD: Configure PostHog with privacy controls
-const posthogConfig = {
-  api_host: process.env.POSTHOG_HOST,
-  person_profiles: 'never',
-  capture_pageview: false,
-  capture_pageleave: false,
-  disable_session_recording: true,
-  opt_out_capturing_by_default: true,
-  loaded: (posthog) => {
-    // Filter sensitive data
-    posthog.register({
-      $current_url: window.location.href.replace(/[?&]token=[^&]+/g, ''),
-    });
-  }
-};
-```
-
 #### Event Sanitization
 ```typescript
 // ✅ GOOD: Sanitize events before sending
@@ -369,7 +348,6 @@ DATABASE_URL="postgresql://user:password@host:5432/db?sslmode=require"
 ENCRYPTION_KEY="32-character-random-string-here"
 GITHUB_CLIENT_SECRET="github-client-secret-here"
 SLACK_CLIENT_SECRET="slack-client-secret-here"
-POSTHOG_API_KEY="posthog-api-key-here"
 SENTRY_DSN="sentry-dsn-here"
 ```
 
