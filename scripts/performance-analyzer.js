@@ -436,7 +436,12 @@ class PerformanceAnalyzer {
   }
 
   /**
-   * Run complete analysis
+   * Run complete analysis.
+   *
+   * This function initiates a performance analysis by loading reports, checking if any reports are available,
+   * generating an analysis report, printing it, and saving the report. If no reports are found, it prompts
+   * the user to run a monitoring command. Errors during the process are caught and logged, terminating the
+   * process with an error message.
    */
   async runAnalysis() {
     console.log('🔍 Starting performance analysis...\n');
