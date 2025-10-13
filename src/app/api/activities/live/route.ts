@@ -13,7 +13,7 @@ import { auth } from '@/lib/auth';
 export async function GET(request: NextRequest) {
   try {
     console.log('[SSE] Received connection request');
-    
+
     // Try to get session from cookies first
     const session = await auth.api.getSession({
       headers: request.headers,

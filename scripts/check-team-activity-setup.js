@@ -2,7 +2,7 @@
 
 /**
  * Team Activity Setup Checker
- * 
+ *
  * This script helps diagnose why team activity might not be showing
  * and provides guidance on how to fix the issue.
  */
@@ -32,8 +32,10 @@ async function checkTeamActivitySetup() {
     console.log(`👥 Found ${users.length} user(s)\n`);
 
     for (const user of users) {
-      console.log(`📋 Checking user: ${user.name || 'Unknown'} (${user.email})`);
-      
+      console.log(
+        `📋 Checking user: ${user.name || 'Unknown'} (${user.email})`
+      );
+
       // Check GitHub connection
       const githubConnection = await prisma.connection.findFirst({
         where: {
@@ -59,7 +61,9 @@ async function checkTeamActivitySetup() {
 
       if (selectedRepos.length === 0) {
         console.log('  ❌ No repositories selected');
-        console.log('     → Go to /integrations and select repositories to track');
+        console.log(
+          '     → Go to /integrations and select repositories to track'
+        );
         continue;
       }
 
@@ -99,7 +103,6 @@ async function checkTeamActivitySetup() {
     console.log('2. Select repositories to track');
     console.log('3. Sync data to see activities');
     console.log('4. Visit /team-activity to view team dashboard');
-
   } catch (error) {
     console.error('❌ Error checking setup:', error.message);
   } finally {

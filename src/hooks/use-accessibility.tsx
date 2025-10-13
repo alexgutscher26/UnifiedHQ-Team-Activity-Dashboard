@@ -402,10 +402,5 @@ export const ARIA_PROPERTIES = {
   HASPOPUP: 'aria-haspopup',
   MODAL: 'aria-modal',
   MULTILINE: 'aria-multiline',
-  ORIENTATION: 'aria-orientation',
   PLACEHOLDER: 'aria-placeholder',
-  READONLY: 'aria-readonly',
-  REQUIRED: 'aria-required',
-  SELECTED: 'aria-selected',
-  SORT: 'aria-sort',
 } as const;

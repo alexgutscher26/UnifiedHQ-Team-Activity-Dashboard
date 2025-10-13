@@ -270,9 +270,10 @@ export function withErrorHandling<T = any>(
       };
 
       const response = options?.retry
-        ? await withRetry(executeHandler, 
-            typeof options.retry === 'boolean' 
-              ? RetryPresets.standard 
+        ? await withRetry(
+            executeHandler,
+            typeof options.retry === 'boolean'
+              ? RetryPresets.standard
               : options.retry
           ).then(result => result.data)
         : await executeHandler();
@@ -549,7 +550,7 @@ export async function requireAdmin(
 ): Promise<{ userId: string; user: any; session: any }> {
   const authResult = await requireAuth(req);
 
-  // Check if user has admin privileges
+  // TODO: Check if user has admin privileges
   // This would depend on your user role system
   // For now, we'll check if the user email contains 'admin' or is a specific admin email
   const prisma = new PrismaClient();
@@ -578,7 +579,7 @@ export async function requireAuthWithContext(
   const authResult = await requireAuth(req);
 
   // Get user permissions/roles from database
-  // For now, we'll use a simple permission system based on user properties
+  // TODO: For now, we'll use a simple permission system based on user properties
   const prisma = new PrismaClient();
   const userPermissions = await prisma.user.findUnique({
     where: { id: authResult.userId },
@@ -629,7 +630,7 @@ export async function requireApiKey(
   }
 
   // For now, we'll use a simple API key validation
-  // In a real implementation, you'd store API keys in the database
+  // TODO: In a real implementation, you'd store API keys in the database
   const validApiKeys = process.env.VALID_API_KEYS?.split(',') || [];
 
   if (!validApiKeys.includes(apiKey)) {

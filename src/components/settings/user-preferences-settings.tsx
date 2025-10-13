@@ -23,7 +23,6 @@ import {
 } from '@/lib/user-preferences';
 import {
   IconUser,
-  IconMail,
   IconCalendar,
   IconEdit,
   IconCheck,

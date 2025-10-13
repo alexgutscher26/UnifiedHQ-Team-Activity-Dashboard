@@ -33,14 +33,8 @@ export default function SignInPage() {
   const [lastMethod, setLastMethod] = useState<string | null>(null);
   const router = useRouter();
 
-  const {
-    data,
-    errors,
-    updateField,
-    validateForm,
-    getFieldError,
-    isFormValid,
-  } = useFormValidation({ email: '', password: '' }, validationSchemas.signIn);
+  const { data, updateField, validateForm, getFieldError, isFormValid } =
+    useFormValidation({ email: '', password: '' }, validationSchemas.signIn);
 
   useEffect(() => {
     // Get the last used login method

@@ -7,7 +7,6 @@ import {
   IconBrandGithub,
   IconBug,
   IconTag,
-  IconStar,
   IconGitCommit,
   IconLoader2,
   IconRefresh,
@@ -161,7 +160,7 @@ export function ActivityFeed() {
       }
 
       console.log('🔄 Attempting to connect to SSE endpoint...');
-      
+
       // Create EventSource with credentials
       const es = new EventSource('/api/activities/live', {
         withCredentials: true,
@@ -181,7 +180,8 @@ export function ActivityFeed() {
           setIsLiveConnected(false);
           toast({
             title: 'Connection Timeout',
-            description: 'Failed to connect to live updates. Please check your connection.',
+            description:
+              'Failed to connect to live updates. Please check your connection.',
             variant: 'destructive',
           });
         }
@@ -236,7 +236,7 @@ export function ActivityFeed() {
       es.onerror = error => {
         // Clear connection timeout
         clearTimeout(connectionTimeout);
-        
+
         // EventSource.onerror provides limited error information
         // Log connection state and URL for better debugging
         console.error('❌ SSE connection error:', {
@@ -246,7 +246,7 @@ export function ActivityFeed() {
           error: error,
           timestamp: new Date().toISOString(),
         });
-        
+
         setIsLiveConnected(false);
 
         // Don't auto-reconnect on error, let user manually refresh

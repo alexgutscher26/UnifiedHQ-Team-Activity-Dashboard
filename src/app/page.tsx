@@ -105,21 +105,6 @@ export default function Home() {
             <Link href='/dashboard'>Dashboard</Link>
           </Button>
         </div>
-
-        {/* Documentation Link */}
-        <div className='text-center mt-8'>
-          <p className='text-muted-foreground'>
-            Based on{' '}
-            <a
-              href='https://www.better-auth.com/docs/basic-usage'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              Better Auth Basic Usage Documentation
-            </a>
-          </p>
-        </div>
       </div>
     </div>
   );

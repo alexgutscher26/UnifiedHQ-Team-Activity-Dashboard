@@ -1,30 +1,7 @@
 import { OpenAI } from 'openai';
-import { PostHog } from 'posthog-node';
 import { withRetry, RetryPresets } from '@/lib/retry-utils';
 
 let openRouterClient: OpenAI | null = null;
-let posthogClient: PostHog | null = null;
-
-export function getPostHogClient(): PostHog | null {
-  if (
-    !process.env.NEXT_PUBLIC_POSTHOG_KEY ||
-    !process.env.NEXT_PUBLIC_POSTHOG_HOST
-  ) {
-    console.warn(
-      'PostHog environment variables not found. Please check your .env.local file.'
-    );
-    return null;
-  }
-
-  if (!posthogClient) {
-    posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-      host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-      flushAt: 1,
-      flushInterval: 0,
-    });
-  }
-  return posthogClient;
-}
 
 export function getOpenRouterClient(): OpenAI | null {
   if (!process.env.OPENROUTER_API_KEY) {
@@ -47,11 +24,6 @@ export function getOpenRouterClient(): OpenAI | null {
 export interface LLMGenerationOptions {
   model: string;
   messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
-  distinctId?: string;
-  traceId?: string;
-  properties?: Record<string, any>;
-  groups?: Record<string, string>;
-  privacyMode?: boolean;
   temperature?: number;
   maxTokens?: number;
   stream?: boolean;
@@ -59,7 +31,6 @@ export interface LLMGenerationOptions {
 
 export async function generateWithOpenRouter(options: LLMGenerationOptions) {
   const openaiClient = getOpenRouterClient();
-  const posthogClient = getPostHogClient();
 
   if (!openaiClient) {
     throw new Error(
@@ -78,42 +49,21 @@ export async function generateWithOpenRouter(options: LLMGenerationOptions) {
         stream: options.stream || false,
       });
 
-      // Capture the LLM generation event with PostHog if available (only for non-streaming responses)
-      if (posthogClient && !options.stream && 'usage' in response) {
-        try {
-          await posthogClient.capture({
-            distinctId: options.distinctId || 'anonymous',
-            event: '$ai_generation',
-            properties: {
-              $ai_model: options.model,
-              $ai_latency: response.usage ? (Date.now() - Date.now()) / 1000 : 0, // This would need proper timing
-              $ai_input: options.messages,
-              $ai_input_tokens: response.usage?.prompt_tokens || 0,
-              $ai_output_choices: response.choices,
-              $ai_output_tokens: response.usage?.completion_tokens || 0,
-              $ai_total_cost_usd: 0, // Would need to calculate based on model pricing
-              trace_id: options.traceId,
-              ...options.properties,
-            },
-            groups: options.groups,
-          });
-        } catch (posthogError) {
-          console.error(
-            'Failed to capture LLM generation with PostHog:',
-            posthogError
-          );
-        }
-      }
-
       return response;
     },
     {
       ...RetryPresets.openrouter,
       onRetry: (error, attempt, delay) => {
-        console.warn(`OpenRouter API call failed (attempt ${attempt}), retrying in ${delay}ms:`, error.message);
+        console.warn(
+          `OpenRouter API call failed (attempt ${attempt}), retrying in ${delay}ms:`,
+          error.message
+        );
       },
       onMaxRetriesExceeded: (error, attempts) => {
-        console.error(`OpenRouter API call failed after ${attempts} attempts:`, error.message);
+        console.error(
+          `OpenRouter API call failed after ${attempts} attempts:`,
+          error.message
+        );
       },
     }
   ).then(result => result.data);

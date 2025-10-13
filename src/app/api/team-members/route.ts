@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { withErrorHandling } from '@/lib/api-error-handler';
-import { captureClientError } from '@/lib/posthog-client';
 
 interface TeamMember {
   id: string;
   name: string;
   email: string;
-  avatar?: string;
+  avatar?: string | null;
   role: string;
   status: 'active' | 'away' | 'offline';
   lastActive: string;
@@ -23,10 +22,7 @@ async function getTeamMembers(request: NextRequest): Promise<NextResponse> {
   });
 
   if (!session?.user) {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const user = {
@@ -37,7 +33,7 @@ async function getTeamMembers(request: NextRequest): Promise<NextResponse> {
   };
 
   try {
-    // For now, return the current user as the only team member
+    // TODO: For now, return the current user as the only team member
     // In a real implementation, this would fetch from a team management system
     const teamMembers: TeamMember[] = [
       {
@@ -52,7 +48,7 @@ async function getTeamMembers(request: NextRequest): Promise<NextResponse> {
         pullRequests: 0,
         issues: 0,
         reviews: 0,
-      }
+      },
     ];
 
     return NextResponse.json({
@@ -62,14 +58,12 @@ async function getTeamMembers(request: NextRequest): Promise<NextResponse> {
     });
   } catch (error) {
     console.error('Error fetching team members:', error);
-    
-    captureClientError(error as Error, {
-      context: 'team_members_api',
-      user_id: user.id,
-    });
+
+    // Log error for debugging
+    console.error('Team members API error:', error);
 
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch team members',
         success: false,
         timestamp: new Date().toISOString(),

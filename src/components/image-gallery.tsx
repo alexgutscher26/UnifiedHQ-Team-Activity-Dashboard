@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { OptimizedImage } from './optimized-image';
 import { cn } from '@/lib/utils';
 import { AccessibleButton } from './accessible-button';

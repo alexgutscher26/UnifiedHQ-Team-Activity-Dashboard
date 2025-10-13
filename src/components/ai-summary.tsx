@@ -12,18 +12,15 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LoadingSkeleton } from '@/components/ui/loading';
-import {
-  useMemoryLeakPrevention,
-  useSafeTimer,
-} from '@/lib/memory-leak-prevention';
+import { useMemoryLeakPrevention } from '@/lib/memory-leak-prevention';
 
 /**
  * Renders an AI-generated daily summary card.
  *
  * This function manages the state for the summary and loading status,
- * simulates an API call to generate a summary, and displays the summary
- * highlights and action items once loading is complete. It also includes
- * memory leak prevention and utilizes a safe timer for simulating delays.
+ * fetches real AI-generated summaries from the API, and displays the summary
+ * highlights and action items once loading is complete. It includes memory
+ * leak prevention and handles errors gracefully.
  */
 export function AISummary() {
   const [summary, setSummary] = useState<AISummaryData | null>(null);
@@ -31,35 +28,47 @@ export function AISummary() {
 
   // Memory leak prevention
   useMemoryLeakPrevention('AISummary');
-  const { setTimeout, clearTimeout } = useSafeTimer();
 
-  // Simulate AI summary generation
+  // Fetch real AI summary from API
   const generateSummary = async () => {
     try {
-      // Simulate API call delay - reduced for faster loading
-      await new Promise<void>(resolve => {
-        setTimeout(() => resolve(), 50);
+      const response = await fetch('/api/ai-summary/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
       });
 
-      // Mock summary data
+      if (!response.ok) {
+        throw new Error(`Failed to generate AI summary: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        setSummary({
+          highlights: data.data.keyHighlights || [],
+          actionItems: data.data.actionItems || [],
+          generatedAt: new Date(data.data.generatedAt).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        });
+      } else {
+        throw new Error(data.message || 'Failed to generate summary');
+      }
+    } catch (error) {
+      console.error('Error generating AI summary:', error);
+      // Set empty summary on error to show the component structure
       setSummary({
-        highlights: [
-          'Engineering team merged 7 pull requests, with authentication flow now complete',
-          'Product roadmap updated with 3 new features prioritized for Q1',
-          'Design team shared new mockups in Slack, awaiting feedback from stakeholders',
-          '156 messages across 8 Slack channels, highest activity in #engineering',
-        ],
-        actionItems: [
-          '2 pull requests awaiting review from senior engineers',
-          'Sprint planning notes need capacity estimates from 3 team members',
-        ],
+        highlights: [],
+        actionItems: [],
         generatedAt: new Date().toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit',
         }),
       });
-    } catch (error) {
-      console.error('Error generating AI summary:', error);
     } finally {
       setIsLoading(false);
     }

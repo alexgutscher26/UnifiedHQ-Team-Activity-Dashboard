@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateWithPostHogAnalytics } from '@/lib/posthog-openrouter';
+import { generateWithOpenRouter } from '@/lib/openrouter-client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,10 +7,6 @@ export async function POST(request: NextRequest) {
     const {
       prompt,
       model = 'gpt-3.5-turbo',
-      distinctId,
-      traceId,
-      properties = {},
-      groups = {},
       temperature = 0.7,
       maxTokens = 1000,
     } = body;
@@ -22,23 +18,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate response using OpenRouter with PostHog analytics
-    const response = await generateWithPostHogAnalytics(
+    // Generate response using OpenRouter
+    const response = await generateWithOpenRouter({
       model,
-      [{ role: 'user', content: prompt }],
-      {
-        distinctId: distinctId || 'api-user',
-        traceId: traceId || `trace_${Date.now()}`,
-        properties: {
-          source: 'api',
-          endpoint: '/api/openrouter',
-          ...properties,
-        },
-        groups,
-        temperature,
-        maxTokens,
-      }
-    );
+      messages: [{ role: 'user', content: prompt }],
+      temperature,
+      maxTokens,
+    });
+
+    // Handle both streaming and non-streaming responses
+    if (!('choices' in response)) {
+      return NextResponse.json(
+        { error: 'Streaming responses not supported in this endpoint' },
+        { status: 400 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -66,15 +60,12 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     message: 'OpenRouter API endpoint',
-    usage:
-      'POST with { prompt, model?, distinctId?, traceId?, properties?, groups?, temperature?, maxTokens? }',
+    usage: 'POST with { prompt, model?, temperature?, maxTokens? }',
     example: {
       prompt: 'Tell me a fun fact about hedgehogs',
       model: 'gpt-3.5-turbo',
-      distinctId: 'user_123',
-      traceId: 'trace_123',
-      properties: { conversation_id: 'abc123' },
-      groups: { company: 'company_id' },
+      temperature: 0.7,
+      maxTokens: 1000,
     },
   });
 }

@@ -1,23 +1,32 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import dynamic from 'next/dynamic';
-
-// Dynamically import List to avoid SSR issues
-const List = dynamic(() => import('react-window').then(mod => mod.List), {
-  ssr: false,
-  loading: () => <div className='h-96 flex items-center justify-center text-gray-400'>Loading...</div>
-});
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import {
   IconHistory,
@@ -29,13 +38,11 @@ import {
   IconCircleCheck,
   IconAlertCircle,
   IconSearch,
-  IconFilter,
   IconSortAscending,
   IconSortDescending,
   IconEye,
   IconBookmark,
   IconDownload,
-  IconRefresh,
   IconFileText,
   IconFileCode,
   IconFileSpreadsheet,
@@ -90,19 +97,23 @@ export function SummaryHistory({
     hasPrev: false,
   });
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
-  
+
   // Enhanced filtering and search states
   const [searchQuery, setSearchQuery] = useState('');
   const [filterModel, setFilterModel] = useState<string>('all');
   const [filterActivityCount, setFilterActivityCount] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'date' | 'activityCount' | 'tokensUsed' | 'model'>('date');
+  const [sortBy, setSortBy] = useState<
+    'date' | 'activityCount' | 'tokensUsed' | 'model'
+  >('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedSummary, setSelectedSummary] = useState<SummaryHistoryItem | null>(null);
-  const [bookmarkedSummaries, setBookmarkedSummaries] = useState<Set<string>>(new Set());
+  const [selectedSummary, setSelectedSummary] =
+    useState<SummaryHistoryItem | null>(null);
+  const [bookmarkedSummaries, setBookmarkedSummaries] = useState<Set<string>>(
+    new Set()
+  );
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
   const [useVirtualScrolling, setUseVirtualScrolling] = useState(false);
-  const [listHeight, setListHeight] = useState(400);
 
   // Load bookmarks from localStorage on mount
   useEffect(() => {
@@ -119,7 +130,10 @@ export function SummaryHistory({
 
   // Save bookmarks to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('summary-bookmarks', JSON.stringify(Array.from(bookmarkedSummaries)));
+    localStorage.setItem(
+      'summary-bookmarks',
+      JSON.stringify(Array.from(bookmarkedSummaries))
+    );
   }, [bookmarkedSummaries]);
 
   useEffect(() => {
@@ -133,17 +147,24 @@ export function SummaryHistory({
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(summary =>
-        summary.title.toLowerCase().includes(query) ||
-        summary.keyHighlights.some(highlight => highlight.toLowerCase().includes(query)) ||
-        summary.actionItems.some(item => item.toLowerCase().includes(query)) ||
-        summary.insights.some(insight => insight.toLowerCase().includes(query))
+      filtered = filtered.filter(
+        summary =>
+          summary.title.toLowerCase().includes(query) ||
+          summary.keyHighlights.some(highlight =>
+            highlight.toLowerCase().includes(query)
+          ) ||
+          summary.actionItems.some(item =>
+            item.toLowerCase().includes(query)
+          ) ||
+          summary.insights.some(insight =>
+            insight.toLowerCase().includes(query)
+          )
       );
     }
 
     // Apply model filter
     if (filterModel !== 'all') {
-      filtered = filtered.filter(summary => 
+      filtered = filtered.filter(summary =>
         summary.metadata.model.toLowerCase().includes(filterModel.toLowerCase())
       );
     }
@@ -163,7 +184,9 @@ export function SummaryHistory({
 
     // Apply bookmark filter
     if (showBookmarksOnly) {
-      filtered = filtered.filter(summary => bookmarkedSummaries.has(summary.id));
+      filtered = filtered.filter(summary =>
+        bookmarkedSummaries.has(summary.id)
+      );
     }
 
     // Apply sorting
@@ -201,11 +224,24 @@ export function SummaryHistory({
     });
 
     return filtered;
-  }, [summaries, searchQuery, filterModel, filterActivityCount, sortBy, sortOrder, showBookmarksOnly, bookmarkedSummaries]);
+  }, [
+    summaries,
+    searchQuery,
+    filterModel,
+    filterActivityCount,
+    sortBy,
+    sortOrder,
+    showBookmarksOnly,
+    bookmarkedSummaries,
+  ]);
 
   // Get unique models for filter dropdown
   const uniqueModels = useMemo(() => {
-    return Array.from(new Set(summaries.map(s => s.metadata.model.split('/')[1] || s.metadata.model)));
+    return Array.from(
+      new Set(
+        summaries.map(s => s.metadata.model.split('/')[1] || s.metadata.model)
+      )
+    );
   }, [summaries]);
 
   // Helper functions
@@ -251,7 +287,10 @@ export function SummaryHistory({
    * @param summary - The summary data to be exported.
    * @param format - The format in which to export the summary (default is 'json').
    */
-  const handleExportSummary = (summary: SummaryHistoryItem, format: 'json' | 'csv' | 'txt' = 'json') => {
+  const handleExportSummary = (
+    summary: SummaryHistoryItem,
+    format: 'json' | 'csv' | 'txt' = 'json'
+  ) => {
     const data = {
       title: summary.title,
       generatedAt: summary.generatedAt,
@@ -261,11 +300,11 @@ export function SummaryHistory({
       insights: summary.insights,
       metadata: summary.metadata,
     };
-    
+
     let content: string;
     let mimeType: string;
     let extension: string;
-    
+
     switch (format) {
       case 'json':
         content = JSON.stringify(data, null, 2);
@@ -321,7 +360,7 @@ export function SummaryHistory({
         mimeType = 'application/json';
         extension = 'json';
     }
-    
+
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -331,118 +370,12 @@ export function SummaryHistory({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast({
       title: 'Export Successful',
       description: `Summary exported as ${format.toUpperCase()}`,
     });
   };
-
-  // Virtual scrolling item renderer
-  const SummaryItem = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const summary = filteredSummaries[index];
-    if (!summary) return null;
-
-    return (
-      <div style={style} className='px-2'>
-        <div
-          className='p-4 border border-slate-700 rounded-lg hover:border-slate-600 transition-colors group'
-        >
-          <div className='flex items-center justify-between mb-2'>
-            <h4 className='text-white font-medium text-sm flex-1'>
-              {summary.title}
-            </h4>
-            <div className='flex items-center gap-2'>
-              <span className='text-xs text-gray-400'>
-                {formatDate(summary.generatedAt)}
-              </span>
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleBookmarkToggle(summary.id);
-                }}
-                className={`opacity-0 group-hover:opacity-100 transition-opacity ${
-                  bookmarkedSummaries.has(summary.id) ? 'text-yellow-400' : 'text-gray-400'
-                }`}
-              >
-                <IconBookmark className='size-4' />
-              </Button>
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedSummary(summary);
-                }}
-                className='opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white'
-              >
-                <IconEye className='size-4' />
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    onClick={(e) => e.stopPropagation()}
-                    className='opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white'
-                  >
-                    <IconDownload className='size-4' />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className='bg-slate-800 border-slate-700'>
-                  <DropdownMenuItem onClick={() => handleExportSummary(summary, 'json')} className='text-white hover:bg-slate-700'>
-                    <IconFileCode className='size-4 mr-2' />
-                    Export as JSON
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleExportSummary(summary, 'csv')} className='text-white hover:bg-slate-700'>
-                    <IconFileSpreadsheet className='size-4 mr-2' />
-                    Export as CSV
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleExportSummary(summary, 'txt')} className='text-white hover:bg-slate-700'>
-                    <IconFileText className='size-4 mr-2' />
-                    Export as Text
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
-          <div className='space-y-2 mb-3'>
-            <div className='flex items-center gap-2 text-xs text-gray-400'>
-              <IconCircleCheck className='size-3' />
-              <span>{summary.keyHighlights.length} highlights</span>
-            </div>
-            <div className='flex items-center gap-2 text-xs text-gray-400'>
-              <IconAlertCircle className='size-3' />
-              <span>{summary.actionItems.length} action items</span>
-            </div>
-          </div>
-
-          <div className='flex items-center justify-between'>
-            <div className='flex gap-2'>
-              <Badge variant='secondary' className='text-xs'>
-                {summary.metadata.activityCount} activities
-              </Badge>
-              <Badge variant='outline' className='text-xs'>
-                {summary.metadata.model.split('/')[1]}
-              </Badge>
-              {bookmarkedSummaries.has(summary.id) && (
-                <Badge variant='default' className='text-xs bg-yellow-500/20 text-yellow-400 border-yellow-500/30'>
-                  Bookmarked
-                </Badge>
-              )}
-            </div>
-            <div className='flex items-center gap-1 text-xs text-gray-500'>
-              <IconTrendingUp className='size-3' />
-              <span>{summary.metadata.tokensUsed} tokens</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }, [filteredSummaries, bookmarkedSummaries, handleBookmarkToggle, handleExportSummary, formatDate]);
 
   // Auto-enable virtual scrolling for large lists
   useEffect(() => {
@@ -536,10 +469,10 @@ export function SummaryHistory({
    * @param format - The format in which to export the summaries. Can be 'json', 'csv', or 'txt'.
    */
   const handleExportAll = (format: 'json' | 'csv' | 'txt' = 'json') => {
-    const summariesToExport = showBookmarksOnly 
+    const summariesToExport = showBookmarksOnly
       ? filteredSummaries.filter(s => bookmarkedSummaries.has(s.id))
       : filteredSummaries;
-    
+
     if (summariesToExport.length === 0) {
       toast({
         title: 'No Summaries to Export',
@@ -548,11 +481,11 @@ export function SummaryHistory({
       });
       return;
     }
-    
+
     let content: string;
     let mimeType: string;
     let extension: string;
-    
+
     switch (format) {
       case 'json':
         content = JSON.stringify(summariesToExport, null, 2);
@@ -561,49 +494,55 @@ export function SummaryHistory({
         break;
       case 'csv':
         const csvRows = [
-          'ID,Title,Generated At,Time Range Start,Time Range End,Activity Count,Model,Tokens Used,Key Highlights,Action Items,Insights'
+          'ID,Title,Generated At,Time Range Start,Time Range End,Activity Count,Model,Tokens Used,Key Highlights,Action Items,Insights',
         ];
-        
+
         summariesToExport.forEach(summary => {
-          csvRows.push([
-            summary.id,
-            `"${summary.title}"`,
-            summary.generatedAt,
-            summary.timeRange.start,
-            summary.timeRange.end,
-            summary.metadata.activityCount,
-            `"${summary.metadata.model}"`,
-            summary.metadata.tokensUsed,
-            `"${summary.keyHighlights.join('; ')}"`,
-            `"${summary.actionItems.join('; ')}"`,
-            `"${summary.insights.join('; ')}"`
-          ].join(','));
+          csvRows.push(
+            [
+              summary.id,
+              `"${summary.title}"`,
+              summary.generatedAt,
+              summary.timeRange.start,
+              summary.timeRange.end,
+              summary.metadata.activityCount,
+              `"${summary.metadata.model}"`,
+              summary.metadata.tokensUsed,
+              `"${summary.keyHighlights.join('; ')}"`,
+              `"${summary.actionItems.join('; ')}"`,
+              `"${summary.insights.join('; ')}"`,
+            ].join(',')
+          );
         });
-        
+
         content = csvRows.join('\n');
         mimeType = 'text/csv';
         extension = 'csv';
         break;
       case 'txt':
-        content = summariesToExport.map(summary => [
-          `Summary: ${summary.title}`,
-          `Generated: ${summary.generatedAt}`,
-          `Time Range: ${summary.timeRange.start} - ${summary.timeRange.end}`,
-          `Activities: ${summary.metadata.activityCount}`,
-          `Model: ${summary.metadata.model}`,
-          `Tokens Used: ${summary.metadata.tokensUsed}`,
-          '',
-          'KEY HIGHLIGHTS:',
-          ...summary.keyHighlights.map(highlight => `• ${highlight}`),
-          '',
-          'ACTION ITEMS:',
-          ...summary.actionItems.map(item => `• ${item}`),
-          '',
-          'INSIGHTS:',
-          ...summary.insights.map(insight => `• ${insight}`),
-          '='.repeat(80),
-          ''
-        ].join('\n')).join('\n');
+        content = summariesToExport
+          .map(summary =>
+            [
+              `Summary: ${summary.title}`,
+              `Generated: ${summary.generatedAt}`,
+              `Time Range: ${summary.timeRange.start} - ${summary.timeRange.end}`,
+              `Activities: ${summary.metadata.activityCount}`,
+              `Model: ${summary.metadata.model}`,
+              `Tokens Used: ${summary.metadata.tokensUsed}`,
+              '',
+              'KEY HIGHLIGHTS:',
+              ...summary.keyHighlights.map(highlight => `• ${highlight}`),
+              '',
+              'ACTION ITEMS:',
+              ...summary.actionItems.map(item => `• ${item}`),
+              '',
+              'INSIGHTS:',
+              ...summary.insights.map(insight => `• ${insight}`),
+              '='.repeat(80),
+              '',
+            ].join('\n')
+          )
+          .join('\n');
         mimeType = 'text/plain';
         extension = 'txt';
         break;
@@ -612,7 +551,7 @@ export function SummaryHistory({
         mimeType = 'application/json';
         extension = 'json';
     }
-    
+
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -622,7 +561,7 @@ export function SummaryHistory({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast({
       title: 'Export Successful',
       description: `${summariesToExport.length} summaries exported as ${format.toUpperCase()}`,
@@ -724,9 +663,10 @@ export function SummaryHistory({
               variant={showBookmarksOnly ? 'default' : 'outline'}
               size='sm'
               onClick={() => setShowBookmarksOnly(!showBookmarksOnly)}
-              className={showBookmarksOnly 
-                ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/30'
-                : 'text-gray-400 border-gray-600 hover:text-white hover:border-gray-500'
+              className={
+                showBookmarksOnly
+                  ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/30'
+                  : 'text-gray-400 border-gray-600 hover:text-white hover:border-gray-500'
               }
             >
               <IconBookmark className='size-4 mr-1' />
@@ -744,21 +684,35 @@ export function SummaryHistory({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className='bg-slate-800 border-slate-700'>
-                <DropdownMenuItem onClick={() => handleExportAll('json')} className='text-white hover:bg-slate-700'>
+                <DropdownMenuItem
+                  onClick={() => handleExportAll('json')}
+                  className='text-white hover:bg-slate-700'
+                >
                   <IconFileCode className='size-4 mr-2' />
                   Export as JSON
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExportAll('csv')} className='text-white hover:bg-slate-700'>
+                <DropdownMenuItem
+                  onClick={() => handleExportAll('csv')}
+                  className='text-white hover:bg-slate-700'
+                >
                   <IconFileSpreadsheet className='size-4 mr-2' />
                   Export as CSV
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExportAll('txt')} className='text-white hover:bg-slate-700'>
+                <DropdownMenuItem
+                  onClick={() => handleExportAll('txt')}
+                  className='text-white hover:bg-slate-700'
+                >
                   <IconFileText className='size-4 mr-2' />
                   Export as Text
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Select value={timeRange} onValueChange={(value: '7d' | '30d' | '90d') => setTimeRange(value)}>
+            <Select
+              value={timeRange}
+              onValueChange={(value: '7d' | '30d' | '90d') =>
+                setTimeRange(value)
+              }
+            >
               <SelectTrigger className='w-32 bg-slate-800 text-white border-slate-600'>
                 <SelectValue />
               </SelectTrigger>
@@ -770,7 +724,7 @@ export function SummaryHistory({
             </Select>
           </div>
         </div>
-        
+
         {/* Search and Filter Bar */}
         <div className='mt-4 space-y-3'>
           <div className='flex items-center gap-2'>
@@ -779,7 +733,7 @@ export function SummaryHistory({
               <Input
                 placeholder='Search summaries...'
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className='pl-10 bg-slate-800 text-white border-slate-600 focus:border-blue-500'
               />
             </div>
@@ -792,11 +746,13 @@ export function SummaryHistory({
               Clear
             </Button>
           </div>
-          
+
           {showFilters && (
             <div className='grid grid-cols-1 md:grid-cols-3 gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700'>
               <div>
-                <label className='text-xs text-gray-400 mb-1 block'>Model</label>
+                <label className='text-xs text-gray-400 mb-1 block'>
+                  Model
+                </label>
                 <Select value={filterModel} onValueChange={setFilterModel}>
                   <SelectTrigger className='bg-slate-800 text-white border-slate-600'>
                     <SelectValue placeholder='All Models' />
@@ -804,15 +760,22 @@ export function SummaryHistory({
                   <SelectContent className='bg-slate-800 border-slate-600'>
                     <SelectItem value='all'>All Models</SelectItem>
                     {uniqueModels.map(model => (
-                      <SelectItem key={model} value={model}>{model}</SelectItem>
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
-                <label className='text-xs text-gray-400 mb-1 block'>Activity Count</label>
-                <Select value={filterActivityCount} onValueChange={setFilterActivityCount}>
+                <label className='text-xs text-gray-400 mb-1 block'>
+                  Activity Count
+                </label>
+                <Select
+                  value={filterActivityCount}
+                  onValueChange={setFilterActivityCount}
+                >
                   <SelectTrigger className='bg-slate-800 text-white border-slate-600'>
                     <SelectValue placeholder='All Counts' />
                   </SelectTrigger>
@@ -825,17 +788,26 @@ export function SummaryHistory({
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
-                <label className='text-xs text-gray-400 mb-1 block'>Sort By</label>
+                <label className='text-xs text-gray-400 mb-1 block'>
+                  Sort By
+                </label>
                 <div className='flex gap-1'>
-                  <Select value={sortBy} onValueChange={(value: 'date' | 'activityCount' | 'tokensUsed' | 'model') => setSortBy(value)}>
+                  <Select
+                    value={sortBy}
+                    onValueChange={(
+                      value: 'date' | 'activityCount' | 'tokensUsed' | 'model'
+                    ) => setSortBy(value)}
+                  >
                     <SelectTrigger className='bg-slate-800 text-white border-slate-600 flex-1'>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className='bg-slate-800 border-slate-600'>
                       <SelectItem value='date'>Date</SelectItem>
-                      <SelectItem value='activityCount'>Activity Count</SelectItem>
+                      <SelectItem value='activityCount'>
+                        Activity Count
+                      </SelectItem>
                       <SelectItem value='tokensUsed'>Tokens Used</SelectItem>
                       <SelectItem value='model'>Model</SelectItem>
                     </SelectContent>
@@ -843,17 +815,23 @@ export function SummaryHistory({
                   <Button
                     variant='outline'
                     size='sm'
-                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                    onClick={() =>
+                      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                    }
                     className='text-gray-400 border-gray-600 hover:text-white hover:border-gray-500'
                   >
-                    {sortOrder === 'asc' ? <IconSortAscending className='size-4' /> : <IconSortDescending className='size-4' />}
+                    {sortOrder === 'asc' ? (
+                      <IconSortAscending className='size-4' />
+                    ) : (
+                      <IconSortDescending className='size-4' />
+                    )}
                   </Button>
                 </div>
               </div>
             </div>
           )}
         </div>
-        
+
         <p className='text-sm text-gray-400 mt-2'>
           {filteredSummaries.length} of {pagination.totalCount} summaries
           {useVirtualScrolling && (
@@ -869,26 +847,147 @@ export function SummaryHistory({
           <div className='text-center py-8'>
             <IconCalendar className='size-12 text-gray-500 mx-auto mb-4' />
             <h4 className='text-lg font-medium text-white mb-2'>
-              {summaries.length === 0 ? 'No History Found' : 'No Matching Summaries'}
+              {summaries.length === 0
+                ? 'No History Found'
+                : 'No Matching Summaries'}
             </h4>
             <p className='text-gray-400'>
-              {summaries.length === 0 
+              {summaries.length === 0
                 ? 'No summaries found for the selected time range.'
-                : 'Try adjusting your search or filter criteria.'
-              }
+                : 'Try adjusting your search or filter criteria.'}
             </p>
           </div>
         ) : (
           <>
             {useVirtualScrolling ? (
-              <div className='border border-slate-700 rounded-lg'>
-                <List
-                  height={Math.min(listHeight, filteredSummaries.length * 120)}
-                  itemCount={filteredSummaries.length}
-                  itemSize={120}
-                  width="100%"
-                  children={SummaryItem}
-                />
+              <div className='border border-slate-700 rounded-lg max-h-96 overflow-y-auto'>
+                {filteredSummaries.map((summary, index) => {
+                  const summaryData = filteredSummaries[index];
+                  if (!summaryData) return null;
+
+                  return (
+                    <div
+                      key={summaryData.id}
+                      className='p-4 border-b border-slate-700 hover:border-slate-600 transition-colors group'
+                    >
+                      <div className='flex items-center justify-between mb-2'>
+                        <h4 className='text-white font-medium text-sm flex-1'>
+                          {summaryData.title}
+                        </h4>
+                        <div className='flex items-center gap-2'>
+                          <span className='text-xs text-gray-400'>
+                            {formatDate(summaryData.generatedAt)}
+                          </span>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleBookmarkToggle(summaryData.id);
+                            }}
+                            className={`opacity-0 group-hover:opacity-100 transition-opacity ${
+                              bookmarkedSummaries.has(summaryData.id)
+                                ? 'text-yellow-400'
+                                : 'text-gray-400'
+                            }`}
+                          >
+                            <IconBookmark className='size-4' />
+                          </Button>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={e => {
+                              e.stopPropagation();
+                              setSelectedSummary(summaryData);
+                            }}
+                            className='opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white'
+                          >
+                            <IconEye className='size-4' />
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant='ghost'
+                                size='sm'
+                                onClick={e => e.stopPropagation()}
+                                className='opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white'
+                              >
+                                <IconDownload className='size-4' />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className='bg-slate-800 border-slate-700'>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleExportSummary(summaryData, 'json')
+                                }
+                                className='text-white hover:bg-slate-700'
+                              >
+                                <IconFileCode className='size-4 mr-2' />
+                                Export as JSON
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleExportSummary(summaryData, 'csv')
+                                }
+                                className='text-white hover:bg-slate-700'
+                              >
+                                <IconFileSpreadsheet className='size-4 mr-2' />
+                                Export as CSV
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleExportSummary(summaryData, 'txt')
+                                }
+                                className='text-white hover:bg-slate-700'
+                              >
+                                <IconFileText className='size-4 mr-2' />
+                                Export as Text
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+
+                      <div className='space-y-2 mb-3'>
+                        <div className='flex items-center gap-2 text-xs text-gray-400'>
+                          <IconCircleCheck className='size-3' />
+                          <span>
+                            {summaryData.keyHighlights.length} highlights
+                          </span>
+                        </div>
+                        <div className='flex items-center gap-2 text-xs text-gray-400'>
+                          <IconAlertCircle className='size-3' />
+                          <span>
+                            {summaryData.actionItems.length} action items
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className='flex items-center justify-between'>
+                        <div className='flex gap-2'>
+                          <Badge variant='secondary' className='text-xs'>
+                            {summaryData.metadata.activityCount} activities
+                          </Badge>
+                          <Badge variant='outline' className='text-xs'>
+                            {summaryData.metadata.model.split('/')[1]}
+                          </Badge>
+                          {bookmarkedSummaries.has(summaryData.id) && (
+                            <Badge
+                              variant='default'
+                              className='text-xs bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                            >
+                              Bookmarked
+                            </Badge>
+                          )}
+                        </div>
+                        <div className='flex items-center gap-1 text-xs text-gray-500'>
+                          <IconTrendingUp className='size-3' />
+                          <span>{summaryData.metadata.tokensUsed} tokens</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <>
@@ -908,12 +1007,14 @@ export function SummaryHistory({
                         <Button
                           variant='ghost'
                           size='sm'
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             handleBookmarkToggle(summary.id);
                           }}
                           className={`opacity-0 group-hover:opacity-100 transition-opacity ${
-                            bookmarkedSummaries.has(summary.id) ? 'text-yellow-400' : 'text-gray-400'
+                            bookmarkedSummaries.has(summary.id)
+                              ? 'text-yellow-400'
+                              : 'text-gray-400'
                           }`}
                         >
                           <IconBookmark className='size-4' />
@@ -921,7 +1022,7 @@ export function SummaryHistory({
                         <Button
                           variant='ghost'
                           size='sm'
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             setSelectedSummary(summary);
                           }}
@@ -934,22 +1035,37 @@ export function SummaryHistory({
                             <Button
                               variant='ghost'
                               size='sm'
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={e => e.stopPropagation()}
                               className='opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white'
                             >
                               <IconDownload className='size-4' />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className='bg-slate-800 border-slate-700'>
-                            <DropdownMenuItem onClick={() => handleExportSummary(summary, 'json')} className='text-white hover:bg-slate-700'>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleExportSummary(summary, 'json')
+                              }
+                              className='text-white hover:bg-slate-700'
+                            >
                               <IconFileCode className='size-4 mr-2' />
                               Export as JSON
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleExportSummary(summary, 'csv')} className='text-white hover:bg-slate-700'>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleExportSummary(summary, 'csv')
+                              }
+                              className='text-white hover:bg-slate-700'
+                            >
                               <IconFileSpreadsheet className='size-4 mr-2' />
                               Export as CSV
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleExportSummary(summary, 'txt')} className='text-white hover:bg-slate-700'>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleExportSummary(summary, 'txt')
+                              }
+                              className='text-white hover:bg-slate-700'
+                            >
                               <IconFileText className='size-4 mr-2' />
                               Export as Text
                             </DropdownMenuItem>
@@ -978,7 +1094,10 @@ export function SummaryHistory({
                           {summary.metadata.model.split('/')[1]}
                         </Badge>
                         {bookmarkedSummaries.has(summary.id) && (
-                          <Badge variant='default' className='text-xs bg-yellow-500/20 text-yellow-400 border-yellow-500/30'>
+                          <Badge
+                            variant='default'
+                            className='text-xs bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                          >
                             Bookmarked
                           </Badge>
                         )}
@@ -1026,9 +1145,12 @@ export function SummaryHistory({
           </>
         )}
       </CardContent>
-      
+
       {/* Detailed View Modal */}
-      <Dialog open={!!selectedSummary} onOpenChange={() => setSelectedSummary(null)}>
+      <Dialog
+        open={!!selectedSummary}
+        onOpenChange={() => setSelectedSummary(null)}
+      >
         <DialogContent className='max-w-4xl max-h-[80vh] bg-slate-800 border-slate-700'>
           <DialogHeader>
             <DialogTitle className='text-white flex items-center gap-2'>
@@ -1036,27 +1158,46 @@ export function SummaryHistory({
               Summary Details
             </DialogTitle>
           </DialogHeader>
-          
+
           {selectedSummary && (
             <ScrollArea className='max-h-[60vh] pr-4'>
               <div className='space-y-6'>
                 {/* Header */}
                 <div className='space-y-2'>
-                  <h2 className='text-xl font-bold text-white'>{selectedSummary.title}</h2>
+                  <h2 className='text-xl font-bold text-white'>
+                    {selectedSummary.title}
+                  </h2>
                   <div className='flex items-center gap-4 text-sm text-gray-400'>
-                    <span>Generated: {formatDate(selectedSummary.generatedAt)}</span>
+                    <span>
+                      Generated: {formatDate(selectedSummary.generatedAt)}
+                    </span>
                     <span>•</span>
-                    <span>Range: {new Date(selectedSummary.timeRange.start).toLocaleDateString()} - {new Date(selectedSummary.timeRange.end).toLocaleDateString()}</span>
+                    <span>
+                      Range:{' '}
+                      {new Date(
+                        selectedSummary.timeRange.start
+                      ).toLocaleDateString()}{' '}
+                      -{' '}
+                      {new Date(
+                        selectedSummary.timeRange.end
+                      ).toLocaleDateString()}
+                    </span>
                   </div>
                   <div className='flex gap-2'>
-                    <Badge variant='secondary'>{selectedSummary.metadata.activityCount} activities</Badge>
-                    <Badge variant='outline'>{selectedSummary.metadata.model}</Badge>
-                    <Badge variant='outline'>{selectedSummary.metadata.tokensUsed} tokens</Badge>
+                    <Badge variant='secondary'>
+                      {selectedSummary.metadata.activityCount} activities
+                    </Badge>
+                    <Badge variant='outline'>
+                      {selectedSummary.metadata.model}
+                    </Badge>
+                    <Badge variant='outline'>
+                      {selectedSummary.metadata.tokensUsed} tokens
+                    </Badge>
                   </div>
                 </div>
-                
+
                 <Separator className='bg-slate-700' />
-                
+
                 {/* Key Highlights */}
                 <div>
                   <h3 className='text-lg font-semibold text-white mb-3 flex items-center gap-2'>
@@ -1065,16 +1206,19 @@ export function SummaryHistory({
                   </h3>
                   <ul className='space-y-2'>
                     {selectedSummary.keyHighlights.map((highlight, index) => (
-                      <li key={index} className='text-gray-300 text-sm flex items-start gap-2'>
+                      <li
+                        key={index}
+                        className='text-gray-300 text-sm flex items-start gap-2'
+                      >
                         <span className='text-green-400 mt-1'>•</span>
                         <span>{highlight}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-                
+
                 <Separator className='bg-slate-700' />
-                
+
                 {/* Action Items */}
                 <div>
                   <h3 className='text-lg font-semibold text-white mb-3 flex items-center gap-2'>
@@ -1083,16 +1227,19 @@ export function SummaryHistory({
                   </h3>
                   <ul className='space-y-2'>
                     {selectedSummary.actionItems.map((item, index) => (
-                      <li key={index} className='text-gray-300 text-sm flex items-start gap-2'>
+                      <li
+                        key={index}
+                        className='text-gray-300 text-sm flex items-start gap-2'
+                      >
                         <span className='text-orange-400 mt-1'>•</span>
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-                
+
                 <Separator className='bg-slate-700' />
-                
+
                 {/* Insights */}
                 <div>
                   <h3 className='text-lg font-semibold text-white mb-3 flex items-center gap-2'>
@@ -1101,35 +1248,49 @@ export function SummaryHistory({
                   </h3>
                   <ul className='space-y-2'>
                     {selectedSummary.insights.map((insight, index) => (
-                      <li key={index} className='text-gray-300 text-sm flex items-start gap-2'>
+                      <li
+                        key={index}
+                        className='text-gray-300 text-sm flex items-start gap-2'
+                      >
                         <span className='text-blue-400 mt-1'>•</span>
                         <span>{insight}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-                
+
                 {/* Source Breakdown */}
-                {selectedSummary.metadata.sourceBreakdown && Object.keys(selectedSummary.metadata.sourceBreakdown).length > 0 && (
-                  <>
-                    <Separator className='bg-slate-700' />
-                    <div>
-                      <h3 className='text-lg font-semibold text-white mb-3'>Source Breakdown</h3>
-                      <div className='grid grid-cols-2 gap-2'>
-                        {Object.entries(selectedSummary.metadata.sourceBreakdown).map(([source, count]) => (
-                          <div key={source} className='flex justify-between items-center p-2 bg-slate-700/50 rounded'>
-                            <span className='text-gray-300 text-sm capitalize'>{source}</span>
-                            <Badge variant='outline'>{count}</Badge>
-                          </div>
-                        ))}
+                {selectedSummary.metadata.sourceBreakdown &&
+                  Object.keys(selectedSummary.metadata.sourceBreakdown).length >
+                    0 && (
+                    <>
+                      <Separator className='bg-slate-700' />
+                      <div>
+                        <h3 className='text-lg font-semibold text-white mb-3'>
+                          Source Breakdown
+                        </h3>
+                        <div className='grid grid-cols-2 gap-2'>
+                          {Object.entries(
+                            selectedSummary.metadata.sourceBreakdown
+                          ).map(([source, count]) => (
+                            <div
+                              key={source}
+                              className='flex justify-between items-center p-2 bg-slate-700/50 rounded'
+                            >
+                              <span className='text-gray-300 text-sm capitalize'>
+                                {source}
+                              </span>
+                              <Badge variant='outline'>{count}</Badge>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  </>
-                )}
+                    </>
+                  )}
               </div>
             </ScrollArea>
           )}
-          
+
           <div className='flex justify-end gap-2 pt-4 border-t border-slate-700'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -1142,15 +1303,33 @@ export function SummaryHistory({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className='bg-slate-800 border-slate-700'>
-                <DropdownMenuItem onClick={() => selectedSummary && handleExportSummary(selectedSummary, 'json')} className='text-white hover:bg-slate-700'>
+                <DropdownMenuItem
+                  onClick={() =>
+                    selectedSummary &&
+                    handleExportSummary(selectedSummary, 'json')
+                  }
+                  className='text-white hover:bg-slate-700'
+                >
                   <IconFileCode className='size-4 mr-2' />
                   Export as JSON
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => selectedSummary && handleExportSummary(selectedSummary, 'csv')} className='text-white hover:bg-slate-700'>
+                <DropdownMenuItem
+                  onClick={() =>
+                    selectedSummary &&
+                    handleExportSummary(selectedSummary, 'csv')
+                  }
+                  className='text-white hover:bg-slate-700'
+                >
                   <IconFileSpreadsheet className='size-4 mr-2' />
                   Export as CSV
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => selectedSummary && handleExportSummary(selectedSummary, 'txt')} className='text-white hover:bg-slate-700'>
+                <DropdownMenuItem
+                  onClick={() =>
+                    selectedSummary &&
+                    handleExportSummary(selectedSummary, 'txt')
+                  }
+                  className='text-white hover:bg-slate-700'
+                >
                   <IconFileText className='size-4 mr-2' />
                   Export as Text
                 </DropdownMenuItem>

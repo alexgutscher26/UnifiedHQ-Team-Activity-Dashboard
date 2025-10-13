@@ -18,7 +18,7 @@ async function troubleshootDailySummary() {
     console.log('1. Checking users...');
     const userCount = await prisma.user.count();
     console.log(`   Total users: ${userCount}`);
-    
+
     if (userCount === 0) {
       console.log('   ❌ No users found in database');
       return;
@@ -28,7 +28,7 @@ async function troubleshootDailySummary() {
     console.log('\n2. Checking recent activity...');
     const now = new Date();
     const startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    
+
     const recentActivityCount = await prisma.activity.count({
       where: {
         timestamp: {
@@ -78,13 +78,18 @@ async function troubleshootDailySummary() {
     for (const user of usersWithActivity) {
       const activityCount = user.activities.length;
       const lastSummary = user.aiSummaries[0];
-      const hasRecentSummary = lastSummary && 
+      const hasRecentSummary =
+        lastSummary &&
         lastSummary.generatedAt > new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
       console.log(`   User ${user.id}:`);
       console.log(`     - Activities (last 24h): ${activityCount}`);
-      console.log(`     - Last summary: ${lastSummary ? lastSummary.generatedAt.toISOString() : 'None'}`);
-      console.log(`     - Has recent summary: ${hasRecentSummary ? 'Yes' : 'No'}`);
+      console.log(
+        `     - Last summary: ${lastSummary ? lastSummary.generatedAt.toISOString() : 'None'}`
+      );
+      console.log(
+        `     - Has recent summary: ${hasRecentSummary ? 'Yes' : 'No'}`
+      );
 
       if (activityCount >= 3) {
         usersWithEnoughActivity++;
@@ -100,7 +105,9 @@ async function troubleshootDailySummary() {
       } else {
         console.log(`     ❌ Not eligible:`);
         if (activityCount < 3) {
-          console.log(`       - Need at least 3 activities (has ${activityCount})`);
+          console.log(
+            `       - Need at least 3 activities (has ${activityCount})`
+          );
         }
         if (hasRecentSummary) {
           console.log(`       - Already has recent summary`);
@@ -137,15 +144,19 @@ async function troubleshootDailySummary() {
         },
         take: 5,
       });
-      
+
       console.log(`   Total monitoring records: ${monitoringCount}`);
       console.log(`   Recent monitoring records: ${recentMonitoring.length}`);
-      
+
       if (recentMonitoring.length > 0) {
         console.log('   Recent monitoring data:');
         recentMonitoring.forEach(record => {
-          console.log(`     - ${record.createdAt.toISOString()}: ${record.type} - ${record.status}`);
-          console.log(`       Processed: ${record.processed}, Generated: ${record.generated}, Errors: ${record.errors}`);
+          console.log(
+            `     - ${record.createdAt.toISOString()}: ${record.type} - ${record.status}`
+          );
+          console.log(
+            `       Processed: ${record.processed}, Generated: ${record.generated}, Errors: ${record.errors}`
+          );
         });
       }
     } catch (error) {
@@ -175,9 +186,10 @@ async function troubleshootDailySummary() {
         console.log('- All users already have recent summaries');
       }
     } else {
-      console.log(`\n✅ ${eligibleUsers} users are eligible for summary generation`);
+      console.log(
+        `\n✅ ${eligibleUsers} users are eligible for summary generation`
+      );
     }
-
   } catch (error) {
     console.error('❌ Error during troubleshooting:', error);
   } finally {

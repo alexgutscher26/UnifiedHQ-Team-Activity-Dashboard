@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
 
     const detailsText = details.length > 0 ? details.join(', ') : 'No activity';
 
-    // Get total channels available (this would need to be implemented)
+    // TODO: Get total channels available (this would need to be implemented)
     const totalChannels = selectedChannelCount; // For now, use selected channels as total
 
     return NextResponse.json({

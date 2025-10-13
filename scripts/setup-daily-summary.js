@@ -48,7 +48,9 @@ if (fs.existsSync(vercelConfigPath)) {
   console.log('   - Cache cleanup will run at 2 AM UTC');
 } else {
   console.log('❌ Vercel cron job configuration not found');
-  console.log('   Please ensure vercel.json exists with cron job configuration');
+  console.log(
+    '   Please ensure vercel.json exists with cron job configuration'
+  );
 }
 
 console.log('');

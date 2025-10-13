@@ -6,14 +6,16 @@ import { Activity } from '@/types/components';
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
-  try {
-    // Verify this is a cron job request
-    const authHeader = request.headers.get('authorization');
-    const expectedToken = process.env.CRON_SECRET_TOKEN;
+  // Verify this is a cron job request
+  const authHeader = request.headers.get('authorization');
+  const expectedToken = process.env.CRON_SECRET_TOKEN;
 
+  try {
     // If CRON_SECRET_TOKEN is not set, log a warning but allow execution
     if (!expectedToken) {
-      console.warn('⚠️ CRON_SECRET_TOKEN not set - running without authentication');
+      console.warn(
+        '⚠️ CRON_SECRET_TOKEN not set - running without authentication'
+      );
     } else if (authHeader !== `Bearer ${expectedToken}`) {
       console.error('❌ Invalid cron job authentication token');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -210,7 +212,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('❌ Error in automated AI summary generation:', error);
-    
+
     // Store error in monitoring
     try {
       await prisma.aISummaryMonitoring.create({
@@ -229,7 +231,10 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (monitoringError) {
-      console.warn('⚠️ Failed to store error monitoring data:', monitoringError);
+      console.warn(
+        '⚠️ Failed to store error monitoring data:',
+        monitoringError
+      );
     }
 
     return NextResponse.json(

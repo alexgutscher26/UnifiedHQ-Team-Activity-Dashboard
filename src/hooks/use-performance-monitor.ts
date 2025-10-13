@@ -2,7 +2,7 @@
  * Performance monitoring hooks and utilities for activity feeds
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 export interface PerformanceMetrics {
   renderTime: number;

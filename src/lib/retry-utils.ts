@@ -65,22 +65,22 @@ export function defaultShouldRetry(error: any, attempt: number): boolean {
   // HTTP errors
   if (error.status || error.statusCode) {
     const status = error.status || error.statusCode;
-    
+
     // 5xx server errors
     if (status >= 500 && status < 600) {
       return true;
     }
-    
+
     // 429 rate limit
     if (status === 429) {
       return true;
     }
-    
+
     // 408 timeout
     if (status === 408) {
       return true;
     }
-    
+
     // 502, 503, 504 gateway errors
     if ([502, 503, 504].includes(status)) {
       return true;
@@ -112,14 +112,14 @@ export function calculateDelay(
 ): number {
   const exponentialDelay = baseDelay * Math.pow(multiplier, attempt - 1);
   const delay = Math.min(exponentialDelay, maxDelay);
-  
+
   if (jitter) {
     // Add random jitter (±25% of the delay)
     const jitterAmount = delay * 0.25;
     const jitterOffset = (Math.random() - 0.5) * 2 * jitterAmount;
     return Math.max(0, delay + jitterOffset);
   }
-  
+
   return delay;
 }
 
@@ -167,11 +167,11 @@ export async function withRetry<T>(
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     attempts = attempt + 1;
-    
+
     try {
       // Create timeout promise if specified
       const timeoutPromise = timeout ? createTimeout(timeout) : null;
-      
+
       // Execute the function with optional timeout
       const result = timeoutPromise
         ? await Promise.race([fn(), timeoutPromise])
@@ -184,7 +184,7 @@ export async function withRetry<T>(
       };
     } catch (error) {
       lastError = error;
-      
+
       // Check if we should retry
       if (attempt === maxRetries || !shouldRetry(error, maxRetries - attempt)) {
         break;
@@ -193,7 +193,13 @@ export async function withRetry<T>(
       // Calculate delay
       const delay = getDelay
         ? getDelay(attempt, initialDelay)
-        : calculateDelay(attempt, initialDelay, maxDelay, backoffMultiplier, jitter);
+        : calculateDelay(
+            attempt,
+            initialDelay,
+            maxDelay,
+            backoffMultiplier,
+            jitter
+          );
 
       // Call retry callback
       if (onRetry) {
@@ -228,15 +234,17 @@ export async function fetchWithRetry(
 ): Promise<Response> {
   return withRetry(async () => {
     const response = await fetch(url, options);
-    
+
     // Check for HTTP errors
     if (!response.ok) {
-      const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+      const error = new Error(
+        `HTTP ${response.status}: ${response.statusText}`
+      );
       (error as any).status = response.status;
       (error as any).response = response;
       throw error;
     }
-    
+
     return response;
   }, retryOptions).then(result => result.data);
 }
@@ -253,7 +261,7 @@ export const RetryPresets = {
     backoffMultiplier: 2,
     jitter: true,
   },
-  
+
   /** Standard retry for API calls (3 retries, moderate delays) */
   standard: {
     maxRetries: 3,
@@ -262,7 +270,7 @@ export const RetryPresets = {
     backoffMultiplier: 2,
     jitter: true,
   },
-  
+
   /** Aggressive retry for critical operations (5 retries, longer delays) */
   aggressive: {
     maxRetries: 5,
@@ -271,7 +279,7 @@ export const RetryPresets = {
     backoffMultiplier: 2,
     jitter: true,
   },
-  
+
   /** GitHub API retry with rate limit handling */
   github: {
     maxRetries: 3,
@@ -291,11 +299,13 @@ export const RetryPresets = {
     },
     onRetry: (error: any, attempt: number, delay: number) => {
       if (error.status === 403) {
-        console.warn(`GitHub rate limit hit, retrying in ${delay}ms (attempt ${attempt})`);
+        console.warn(
+          `GitHub rate limit hit, retrying in ${delay}ms (attempt ${attempt})`
+        );
       }
     },
   },
-  
+
   /** OpenRouter API retry with cost consideration */
   openrouter: {
     maxRetries: 2, // Lower retries due to cost
@@ -364,7 +374,7 @@ export class CircuitBreaker {
   private onFailure() {
     this.failures++;
     this.lastFailureTime = Date.now();
-    
+
     if (this.failures >= this.threshold) {
       this.state = 'OPEN';
     }

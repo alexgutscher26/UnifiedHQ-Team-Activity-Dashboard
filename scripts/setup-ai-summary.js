@@ -9,7 +9,7 @@ import { execSync } from 'child_process';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
-const ENV_FILE = '.env.local';
+const ENV_FILE = '.env';
 const ENV_EXAMPLE_FILE = '.env.example';
 
 console.log('🤖 AI Summary Feature Setup');

@@ -4,10 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  IconChartBar,
-  IconRefresh,
-} from '@tabler/icons-react';
+import { IconChartBar, IconRefresh } from '@tabler/icons-react';
 
 interface SummaryStats {
   totalSummaries: number;
@@ -29,7 +26,10 @@ interface SummaryStatisticsProps {
   timeRange?: '7d' | '30d' | '90d';
 }
 
-export function SummaryStatistics({ className, timeRange = '30d' }: SummaryStatisticsProps) {
+export function SummaryStatistics({
+  className,
+  timeRange = '30d',
+}: SummaryStatisticsProps) {
   const [stats, setStats] = useState<SummaryStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +58,9 @@ export function SummaryStatistics({ className, timeRange = '30d' }: SummaryStati
       setStats(data);
     } catch (error) {
       console.error('Error fetching summary statistics:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load statistics');
+      setError(
+        error instanceof Error ? error.message : 'Failed to load statistics'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +92,9 @@ export function SummaryStatistics({ className, timeRange = '30d' }: SummaryStati
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
               <IconChartBar className='size-5 text-white' />
-              <CardTitle className='text-lg text-white'>Summary Statistics</CardTitle>
+              <CardTitle className='text-lg text-white'>
+                Summary Statistics
+              </CardTitle>
             </div>
             <Skeleton className='h-6 w-6' />
           </div>
@@ -117,7 +121,9 @@ export function SummaryStatistics({ className, timeRange = '30d' }: SummaryStati
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
               <IconChartBar className='size-5 text-white' />
-              <CardTitle className='text-lg text-white'>Summary Statistics</CardTitle>
+              <CardTitle className='text-lg text-white'>
+                Summary Statistics
+              </CardTitle>
             </div>
             <button
               onClick={fetchStats}
@@ -148,7 +154,9 @@ export function SummaryStatistics({ className, timeRange = '30d' }: SummaryStati
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
             <IconChartBar className='size-5 text-white' />
-            <CardTitle className='text-lg text-white'>Summary Statistics</CardTitle>
+            <CardTitle className='text-lg text-white'>
+              Summary Statistics
+            </CardTitle>
           </div>
           <button
             onClick={fetchStats}
@@ -158,30 +166,39 @@ export function SummaryStatistics({ className, timeRange = '30d' }: SummaryStati
           </button>
         </div>
       </CardHeader>
-      
-      <CardContent className='space-y-6'>
 
+      <CardContent className='space-y-6'>
         {/* Activity Distribution */}
-        {stats.activityDistribution && Object.keys(stats.activityDistribution).length > 0 && (
-          <div>
-            <h3 className='text-lg font-semibold text-white mb-3'>Activity Distribution</h3>
-            <div className='space-y-2'>
-              {Object.entries(stats.activityDistribution)
-                .sort(([, a], [, b]) => b - a)
-                .map(([source, count]) => (
-                  <div key={source} className='flex items-center justify-between p-3 bg-slate-800/50 rounded-lg'>
-                    <span className='text-gray-300 text-sm capitalize'>{source}</span>
-                    <Badge variant='secondary'>{count} activities</Badge>
-                  </div>
-                ))}
+        {stats.activityDistribution &&
+          Object.keys(stats.activityDistribution).length > 0 && (
+            <div>
+              <h3 className='text-lg font-semibold text-white mb-3'>
+                Activity Distribution
+              </h3>
+              <div className='space-y-2'>
+                {Object.entries(stats.activityDistribution)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([source, count]) => (
+                    <div
+                      key={source}
+                      className='flex items-center justify-between p-3 bg-slate-800/50 rounded-lg'
+                    >
+                      <span className='text-gray-300 text-sm capitalize'>
+                        {source}
+                      </span>
+                      <Badge variant='secondary'>{count} activities</Badge>
+                    </div>
+                  ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Top Insights */}
         {stats.topInsights && stats.topInsights.length > 0 && (
           <div>
-            <h3 className='text-lg font-semibold text-white mb-3'>Common Insights</h3>
+            <h3 className='text-lg font-semibold text-white mb-3'>
+              Common Insights
+            </h3>
             <div className='space-y-2'>
               {stats.topInsights.slice(0, 5).map((insight, index) => (
                 <div key={index} className='p-3 bg-slate-800/50 rounded-lg'>

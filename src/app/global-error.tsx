@@ -1,6 +1,5 @@
 'use client';
 
-import { captureClientError } from '@/lib/posthog-client';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,11 +19,8 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Capture the global error with PostHog
-    captureClientError(error, {
-      error_boundary: 'global_error',
-      digest: error.digest,
-    });
+    // Log the global error to console for debugging
+    console.error('Global error occurred:', error);
   }, [error]);
 
   return (
@@ -36,7 +32,8 @@ export default function GlobalError({
           </div>
           <CardTitle>Global Error</CardTitle>
           <CardDescription>
-            A critical error occurred. We've been notified and are working to fix it.
+            A critical error occurred. We've been notified and are working to
+            fix it.
           </CardDescription>
         </CardHeader>
         <CardContent className='space-y-4'>

@@ -105,13 +105,15 @@ export async function GET(request: NextRequest) {
       return sum + (metadata?.tokensUsed || 0);
     }, 0);
 
-    const averageActivities = allSummaries.length > 0 
-      ? Math.round(totalActivities / allSummaries.length)
-      : 0;
+    const averageActivities =
+      allSummaries.length > 0
+        ? Math.round(totalActivities / allSummaries.length)
+        : 0;
 
-    const averageTokensPerSummary = allSummaries.length > 0
-      ? Math.round(totalTokensUsed / allSummaries.length)
-      : 0;
+    const averageTokensPerSummary =
+      allSummaries.length > 0
+        ? Math.round(totalTokensUsed / allSummaries.length)
+        : 0;
 
     // Model breakdown
     const modelBreakdown: Record<string, number> = {};
@@ -123,22 +125,30 @@ export async function GET(request: NextRequest) {
     });
 
     // Daily trends (last 7 days)
-    const dailyTrends: Array<{ date: string; count: number; tokensUsed: number }> = [];
+    const dailyTrends: Array<{
+      date: string;
+      count: number;
+      tokensUsed: number;
+    }> = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const dayStart = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      );
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
-      
+
       const daySummaries = allSummaries.filter(summary => {
         const summaryDate = new Date(summary.generatedAt);
         return summaryDate >= dayStart && summaryDate < dayEnd;
       });
-      
+
       const dayTokens = daySummaries.reduce((sum, summary) => {
         const metadata = summary.metadata as any;
         return sum + (metadata?.tokensUsed || 0);
       }, 0);
-      
+
       dailyTrends.push({
         date: dayStart.toISOString().split('T')[0],
         count: daySummaries.length,
@@ -152,7 +162,8 @@ export async function GET(request: NextRequest) {
       const metadata = summary.metadata as any;
       const sourceBreakdown = metadata?.sourceBreakdown || {};
       Object.entries(sourceBreakdown).forEach(([source, count]) => {
-        activityDistribution[source] = (activityDistribution[source] || 0) + (count as number);
+        activityDistribution[source] =
+          (activityDistribution[source] || 0) + (count as number);
       });
     });
 
@@ -160,8 +171,12 @@ export async function GET(request: NextRequest) {
     const topInsights: string[] = [];
     const recentSummaries = allSummaries.slice(0, 5);
     recentSummaries.forEach(summary => {
-      if (summary.insights && summary.insights.length > 0) {
-        topInsights.push(...summary.insights.slice(0, 2));
+      if (
+        summary.insights &&
+        Array.isArray(summary.insights) &&
+        summary.insights.length > 0
+      ) {
+        topInsights.push(...(summary.insights as string[]).slice(0, 2));
       }
     });
 

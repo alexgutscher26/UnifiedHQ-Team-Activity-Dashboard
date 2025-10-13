@@ -19,12 +19,16 @@ async function testTeamActivityTransformation() {
     const selectedRepos = await prisma.selectedRepository.findMany({
       where: { userId: user.id },
     });
-    
-    const cacheKey = 'activities:' + user.id + ':' + selectedRepos
-      .map(r => r.repoId)
-      .sort()
-      .join(',');
-    
+
+    const cacheKey =
+      'activities:' +
+      user.id +
+      ':' +
+      selectedRepos
+        .map(r => r.repoId)
+        .sort()
+        .join(',');
+
     const cachedActivities = await prisma.gitHubCache.findUnique({
       where: {
         userId_cacheKey: {
@@ -47,7 +51,7 @@ async function testTeamActivityTransformation() {
       const eventType = activity.metadata?.eventType || 'commit';
       const repoInfo = activity.metadata?.repo;
       const actor = activity.metadata?.actor;
-      
+
       return {
         id: `activity-${activity.externalId || index}`,
         type: eventType,
@@ -68,12 +72,14 @@ async function testTeamActivityTransformation() {
         },
         repository: repoInfo?.name || 'Unknown Repository',
         timestamp: activity.timestamp,
-        status: activity.metadata?.payload?.pull_request?.state || 
-                activity.metadata?.payload?.issue?.state || 
-                'open',
-        url: activity.metadata?.payload?.commit?.url || 
-             activity.metadata?.payload?.pull_request?.html_url || 
-             activity.metadata?.payload?.issue?.html_url,
+        status:
+          activity.metadata?.payload?.pull_request?.state ||
+          activity.metadata?.payload?.issue?.state ||
+          'open',
+        url:
+          activity.metadata?.payload?.commit?.url ||
+          activity.metadata?.payload?.pull_request?.html_url ||
+          activity.metadata?.payload?.issue?.html_url,
         metadata: activity.metadata,
       };
     });
@@ -83,13 +89,17 @@ async function testTeamActivityTransformation() {
     // Test time filtering
     const now = new Date();
     const timeRangeDays = 30;
-    const cutoffDate = new Date(now.getTime() - (timeRangeDays * 24 * 60 * 60 * 1000));
-    
-    const filteredActivities = teamActivities.filter(activity => 
-      new Date(activity.timestamp) >= cutoffDate
+    const cutoffDate = new Date(
+      now.getTime() - timeRangeDays * 24 * 60 * 60 * 1000
     );
 
-    console.log(`✅ Time filtering: ${teamActivities.length} → ${filteredActivities.length} activities`);
+    const filteredActivities = teamActivities.filter(
+      activity => new Date(activity.timestamp) >= cutoffDate
+    );
+
+    console.log(
+      `✅ Time filtering: ${teamActivities.length} → ${filteredActivities.length} activities`
+    );
 
     if (filteredActivities.length > 0) {
       console.log('\n📋 Sample transformed activities:');
@@ -104,7 +114,6 @@ async function testTeamActivityTransformation() {
     } else {
       console.log('⚠️  No activities after time filtering');
     }
-
   } catch (error) {
     console.error('❌ Test failed:', error.message);
   } finally {

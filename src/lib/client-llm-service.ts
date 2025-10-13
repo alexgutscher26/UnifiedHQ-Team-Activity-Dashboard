@@ -1,6 +1,3 @@
-// Client-side LLM service that uses API endpoints
-// This avoids importing posthog-node in client-side code
-
 import { withRetry, RetryPresets } from '@/lib/retry-utils';
 
 export interface LLMRequest {
@@ -87,10 +84,16 @@ export class ClientLLMService {
       {
         ...RetryPresets.openrouter,
         onRetry: (error, attempt, delay) => {
-          console.warn(`LLM request failed (attempt ${attempt}), retrying in ${delay}ms:`, error.message);
+          console.warn(
+            `LLM request failed (attempt ${attempt}), retrying in ${delay}ms:`,
+            error.message
+          );
         },
         onMaxRetriesExceeded: (error, attempts) => {
-          console.error(`LLM request failed after ${attempts} attempts:`, error.message);
+          console.error(
+            `LLM request failed after ${attempts} attempts:`,
+            error.message
+          );
         },
       }
     ).then(result => result.data);

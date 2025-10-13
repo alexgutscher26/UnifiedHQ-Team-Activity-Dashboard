@@ -184,6 +184,3 @@ PostHog debug mode is enabled in development. Check browser console for PostHog 
 - **Model Comparison**: Compare performance across different models
 - **Usage Patterns**: Analyze peak usage times and popular features
 
-Your OpenRouter + PostHog LLM analytics integration is now complete and ready to track all your AI interactions! 🎉
-
-Visit `/openrouter-demo` to test it out and see the analytics in action.

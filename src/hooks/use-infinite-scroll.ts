@@ -260,14 +260,14 @@ export const useSearchablePagination = <T>(
     return filteredItems.slice(0, startIndex + pagination.pageSize);
   }, [filteredItems, pagination.currentPage, pagination.pageSize]);
 
-  const hasMore = paginatedItems.length < filteredItems.length;
+  const hasMoreItems = paginatedItems.length < filteredItems.length;
 
   return {
     searchQuery,
     setSearchQuery,
     filteredItems,
     paginatedItems,
-    hasMore,
+    hasMoreItems,
     ...pagination,
   };
 };

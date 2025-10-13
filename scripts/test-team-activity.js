@@ -1,5 +1,7 @@
 const { PrismaClient } = require('../src/generated/prisma');
-const { fetchGithubActivity } = require('../src/lib/integrations/github-cached');
+const {
+  fetchGithubActivity,
+} = require('../src/lib/integrations/github-cached');
 
 const prisma = new PrismaClient();
 
@@ -20,8 +22,10 @@ async function testTeamActivity() {
     console.log('\n📡 Testing fetchGithubActivity...');
     try {
       const activities = await fetchGithubActivity(user.id);
-      console.log(`✅ fetchGithubActivity returned ${activities.length} activities`);
-      
+      console.log(
+        `✅ fetchGithubActivity returned ${activities.length} activities`
+      );
+
       if (activities.length > 0) {
         console.log('📋 Sample activity:');
         const sample = activities[0];
@@ -38,12 +42,12 @@ async function testTeamActivity() {
     console.log('\n🔄 Testing transformation logic...');
     try {
       const activities = await fetchGithubActivity(user.id);
-      
+
       const teamActivities = activities.map((activity, index) => {
         const eventType = activity.metadata?.eventType || 'commit';
         const repoInfo = activity.metadata?.repo;
         const actor = activity.metadata?.actor;
-        
+
         return {
           id: `activity-${activity.externalId || index}`,
           type: eventType,
@@ -64,18 +68,20 @@ async function testTeamActivity() {
           },
           repository: repoInfo?.name || 'Unknown Repository',
           timestamp: activity.timestamp.toISOString(),
-          status: activity.metadata?.payload?.pull_request?.state || 
-                  activity.metadata?.payload?.issue?.state || 
-                  'open',
-          url: activity.metadata?.payload?.commit?.url || 
-               activity.metadata?.payload?.pull_request?.html_url || 
-               activity.metadata?.payload?.issue?.html_url,
+          status:
+            activity.metadata?.payload?.pull_request?.state ||
+            activity.metadata?.payload?.issue?.state ||
+            'open',
+          url:
+            activity.metadata?.payload?.commit?.url ||
+            activity.metadata?.payload?.pull_request?.html_url ||
+            activity.metadata?.payload?.issue?.html_url,
           metadata: activity.metadata,
         };
       });
 
       console.log(`✅ Transformed ${teamActivities.length} activities`);
-      
+
       if (teamActivities.length > 0) {
         console.log('📋 Sample transformed activity:');
         const sample = teamActivities[0];
@@ -91,18 +97,20 @@ async function testTeamActivity() {
       console.log('\n⏰ Testing time filtering...');
       const now = new Date();
       const timeRangeDays = 30;
-      const cutoffDate = new Date(now.getTime() - (timeRangeDays * 24 * 60 * 60 * 1000));
-      
-      const filteredActivities = teamActivities.filter(activity => 
-        new Date(activity.timestamp) >= cutoffDate
+      const cutoffDate = new Date(
+        now.getTime() - timeRangeDays * 24 * 60 * 60 * 1000
       );
 
-      console.log(`✅ Time filtering: ${teamActivities.length} → ${filteredActivities.length} activities`);
+      const filteredActivities = teamActivities.filter(
+        activity => new Date(activity.timestamp) >= cutoffDate
+      );
 
+      console.log(
+        `✅ Time filtering: ${teamActivities.length} → ${filteredActivities.length} activities`
+      );
     } catch (error) {
       console.log(`❌ Transformation failed: ${error.message}`);
     }
-
   } catch (error) {
     console.error('❌ Test failed:', error.message);
   } finally {

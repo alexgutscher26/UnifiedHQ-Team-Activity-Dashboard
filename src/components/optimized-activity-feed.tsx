@@ -386,7 +386,7 @@ export function OptimizedActivityFeed() {
       }
 
       console.log('🔄 Attempting to connect to SSE endpoint...');
-      
+
       const es = new EventSource('/api/activities/live', {
         withCredentials: true,
       });
@@ -405,7 +405,8 @@ export function OptimizedActivityFeed() {
           setIsLiveConnected(false);
           toast({
             title: 'Connection Timeout',
-            description: 'Failed to connect to live updates. Please check your connection.',
+            description:
+              'Failed to connect to live updates. Please check your connection.',
             variant: 'destructive',
           });
         }
@@ -459,7 +460,7 @@ export function OptimizedActivityFeed() {
       es.onerror = error => {
         // Clear connection timeout
         clearTimeout(connectionTimeout);
-        
+
         // EventSource.onerror provides limited error information
         // Log connection state and URL for better debugging
         console.error('❌ SSE connection error:', {
@@ -469,7 +470,7 @@ export function OptimizedActivityFeed() {
           error: error,
           timestamp: new Date().toISOString(),
         });
-        
+
         setIsLiveConnected(false);
         toast({
           title: 'Connection Lost',

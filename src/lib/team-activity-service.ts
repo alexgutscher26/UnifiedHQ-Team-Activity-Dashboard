@@ -1,6 +1,5 @@
 import { fetchGithubActivity } from '@/lib/integrations/github-cached';
 import { withRetry, RetryPresets } from '@/lib/retry-utils';
-import { captureClientError } from '@/lib/posthog-client';
 
 export interface TeamActivityData {
   activities: Array<{
@@ -98,7 +97,10 @@ export async function fetchTeamActivityData(
       {
         ...RetryPresets.github,
         onRetry: (error, attempt, delay) => {
-          console.warn(`Team activity fetch retry attempt ${attempt}:`, error.message);
+          console.warn(
+            `Team activity fetch retry attempt ${attempt}:`,
+            error.message
+          );
         },
       }
     );
@@ -111,7 +113,9 @@ export async function fetchTeamActivityData(
 
     if (githubActivities && Array.isArray(githubActivities)) {
       for (const activity of githubActivities) {
-        const activityDate = new Date(activity.created_at || activity.pushed_at || activity.updated_at);
+        const activityDate = new Date(
+          activity.created_at || activity.pushed_at || activity.updated_at
+        );
         if (activityDate < startDate) continue;
 
         const actorId = activity.actor.id.toString();
@@ -124,7 +128,8 @@ export async function fetchTeamActivityData(
           memberMap.set(actorId, {
             id: actorId,
             name: actorLogin,
-            email: activity.actor.email || `${actorLogin}@users.noreply.github.com`,
+            email:
+              activity.actor.email || `${actorLogin}@users.noreply.github.com`,
             avatar: activity.actor.avatar_url,
             role: 'Developer',
             status: 'active',
@@ -170,11 +175,15 @@ export async function fetchTeamActivityData(
               id: `commit-${commit.sha}`,
               type: 'commit',
               title: commit.message.split('\n')[0],
-              description: commit.message.split('\n').slice(1).join('\n').trim() || undefined,
+              description:
+                commit.message.split('\n').slice(1).join('\n').trim() ||
+                undefined,
               author: {
                 id: actorId,
                 name: actorLogin,
-                email: activity.actor.email || `${actorLogin}@users.noreply.github.com`,
+                email:
+                  activity.actor.email ||
+                  `${actorLogin}@users.noreply.github.com`,
                 avatar: activity.actor.avatar_url,
                 role: 'Developer',
                 status: 'active',
@@ -207,7 +216,9 @@ export async function fetchTeamActivityData(
             author: {
               id: actorId,
               name: actorLogin,
-              email: activity.actor.email || `${actorLogin}@users.noreply.github.com`,
+              email:
+                activity.actor.email ||
+                `${actorLogin}@users.noreply.github.com`,
               avatar: activity.actor.avatar_url,
               role: 'Developer',
               status: 'active',
@@ -215,7 +226,8 @@ export async function fetchTeamActivityData(
             },
             repository: repoName,
             timestamp: activity.created_at,
-            status: pr.state === 'open' ? 'open' : pr.merged_at ? 'merged' : 'closed',
+            status:
+              pr.state === 'open' ? 'open' : pr.merged_at ? 'merged' : 'closed',
             url: pr.html_url,
             metadata: {
               number: pr.number,
@@ -240,7 +252,9 @@ export async function fetchTeamActivityData(
             author: {
               id: actorId,
               name: actorLogin,
-              email: activity.actor.email || `${actorLogin}@users.noreply.github.com`,
+              email:
+                activity.actor.email ||
+                `${actorLogin}@users.noreply.github.com`,
               avatar: activity.actor.avatar_url,
               role: 'Developer',
               status: 'active',
@@ -253,7 +267,8 @@ export async function fetchTeamActivityData(
             metadata: {
               number: issue.number,
               labels: issue.labels?.map((label: any) => label.name) || [],
-              assignees: issue.assignees?.map((assignee: any) => assignee.login) || [],
+              assignees:
+                issue.assignees?.map((assignee: any) => assignee.login) || [],
             },
           });
 
@@ -271,7 +286,9 @@ export async function fetchTeamActivityData(
             author: {
               id: actorId,
               name: actorLogin,
-              email: activity.actor.email || `${actorLogin}@users.noreply.github.com`,
+              email:
+                activity.actor.email ||
+                `${actorLogin}@users.noreply.github.com`,
               avatar: activity.actor.avatar_url,
               role: 'Developer',
               status: 'active',
@@ -301,13 +318,17 @@ export async function fetchTeamActivityData(
     }
 
     // Sort activities by timestamp (newest first)
-    activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    activities.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
 
     // Convert member map to array and determine status
     const members = Array.from(memberMap.values()).map(member => {
       const lastActiveTime = new Date(member.lastActive).getTime();
-      const hoursSinceActive = (now.getTime() - lastActiveTime) / (1000 * 60 * 60);
-      
+      const hoursSinceActive =
+        (now.getTime() - lastActiveTime) / (1000 * 60 * 60);
+
       let status: 'active' | 'away' | 'offline' = 'offline';
       if (hoursSinceActive < 2) {
         status = 'active';
@@ -329,15 +350,26 @@ export async function fetchTeamActivityData(
     });
 
     // Calculate stats
-    const totalCommits = members.reduce((sum, member) => sum + member.commits, 0);
-    const totalPullRequests = members.reduce((sum, member) => sum + member.pullRequests, 0);
+    const totalCommits = members.reduce(
+      (sum, member) => sum + member.commits,
+      0
+    );
+    const totalPullRequests = members.reduce(
+      (sum, member) => sum + member.pullRequests,
+      0
+    );
     const totalIssues = members.reduce((sum, member) => sum + member.issues, 0);
-    const totalReviews = members.reduce((sum, member) => sum + member.reviews, 0);
-    const totalActivity = totalCommits + totalPullRequests + totalIssues + totalReviews;
+    const totalReviews = members.reduce(
+      (sum, member) => sum + member.reviews,
+      0
+    );
+    const totalActivity =
+      totalCommits + totalPullRequests + totalIssues + totalReviews;
 
     const stats: TeamActivityData['stats'] = {
       totalMembers: members.length,
-      activeMembers: members.filter(member => member.status === 'active').length,
+      activeMembers: members.filter(member => member.status === 'active')
+        .length,
       totalCommits,
       totalPullRequests,
       totalIssues,
@@ -347,13 +379,15 @@ export async function fetchTeamActivityData(
       activityTrends: Array.from({ length: 7 }, (_, i) => {
         const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
         const dateKey = date.toISOString().split('T')[0];
-        return dailyActivity.get(dateKey) || {
-          date: dateKey,
-          commits: 0,
-          pullRequests: 0,
-          issues: 0,
-          reviews: 0,
-        };
+        return (
+          dailyActivity.get(dateKey) || {
+            date: dateKey,
+            commits: 0,
+            pullRequests: 0,
+            issues: 0,
+            reviews: 0,
+          }
+        );
       }).reverse(),
       repositoryStats: Array.from(repoMap.values())
         .map(repo => ({
@@ -375,14 +409,11 @@ export async function fetchTeamActivityData(
     };
   } catch (error) {
     console.error('Team activity data fetch error:', error);
-    
-    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch team activity data';
-    captureClientError(error instanceof Error ? error : new Error(errorMessage), {
-      context: 'team_activity_service',
-      userId,
-      timeRange,
-    });
 
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Failed to fetch team activity data';
     throw new Error(errorMessage);
   }
 }
@@ -399,7 +430,7 @@ export async function fetchTeamActivityDataCached(
   timeRange: '7d' | '30d' = '30d',
   ttl: number = 5 * 60 * 1000 // 5 minutes
 ): Promise<TeamActivityData> {
-  // For now, we'll use the GitHub cache system which already handles caching
+  // TODO: For now, we'll use the GitHub cache system which already handles caching
   // In the future, we could implement a dedicated team activity cache
   return await fetchTeamActivityData(userId, timeRange);
 }

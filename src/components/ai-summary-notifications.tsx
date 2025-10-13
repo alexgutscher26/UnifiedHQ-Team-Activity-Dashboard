@@ -8,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import {
   IconBell,
   IconBellOff,
-  IconSettings,
   IconClock,
   IconSparkles,
   IconCheck,

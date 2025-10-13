@@ -7,7 +7,6 @@ import { useToast } from '@/hooks/use-toast';
 import {
   IconUser,
   IconBrandGithub,
-  IconBrandSlack,
   IconBell,
   IconPalette,
   IconDatabase,

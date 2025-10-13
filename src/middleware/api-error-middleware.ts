@@ -122,7 +122,7 @@ export function checkApiRateLimit(req: NextRequest): boolean {
     'unknown';
   const key = `rate_limit_${ip}`;
 
-  // This is a simple in-memory rate limiter
+  // TODO: This is a simple in-memory rate limiter
   // In production, use Redis or a proper rate limiting service
   if (!global.rateLimitStore) {
     global.rateLimitStore = new Map();

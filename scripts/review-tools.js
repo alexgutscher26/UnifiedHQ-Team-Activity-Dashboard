@@ -3,11 +3,16 @@
 /**
  * Code Review Tools
  * Automated tools for code review analysis and reporting
+ * Cross-platform compatible (Windows & Unix)
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class ReviewTools {
   constructor() {
@@ -18,6 +23,91 @@ class ReviewTools {
       suggestions: [],
       metrics: {},
     };
+    this.isWindows = process.platform === 'win32';
+  }
+
+  /**
+   * Execute command with cross-platform compatibility
+   */
+  execCommand(command, options = {}) {
+    try {
+      return execSync(command, {
+        encoding: 'utf8',
+        shell: this.isWindows,
+        ...options,
+      });
+    } catch (error) {
+      return '';
+    }
+  }
+
+  /**
+   * Find files recursively (cross-platform)
+   */
+  findFiles(directory, extensions) {
+    const files = [];
+
+    function walkDir(dir) {
+      try {
+        const items = fs.readdirSync(dir);
+        for (const item of items) {
+          const fullPath = path.join(dir, item);
+          const stat = fs.statSync(fullPath);
+
+          if (
+            stat.isDirectory() &&
+            !item.startsWith('.') &&
+            item !== 'node_modules'
+          ) {
+            walkDir(fullPath);
+          } else if (stat.isFile()) {
+            const ext = path.extname(item);
+            if (extensions.includes(ext)) {
+              files.push(fullPath);
+            }
+          }
+        }
+      } catch (error) {
+        // Skip directories we can't read
+      }
+    }
+
+    walkDir(directory);
+    return files;
+  }
+
+  /**
+   * Search for pattern in files (cross-platform)
+   */
+  searchInFiles(files, pattern, excludePatterns = []) {
+    const results = [];
+
+    for (const file of files) {
+      try {
+        const content = fs.readFileSync(file, 'utf8');
+        const lines = content.split('\n');
+
+        lines.forEach((line, index) => {
+          if (pattern.test(line)) {
+            // Check if line should be excluded
+            const shouldExclude = excludePatterns.some(exclude =>
+              exclude.test(line)
+            );
+            if (!shouldExclude) {
+              results.push({
+                file: file.replace(this.projectRoot + path.sep, ''),
+                line: index + 1,
+                content: line.trim(),
+              });
+            }
+          }
+        });
+      } catch (error) {
+        // Skip files we can't read
+      }
+    }
+
+    return results;
   }
 
   /**
@@ -49,114 +139,110 @@ class ReviewTools {
    * Check for console.log statements
    */
   checkConsoleLogs() {
-    try {
-      const result = execSync(
-        'grep -r "console\\.log" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" || true',
-        { encoding: 'utf8' }
-      );
-      if (result.trim()) {
-        const lines = result.trim().split('\n');
-        lines.forEach(line => {
-          if (line && !line.includes('// eslint-disable')) {
-            this.results.issues.push({
-              type: 'console.log',
-              message: 'Console.log statement found',
-              file: line.split(':')[0],
-              line: line.split(':')[1],
-              severity: 'error',
-            });
-          }
-        });
-      }
-    } catch (error) {
-      // No console.log statements found
-    }
+    const files = this.findFiles(path.join(this.projectRoot, 'src'), [
+      '.ts',
+      '.tsx',
+      '.js',
+      '.jsx',
+    ]);
+    const results = this.searchInFiles(files, /console\.log/, [
+      /\/\/ eslint-disable/,
+    ]);
+
+    results.forEach(result => {
+      this.results.issues.push({
+        type: 'console.log',
+        message: 'Console.log statement found',
+        file: result.file,
+        line: result.line,
+        severity: 'error',
+      });
+    });
   }
 
   /**
    * Check for TODO comments.
    *
    * This function searches through the source files for any lines containing TODO, FIXME, or HACK comments.
-   * It utilizes the execSync method to run a grep command on the specified file types. If any such comments are found,
-   * it processes each line to extract the file name and line number, and pushes a warning object into the results.warnings array.
+   * It uses cross-platform file searching to find and analyze comments in the specified file types.
    */
   checkTODOComments() {
-    try {
-      const result = execSync(
-        'grep -r "TODO\\|FIXME\\|HACK" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" || true',
-        { encoding: 'utf8' }
-      );
-      if (result.trim()) {
-        const lines = result.trim().split('\n');
-        lines.forEach(line => {
-          if (line) {
-            this.results.warnings.push({
-              type: 'todo',
-              message: 'TODO/FIXME comment found',
-              file: line.split(':')[0],
-              line: line.split(':')[1],
-              severity: 'warning',
-            });
-          }
-        });
-      }
-    } catch (error) {
-    }
+    const files = this.findFiles(path.join(this.projectRoot, 'src'), [
+      '.ts',
+      '.tsx',
+      '.js',
+      '.jsx',
+    ]);
+    const results = this.searchInFiles(files, /TODO|FIXME|HACK/);
+
+    results.forEach(result => {
+      this.results.warnings.push({
+        type: 'todo',
+        message: 'TODO/FIXME comment found',
+        file: result.file,
+        line: result.line,
+        severity: 'warning',
+      });
+    });
   }
 
   /**
    * Check for hardcoded values
    */
   checkHardcodedValues() {
-    try {
-      const result = execSync(
-        'grep -r "localhost\\|127\\.0\\.0\\.1\\|password\\|secret" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" || true',
-        { encoding: 'utf8' }
-      );
-      if (result.trim()) {
-        const lines = result.trim().split('\n');
-        lines.forEach(line => {
-          if (line && !line.includes('// eslint-disable')) {
-            this.results.warnings.push({
-              type: 'hardcoded',
-              message: 'Potential hardcoded value found',
-              file: line.split(':')[0],
-              line: line.split(':')[1],
-              severity: 'warning',
-            });
-          }
-        });
-      }
-    } catch (error) {
-      // No hardcoded values found
-    }
+    const files = this.findFiles(path.join(this.projectRoot, 'src'), [
+      '.ts',
+      '.tsx',
+      '.js',
+      '.jsx',
+    ]);
+    const results = this.searchInFiles(
+      files,
+      /localhost|127\.0\.0\.1|password|secret/,
+      [/\/\/ eslint-disable/]
+    );
+
+    results.forEach(result => {
+      this.results.warnings.push({
+        type: 'hardcoded',
+        message: 'Potential hardcoded value found',
+        file: result.file,
+        line: result.line,
+        severity: 'warning',
+      });
+    });
   }
 
   /**
    * Check for unused imports
    */
   checkUnusedImports() {
+    // Try to run ESLint if available (using modern config format)
     try {
-      const result = execSync(
-        'npx eslint --no-eslintrc --config .eslintrc.json --rule "no-unused-vars: error" --format compact src/ 2>/dev/null || true',
-        { encoding: 'utf8' }
-      );
+      const eslintCommand = this.isWindows
+        ? 'npx eslint --rule "no-unused-vars: error" --format compact src/'
+        : 'npx eslint --rule "no-unused-vars: error" --format compact src/ 2>/dev/null';
+
+      const result = this.execCommand(eslintCommand);
       if (result.trim()) {
         const lines = result.trim().split('\n');
         lines.forEach(line => {
           if (line.includes('no-unused-vars')) {
-            this.results.warnings.push({
-              type: 'unused-import',
-              message: 'Unused import or variable',
-              file: line.split(':')[0],
-              line: line.split(':')[1],
-              severity: 'warning',
-            });
+            const parts = line.split(':');
+            if (parts.length >= 2) {
+              this.results.warnings.push({
+                type: 'unused-import',
+                message: 'Unused import or variable',
+                file: parts[0],
+                line: parts[1],
+                severity: 'warning',
+              });
+            }
           }
         });
       }
     } catch (error) {
-      // No unused imports found
+      // ESLint not available or failed, skip this check
     }
   }
 
@@ -164,83 +250,71 @@ class ReviewTools {
    * Check for security issues
    */
   checkSecurityIssues() {
-    try {
-      const result = execSync(
-        'grep -r "eval\\|innerHTML\\|dangerouslySetInnerHTML" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" || true',
-        { encoding: 'utf8' }
-      );
-      if (result.trim()) {
-        const lines = result.trim().split('\n');
-        lines.forEach(line => {
-          if (line) {
-            this.results.issues.push({
-              type: 'security',
-              message: 'Potential security issue found',
-              file: line.split(':')[0],
-              line: line.split(':')[1],
-              severity: 'error',
-            });
-          }
-        });
-      }
-    } catch (error) {
-      // No security issues found
-    }
+    const files = this.findFiles(path.join(this.projectRoot, 'src'), [
+      '.ts',
+      '.tsx',
+      '.js',
+      '.jsx',
+    ]);
+    const results = this.searchInFiles(
+      files,
+      /eval|innerHTML|dangerouslySetInnerHTML/
+    );
+
+    results.forEach(result => {
+      this.results.issues.push({
+        type: 'security',
+        message: 'Potential security issue found',
+        file: result.file,
+        line: result.line,
+        severity: 'error',
+      });
+    });
   }
 
   /**
    * Check project-specific rules
    */
   checkProjectRules() {
+    const files = this.findFiles(path.join(this.projectRoot, 'src'), [
+      '.ts',
+      '.tsx',
+      '.js',
+      '.jsx',
+    ]);
+
     // Check GitHub integration usage
-    try {
-      const result = execSync(
-        'grep -r "@/lib/integrations/github[^-]" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" || true',
-        { encoding: 'utf8' }
-      );
-      if (result.trim()) {
-        const lines = result.trim().split('\n');
-        lines.forEach(line => {
-          if (line) {
-            this.results.issues.push({
-              type: 'github-integration',
-              message:
-                'Non-cached GitHub import found. Use @/lib/integrations/github-cached instead',
-              file: line.split(':')[0],
-              line: line.split(':')[1],
-              severity: 'error',
-            });
-          }
-        });
-      }
-    } catch (error) {
-      // No issues found
-    }
+    const githubResults = this.searchInFiles(
+      files,
+      /@\/lib\/integrations\/github[^-]/
+    );
+    githubResults.forEach(result => {
+      this.results.issues.push({
+        type: 'github-integration',
+        message:
+          'Non-cached GitHub import found. Use @/lib/integrations/github-cached instead',
+        file: result.file,
+        line: result.line,
+        severity: 'error',
+      });
+    });
 
     // Check image optimization usage
-    try {
-      const result = execSync(
-        'grep -r "<img" src/ --include="*.tsx" --include="*.jsx" || true',
-        { encoding: 'utf8' }
-      );
-      if (result.trim()) {
-        const lines = result.trim().split('\n');
-        lines.forEach(line => {
-          if (line) {
-            this.results.suggestions.push({
-              type: 'image-optimization',
-              message:
-                'Consider using OptimizedImage component instead of standard img tag',
-              file: line.split(':')[0],
-              line: line.split(':')[1],
-              severity: 'suggestion',
-            });
-          }
-        });
-      }
-    } catch (error) {
-      // No issues found
-    }
+    const imageFiles = this.findFiles(path.join(this.projectRoot, 'src'), [
+      '.tsx',
+      '.jsx',
+    ]);
+    const imageResults = this.searchInFiles(imageFiles, /<img/);
+    imageResults.forEach(result => {
+      this.results.suggestions.push({
+        type: 'image-optimization',
+        message:
+          'Consider using OptimizedImage component instead of standard img tag',
+        file: result.file,
+        line: result.line,
+        severity: 'suggestion',
+      });
+    });
   }
 
   /**
@@ -250,31 +324,49 @@ class ReviewTools {
     console.log('📊 Calculating code metrics...');
 
     try {
-      // Get file count
-      const fileCount = execSync(
-        'find src/ -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | wc -l',
-        { encoding: 'utf8' }
-      ).trim();
+      const files = this.findFiles(path.join(this.projectRoot, 'src'), [
+        '.ts',
+        '.tsx',
+        '.js',
+        '.jsx',
+      ]);
 
-      // Get line count
-      const lineCount = execSync(
-        'find src/ -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" | xargs wc -l | tail -1',
-        { encoding: 'utf8' }
-      ).trim();
+      let totalLines = 0;
+      let functionCount = 0;
 
-      // Get function count
-      const functionCount = execSync(
-        'grep -r "function\\|const.*=.*=>" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" | wc -l',
-        { encoding: 'utf8' }
-      ).trim();
+      files.forEach(file => {
+        try {
+          const content = fs.readFileSync(file, 'utf8');
+          const lines = content.split('\n');
+          totalLines += lines.length;
+
+          // Count functions and arrow functions
+          lines.forEach(line => {
+            if (
+              /function\s+\w+|const\s+\w+\s*=\s*\(.*\)\s*=>|const\s+\w+\s*=\s*async\s*\(.*\)\s*=>/.test(
+                line
+              )
+            ) {
+              functionCount++;
+            }
+          });
+        } catch (error) {
+          // Skip files we can't read
+        }
+      });
 
       this.results.metrics = {
-        files: parseInt(fileCount),
-        lines: parseInt(lineCount.split(' ')[0]),
-        functions: parseInt(functionCount),
+        files: files.length,
+        lines: totalLines,
+        functions: functionCount,
       };
     } catch (error) {
       console.error('Error calculating metrics:', error.message);
+      this.results.metrics = {
+        files: 0,
+        lines: 0,
+        functions: 0,
+      };
     }
   }
 
@@ -376,9 +468,12 @@ class ReviewTools {
 }
 
 // Run if called directly
-if (require.main === module) {
+if (
+  import.meta.url === `file://${process.argv[1]}` ||
+  import.meta.url.endsWith('review-tools.js')
+) {
   const reviewTools = new ReviewTools();
   reviewTools.run().catch(console.error);
 }
 
-module.exports = ReviewTools;
+export default ReviewTools;

@@ -23,13 +23,13 @@ async function testFetchGithubActivity() {
     });
 
     console.log(`📁 Found ${selectedRepos.length} selected repositories`);
-    
+
     // Generate cache key like the function does
     const cacheKey = `activities:${user.id}:${selectedRepos
       .map(r => r.repoId)
       .sort()
       .join(',')}`;
-    
+
     console.log(`🔑 Cache key: ${cacheKey}`);
 
     // Check if there's cached data
@@ -55,9 +55,9 @@ async function testFetchGithubActivity() {
     if (selectedRepos.length > 0) {
       const repo = selectedRepos[0];
       const [owner, repoName] = repo.repoName.split('/');
-      
+
       console.log(`\n🔍 Testing GitHub API for ${owner}/${repoName}...`);
-      
+
       const connection = await prisma.connection.findFirst({
         where: {
           userId: user.id,
@@ -78,14 +78,18 @@ async function testFetchGithubActivity() {
             repo: repoName,
             per_page: 5,
           });
-          
+
           console.log(`✅ Found ${commits.data.length} commits`);
-          
+
           if (commits.data.length > 0) {
             const commit = commits.data[0];
             console.log(`   Latest: ${commit.commit.message.split('\n')[0]}`);
-            console.log(`   Author: ${commit.commit.author?.name || 'Unknown'}`);
-            console.log(`   Date: ${commit.commit.author?.date || commit.commit.committer?.date}`);
+            console.log(
+              `   Author: ${commit.commit.author?.name || 'Unknown'}`
+            );
+            console.log(
+              `   Date: ${commit.commit.author?.date || commit.commit.committer?.date}`
+            );
           }
         } catch (apiError) {
           console.log(`❌ GitHub API error: ${apiError.message}`);
@@ -95,7 +99,6 @@ async function testFetchGithubActivity() {
         }
       }
     }
-
   } catch (error) {
     console.error('❌ Test failed:', error.message);
   } finally {

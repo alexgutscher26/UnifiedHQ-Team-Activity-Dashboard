@@ -72,8 +72,8 @@ export function RetryComponent({
   if (showSuccess && !loading && !error) {
     return (
       <div className={`flex items-center gap-2 text-green-600 ${className}`}>
-        <CheckCircle className="h-4 w-4" />
-        <span className="text-sm">{successMessage}</span>
+        <CheckCircle className='h-4 w-4' />
+        <span className='text-sm'>{successMessage}</span>
       </div>
     );
   }
@@ -81,43 +81,43 @@ export function RetryComponent({
   // Show error state
   if (error) {
     return (
-      <Alert variant="destructive" className={className}>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription className="flex flex-col gap-2">
+      <Alert variant='destructive' className={className}>
+        <AlertCircle className='h-4 w-4' />
+        <AlertDescription className='flex flex-col gap-2'>
           <div>
             {errorMessage || error.message}
             {showAttempts && attempts > 0 && (
-              <span className="text-xs text-muted-foreground ml-2">
+              <span className='text-xs text-muted-foreground ml-2'>
                 (Attempt {attempts})
               </span>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={onRetry}
               disabled={!canRetry || retrying}
-              className="h-8"
+              className='h-8'
             >
               {retrying ? (
                 <>
-                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  <Loader2 className='h-3 w-3 mr-1 animate-spin' />
                   Retrying...
                 </>
               ) : (
                 <>
-                  <RefreshCw className="h-3 w-3 mr-1" />
+                  <RefreshCw className='h-3 w-3 mr-1' />
                   {retryText}
                 </>
               )}
             </Button>
             {onReset && (
               <Button
-                variant="ghost"
-                size="sm"
+                variant='ghost'
+                size='sm'
                 onClick={onReset}
-                className="h-8"
+                className='h-8'
               >
                 Reset
               </Button>
@@ -132,12 +132,12 @@ export function RetryComponent({
   if (loading) {
     return (
       <div className={`flex items-center gap-2 ${className}`}>
-        <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-sm">
+        <Loader2 className='h-4 w-4 animate-spin' />
+        <span className='text-sm'>
           {retrying ? 'Retrying...' : 'Loading...'}
         </span>
         {showAttempts && attempts > 0 && (
-          <span className="text-xs text-muted-foreground">
+          <span className='text-xs text-muted-foreground'>
             (Attempt {attempts})
           </span>
         )}
@@ -240,8 +240,8 @@ export function InlineRetry({
 }: InlineRetryProps) {
   if (loading) {
     return (
-      <span className="flex items-center gap-1 text-sm text-muted-foreground">
-        <Loader2 className="h-3 w-3 animate-spin" />
+      <span className='flex items-center gap-1 text-sm text-muted-foreground'>
+        <Loader2 className='h-3 w-3 animate-spin' />
         Loading...
       </span>
     );
@@ -249,15 +249,17 @@ export function InlineRetry({
 
   if (error) {
     return (
-      <span className={`flex items-center gap-2 text-sm text-destructive ${inline ? 'inline-flex' : 'flex'}`}>
-        <AlertCircle className="h-3 w-3" />
+      <span
+        className={`flex items-center gap-2 text-sm text-destructive ${inline ? 'inline-flex' : 'flex'}`}
+      >
+        <AlertCircle className='h-3 w-3' />
         <span>{errorMessage || error.message}</span>
         {onRetry && (
           <Button
-            variant="link"
-            size="sm"
+            variant='link'
+            size='sm'
             onClick={onRetry}
-            className="h-auto p-0 text-destructive hover:text-destructive/80"
+            className='h-auto p-0 text-destructive hover:text-destructive/80'
           >
             {retryText}
           </Button>
@@ -280,7 +282,13 @@ export interface RetryButtonProps {
   /** Disabled state */
   disabled?: boolean;
   /** Button variant */
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link';
   /** Button size */
   size?: 'default' | 'sm' | 'lg' | 'icon';
   /** Custom text */
@@ -311,12 +319,12 @@ export function RetryButton({
     >
       {loading ? (
         <>
-          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+          <Loader2 className='h-3 w-3 mr-1 animate-spin' />
           Retrying...
         </>
       ) : (
         <>
-          <RefreshCw className="h-3 w-3 mr-1" />
+          <RefreshCw className='h-3 w-3 mr-1' />
           {children}
         </>
       )}

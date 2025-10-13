@@ -17,14 +17,18 @@ async function testTeamActivityAPI() {
 
     // Simulate the team activity API logic
     console.log('\n📡 Testing fetchGithubActivity...');
-    
+
     // Import the function dynamically
-    const { fetchGithubActivity } = await import('../src/lib/integrations/github-cached.ts');
-    
+    const { fetchGithubActivity } = await import(
+      '../src/lib/integrations/github-cached.ts'
+    );
+
     try {
       const githubActivities = await fetchGithubActivity(user.id);
-      console.log(`✅ fetchGithubActivity returned ${githubActivities.length} activities`);
-      
+      console.log(
+        `✅ fetchGithubActivity returned ${githubActivities.length} activities`
+      );
+
       if (githubActivities.length > 0) {
         console.log('📋 Sample activities:');
         githubActivities.slice(0, 3).forEach((activity, index) => {
@@ -39,7 +43,6 @@ async function testTeamActivityAPI() {
     } catch (error) {
       console.log(`❌ fetchGithubActivity failed: ${error.message}`);
     }
-
   } catch (error) {
     console.error('❌ Test failed:', error.message);
   } finally {

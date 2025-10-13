@@ -1,21 +1,15 @@
+import { generateWithOpenRouter } from '@/lib/openrouter-client';
+
 /**
- * LLM Service with PostHog Analytics Integration
+ * LLM Service
  *
- * This service provides a clean interface for using OpenRouter with PostHog analytics
- * following the PostHog LLM analytics documentation.
+ * This service provides a clean interface for using OpenRouter for AI text generation.
  *
  * Note: This is a server-side service. For client-side usage, use client-llm-service.ts
  */
-
-import { generateWithPostHogAnalytics } from '@/lib/posthog-openrouter';
-
 export interface LLMRequest {
   prompt: string;
   model?: string;
-  distinctId?: string;
-  traceId?: string;
-  properties?: Record<string, any>;
-  groups?: Record<string, string>;
   temperature?: number;
   maxTokens?: number;
   stream?: boolean;
@@ -34,58 +28,45 @@ export interface LLMResponse {
 
 export class LLMService {
   private defaultModel: string;
-  private defaultDistinctId: string;
 
-  constructor(
-    defaultModel: string = 'gpt-3.5-turbo',
-    defaultDistinctId: string = 'anonymous'
-  ) {
+  constructor(defaultModel: string = 'gpt-3.5-turbo') {
     this.defaultModel = defaultModel;
-    this.defaultDistinctId = defaultDistinctId;
   }
 
   /**
-   * Generate text using OpenRouter with PostHog analytics
+   * Generate text using OpenRouter
    * Server-side only - use client-llm-service.ts for client-side
    */
   async generateText(request: LLMRequest): Promise<LLMResponse> {
     const {
       prompt,
       model = this.defaultModel,
-      distinctId = this.defaultDistinctId,
-      traceId = `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      properties = {},
-      groups = {},
       temperature = 0.7,
       maxTokens = 1000,
       stream = false,
     } = request;
 
     try {
-      const response = await generateWithPostHogAnalytics(
+      const response = await generateWithOpenRouter({
         model,
-        [{ role: 'user', content: prompt }],
-        {
-          distinctId,
-          traceId,
-          properties: {
-            service: 'llm-service',
-            timestamp: new Date().toISOString(),
-            ...properties,
-          },
-          groups,
-          temperature,
-          maxTokens,
-          stream,
-        }
-      );
+        messages: [{ role: 'user', content: prompt }],
+        temperature,
+        maxTokens,
+        stream,
+      });
 
-      return {
-        content: response.choices[0]?.message?.content || '',
-        model: response.model,
-        usage: response.usage,
-        finishReason: response.choices[0]?.finish_reason,
-      };
+      // Handle both streaming and non-streaming responses
+      if ('choices' in response) {
+        return {
+          content: response.choices[0]?.message?.content || '',
+          model: response.model,
+          usage: response.usage,
+          finishReason: response.choices[0]?.finish_reason,
+        };
+      } else {
+        // For streaming responses, we can't extract content directly
+        throw new Error('Streaming responses not supported in this method');
+      }
     } catch (error) {
       console.error('LLM Service error:', error);
       throw new Error(
@@ -103,38 +84,35 @@ export class LLMService {
   ): Promise<LLMResponse> {
     const {
       model = this.defaultModel,
-      distinctId = this.defaultDistinctId,
-      traceId = `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      properties = {},
-      groups = {},
       temperature = 0.7,
       maxTokens = 1000,
       stream = false,
     } = options;
 
     try {
-      const response = await generateWithPostHogAnalytics(model, messages, {
-        distinctId,
-        traceId,
-        properties: {
-          service: 'llm-service',
-          context_type: 'conversation',
-          message_count: messages.length,
-          timestamp: new Date().toISOString(),
-          ...properties,
-        },
-        groups,
+      const response = await generateWithOpenRouter({
+        model,
+        messages: messages.map(msg => ({
+          role: msg.role as 'user' | 'assistant' | 'system',
+          content: msg.content,
+        })),
         temperature,
         maxTokens,
         stream,
       });
 
-      return {
-        content: response.choices[0]?.message?.content || '',
-        model: response.model,
-        usage: response.usage,
-        finishReason: response.choices[0]?.finish_reason,
-      };
+      // Handle both streaming and non-streaming responses
+      if ('choices' in response) {
+        return {
+          content: response.choices[0]?.message?.content || '',
+          model: response.model,
+          usage: response.usage,
+          finishReason: response.choices[0]?.finish_reason,
+        };
+      } else {
+        // For streaming responses, we can't extract content directly
+        throw new Error('Streaming responses not supported in this method');
+      }
     } catch (error) {
       console.error('LLM Service error:', error);
       throw new Error(
@@ -149,16 +127,11 @@ export class LLMService {
   async generateForUser(
     userId: string,
     prompt: string,
-    options: Omit<LLMRequest, 'prompt' | 'distinctId'> = {}
+    options: Omit<LLMRequest, 'prompt'> = {}
   ): Promise<LLMResponse> {
     return this.generateText({
       ...options,
       prompt,
-      distinctId: userId,
-      properties: {
-        user_id: userId,
-        ...options.properties,
-      },
     });
   }
 
@@ -173,10 +146,6 @@ export class LLMService {
     return this.generateText({
       ...options,
       prompt,
-      groups: {
-        team: teamId,
-        ...options.groups,
-      },
     });
   }
 }

@@ -19,6 +19,7 @@ export interface UseRetryReturn<T> extends UseRetryState<T> {
   execute: (...args: any[]) => Promise<T>;
   retry: () => Promise<T>;
   reset: () => void;
+  updateState: (updates: Partial<UseRetryState<T>>) => void;
   isRetrying: boolean;
   canRetry: boolean;
 }
@@ -82,29 +83,28 @@ export function useRetry<T = any>(
     }
   }, []);
 
-  const execute = useCallback(async (...args: any[]): Promise<T> => {
-    // Cancel previous execution if still running
-    if (currentExecutionRef.current) {
-      // Note: We can't actually cancel the previous execution,
-      // but we can ignore its result
-    }
+  const execute = useCallback(
+    async (...args: any[]): Promise<T> => {
+      // Cancel previous execution if still running
+      if (currentExecutionRef.current) {
+        // Note: We can't actually cancel the previous execution,
+        // but we can ignore its result
+      }
 
-    if (resetOnExecute) {
-      updateState({
-        data: null,
-        loading: true,
-        error: null,
-        attempts: 0,
-        totalTime: 0,
-        retrying: false,
-      });
-    } else {
-      updateState({ loading: true, retrying: false });
-    }
+      if (resetOnExecute) {
+        updateState({
+          data: null,
+          loading: true,
+          error: null,
+          attempts: 0,
+          totalTime: 0,
+          retrying: false,
+        });
+      } else {
+        updateState({ loading: true, retrying: false });
+      }
 
-    const executionPromise = withRetry(
-      () => asyncFn(...args),
-      {
+      const executionPromise = withRetry(() => asyncFn(...args), {
         ...retryOptions,
         onRetry: (error, attempt, delay) => {
           updateState({ retrying: true, attempts: attempt });
@@ -114,38 +114,39 @@ export function useRetry<T = any>(
           updateState({ retrying: false });
           retryOptions.onMaxRetriesExceeded?.(error, attempts);
         },
-      }
-    );
+      });
 
-    currentExecutionRef.current = executionPromise;
+      currentExecutionRef.current = executionPromise;
 
-    try {
-      const result: RetryResult<T> = await executionPromise;
-      
-      if (currentExecutionRef.current === executionPromise) {
-        updateState({
-          data: result.data,
-          loading: false,
-          error: null,
-          attempts: result.attempts,
-          totalTime: result.totalTime,
-          retrying: false,
-          fromCache: result.fromCache,
-        });
+      try {
+        const result: RetryResult<T> = await executionPromise;
+
+        if (currentExecutionRef.current === executionPromise) {
+          updateState({
+            data: result.data,
+            loading: false,
+            error: null,
+            attempts: result.attempts,
+            totalTime: result.totalTime,
+            retrying: false,
+            fromCache: result.fromCache,
+          });
+        }
+
+        return result.data;
+      } catch (error) {
+        if (currentExecutionRef.current === executionPromise) {
+          updateState({
+            loading: false,
+            error: error instanceof Error ? error : new Error(String(error)),
+            retrying: false,
+          });
+        }
+        throw error;
       }
-      
-      return result.data;
-    } catch (error) {
-      if (currentExecutionRef.current === executionPromise) {
-        updateState({
-          loading: false,
-          error: error instanceof Error ? error : new Error(String(error)),
-          retrying: false,
-        });
-      }
-      throw error;
-    }
-  }, [asyncFn, retryOptions, resetOnExecute, updateState]);
+    },
+    [asyncFn, retryOptions, resetOnExecute, updateState]
+  );
 
   const retry = useCallback(async (): Promise<T> => {
     if (!state.error) {
@@ -170,6 +171,7 @@ export function useRetry<T = any>(
     execute,
     retry,
     reset,
+    updateState,
     isRetrying: state.retrying,
     canRetry: !!state.error && !state.loading,
   };
@@ -219,15 +221,18 @@ export function useRetryOptimistic<T = any>(
   } = {}
 ): UseRetryReturn<T> {
   const { optimisticData, showOptimistic = true, ...retryOptions } = options;
-  
+
   const retryHook = useRetry(asyncFn, retryOptions);
-  
-  const executeOptimistic = useCallback(async (...args: any[]): Promise<T> => {
-    if (showOptimistic && optimisticData) {
-      retryHook.updateState?.({ data: optimisticData });
-    }
-    return retryHook.execute(...args);
-  }, [retryHook, optimisticData, showOptimistic]);
+
+  const executeOptimistic = useCallback(
+    async (...args: any[]): Promise<T> => {
+      if (showOptimistic && optimisticData) {
+        retryHook.updateState?.({ data: optimisticData });
+      }
+      return retryHook.execute(...args);
+    },
+    [retryHook, optimisticData, showOptimistic]
+  );
 
   return {
     ...retryHook,
@@ -266,7 +271,7 @@ export function useRetryPolling<T = any>(
 
   const startPolling = useCallback(() => {
     if (intervalRef.current) return;
-    
+
     setIsPolling(true);
     intervalRef.current = setInterval(() => {
       retryHook.execute().catch(error => {
@@ -290,7 +295,7 @@ export function useRetryPolling<T = any>(
     if (startImmediately) {
       startPolling();
     }
-    
+
     return () => {
       stopPolling();
     };
@@ -329,12 +334,12 @@ export function useRetryWithBackoff<T = any>(
     if (backoffDelay > 0) {
       await new Promise(resolve => setTimeout(resolve, backoffDelay));
     }
-    
+
     const result = await retryHook.retry();
-    
+
     // Increase backoff delay for next retry
     setBackoffDelay(prev => Math.min(prev * 2, 30000)); // Max 30 seconds
-    
+
     return result;
   }, [retryHook, backoffDelay]);
 

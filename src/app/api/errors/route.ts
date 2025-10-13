@@ -5,7 +5,6 @@ import {
   createApiSuccessResponse,
 } from '@/lib/api-error-handler';
 import { validateRequestBody } from '@/lib/api-validation';
-import { captureClientError } from '@/lib/posthog-server';
 import { z } from 'zod';
 
 // Error report schema
@@ -27,11 +26,10 @@ const errorReportSchema = z.object({
 });
 
 /**
- * Report an error by capturing it and associating it with a user session.
+ * Report an error by logging it and associating it with a user session.
  *
  * The function retrieves the user session from the request headers, validates the request body against a schema,
- * and constructs an error object. It then captures the error in PostHog with relevant context, logs the error details,
- * and returns a success response indicating that the error report was received.
+ * and logs the error details to the server console for debugging purposes.
  *
  * @param request - The NextRequest object containing the request data.
  * @returns A success response indicating that the error report was received.
@@ -47,27 +45,16 @@ async function reportError(request: NextRequest) {
     await request.json()
   );
 
-  // Create error object for PostHog
-  const error = new Error(errorData.error.message);
-  error.name = errorData.error.name || 'ClientError';
-  error.stack = errorData.error.stack;
-
-  // Capture error in PostHog with additional context
-  await captureClientError(error, session?.user?.id || 'anonymous', {
+  // Log error details to console for debugging
+  console.error('Client Error Report:', {
+    error: errorData.error,
+    errorInfo: errorData.errorInfo,
     errorId: errorData.errorId,
     url: errorData.url,
     userAgent: errorData.userAgent,
-    componentStack: errorData.errorInfo?.componentStack,
     timestamp: errorData.timestamp || new Date().toISOString(),
+    userId: session?.user?.id || 'anonymous',
     environment: process.env.NODE_ENV,
-    errorType: 'client_error',
-    userId: session?.user?.id || 'anonymous',
-  });
-
-  console.error('Client Error Report:', {
-    ...errorData,
-    userId: session?.user?.id || 'anonymous',
-    timestamp: new Date().toISOString(),
   });
 
   return createApiSuccessResponse(

@@ -13,7 +13,7 @@ export interface ScrollThrottleConfig {
 export interface ScrollOptimizationConfig {
   enableThrottling?: boolean;
   enablePassiveListeners?: boolean;
-  enableRAF?: boolean; // RequestAnimationFrame optimization
+  enableRAF?: boolean;
   enableDebouncing?: boolean;
   debounceMs?: number;
 }

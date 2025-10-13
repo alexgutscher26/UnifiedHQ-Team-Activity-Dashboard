@@ -1,6 +1,5 @@
 'use client';
 
-import { captureClientError } from '@/lib/posthog-client';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,11 +19,8 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Capture the error with PostHog
-    captureClientError(error, {
-      error_boundary: 'nextjs_error',
-      digest: error.digest,
-    });
+    // Log the error to console for debugging
+    console.error('Next.js error occurred:', error);
   }, [error]);
 
   return (

@@ -1,5 +1,3 @@
-// Memory leak prevention utilities for React components
-
 import React, { useEffect, useRef, useCallback } from 'react';
 
 // Memory leak detection and monitoring

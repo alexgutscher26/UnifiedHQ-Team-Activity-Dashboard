@@ -2,8 +2,6 @@
  * Error logging utility for tracking and reporting errors
  */
 
-import { captureClientError } from './posthog-client';
-
 export interface ErrorContext {
   userId?: string;
   sessionId?: string;
@@ -47,14 +45,6 @@ class ErrorLogger {
     if (this.errors.length > this.maxErrors) {
       this.errors = this.errors.slice(0, this.maxErrors);
     }
-
-    // Capture error with PostHog if available
-    captureClientError(error, {
-      error_boundary: 'custom_error_logger',
-      error_id: errorDetails.context.errorId,
-      component_stack: errorInfo?.componentStack,
-      ...errorDetails.context,
-    });
 
     if (process.env.NODE_ENV === 'development') {
       console.group('🚨 Error Boundary Caught Error');

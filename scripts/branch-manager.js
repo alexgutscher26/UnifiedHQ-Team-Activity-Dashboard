@@ -29,11 +29,14 @@ class BranchManager {
       try {
         const fileContents = fs.readFileSync(configPath, 'utf8');
         const config = yaml.load(fileContents);
-        
+
         // Validate and merge with defaults
         return this.mergeWithDefaults(config);
       } catch (error) {
-        console.warn(`⚠️  Warning: Failed to parse YAML config at ${configPath}:`, error.message);
+        console.warn(
+          `⚠️  Warning: Failed to parse YAML config at ${configPath}:`,
+          error.message
+        );
         console.warn('   Falling back to default configuration.');
         return this.getDefaultConfig();
       }
@@ -46,13 +49,13 @@ class BranchManager {
    */
   mergeWithDefaults(userConfig) {
     const defaults = this.getDefaultConfig();
-    
+
     return {
       branches: { ...defaults.branches, ...(userConfig.branches || {}) },
       naming: { ...defaults.naming, ...(userConfig.naming || {}) },
       workflows: { ...defaults.workflows, ...(userConfig.workflows || {}) },
       // Add any additional config sections
-      ...userConfig
+      ...userConfig,
     };
   }
 
@@ -604,33 +607,41 @@ ${description}
    */
   showConfig() {
     console.log('⚙️  Branch Manager Configuration\n');
-    
+
     console.log('📁 Config Source:');
-    const configPath = path.join(this.projectRoot, '.github', 'branch-config.yml');
+    const configPath = path.join(
+      this.projectRoot,
+      '.github',
+      'branch-config.yml'
+    );
     if (fs.existsSync(configPath)) {
       console.log(`   ✅ Using: ${configPath}`);
     } else {
-      console.log(`   ⚠️  Using: Default configuration (${configPath} not found)`);
+      console.log(
+        `   ⚠️  Using: Default configuration (${configPath} not found)`
+      );
     }
-    
+
     console.log('\n🌿 Branch Settings:');
     Object.entries(this.config.branches).forEach(([name, settings]) => {
       const protectedIcon = settings.protected ? '🔒' : '🔓';
       const reviews = settings.required_reviews || 0;
-      console.log(`   ${protectedIcon} ${name}: ${reviews} review${reviews !== 1 ? 's' : ''} required`);
+      console.log(
+        `   ${protectedIcon} ${name}: ${reviews} review${reviews !== 1 ? 's' : ''} required`
+      );
     });
-    
+
     console.log('\n🏷️  Naming Conventions:');
     Object.entries(this.config.naming).forEach(([type, prefix]) => {
       console.log(`   ${type}: ${prefix}`);
     });
-    
+
     console.log('\n⚡ Workflow Settings:');
     Object.entries(this.config.workflows).forEach(([setting, enabled]) => {
       const icon = enabled ? '✅' : '❌';
       console.log(`   ${icon} ${setting.replace(/_/g, ' ')}`);
     });
-    
+
     // Show additional settings if they exist
     if (this.config.settings) {
       console.log('\n🔧 Additional Settings:');
@@ -638,16 +649,18 @@ ${description}
         console.log(`   ${key}: ${value}`);
       });
     }
-    
+
     if (this.config.integrations) {
       console.log('\n🔌 Integrations:');
-      Object.entries(this.config.integrations).forEach(([service, settings]) => {
-        console.log(`   ${service}:`);
-        Object.entries(settings).forEach(([key, value]) => {
-          const icon = value ? '✅' : '❌';
-          console.log(`     ${icon} ${key.replace(/_/g, ' ')}`);
-        });
-      });
+      Object.entries(this.config.integrations).forEach(
+        ([service, settings]) => {
+          console.log(`   ${service}:`);
+          Object.entries(settings).forEach(([key, value]) => {
+            const icon = value ? '✅' : '❌';
+            console.log(`     ${icon} ${key.replace(/_/g, ' ')}`);
+          });
+        }
+      );
     }
   }
 
